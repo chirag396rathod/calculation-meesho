@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="E-Commerce Business Analytics Dashboard — Track profits, return charges, SKU performance, and raw costs from your marketplace payment files.">
+  <title>FC Analytics — E-Commerce Business Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📊</text></svg>">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- ═══ Sidebar ═══ -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">📊</div>
+        <div>
+          <div class="logo-text">FC Analytics</div>
+          <div class="logo-subtitle">Business Dashboard</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main</div>
+
+        <div class="nav-item active" data-section="dashboard">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">Dashboard</span>
+        </div>
+
+        <div class="nav-item" data-section="skuAnalytics">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">SKU Analytics</span>
+        </div>
+
+        <div class="nav-item" data-section="returns">
+          <span class="nav-icon">🔄</span>
+          <span class="nav-label">Returns Analysis</span>
+          <span class="nav-badge">0</span>
+        </div>
+
+        <div class="nav-section-title">Manage</div>
+
+        <div class="nav-item" data-section="skuManager">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">SKU Groups & Costing</span>
+          <span class="nav-badge">0</span>
+        </div>
+
+        <div class="nav-item" data-section="exportSection">
+          <span class="nav-icon">📥</span>
+          <span class="nav-label">Export & Data</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="upload-btn upload-trigger" id="sidebarUploadBtn">
+          📂 Upload Payment File
+        </button>
+      </div>
+    </aside>
+
+    <!-- ═══ Main Content ═══ -->
+    <main class="main-content">
+
+      <!-- ══ Dashboard Section ══ -->
+      <section id="dashboard" class="section active">
+        <div class="page-header">
+          <div>
+            <h1>Business Dashboard</h1>
+            <p class="subtitle">E-Commerce Profit & Performance Analytics</p>
+          </div>
+          <div class="header-actions">
+            <div class="header-badge" id="dataBadge">
+              <span class="dot" style="background: var(--color-warning)"></span> No data loaded
+            </div>
+            <button class="btn btn-primary upload-trigger">📂 Upload Files</button>
+          </div>
+        </div>
+
+        <!-- Date Range Filter Bar -->
+        <div class="date-filter-bar" id="dateFilterBar">
+          <div class="date-filter-left">
+            <span class="date-filter-icon">📅</span>
+            <span class="date-filter-label">Filter by Order Date:</span>
+            <div class="date-input-group">
+              <input type="date" class="date-input" id="dateStart" title="Start Date">
+              <span class="date-separator">→</span>
+              <input type="date" class="date-input" id="dateEnd" title="End Date">
+            </div>
+            <button class="btn btn-sm btn-primary" id="applyDateFilter">Apply</button>
+            <button class="btn btn-sm btn-secondary" id="clearDateFilter">Clear</button>
+          </div>
+          <div class="date-filter-right">
+            <div class="date-presets">
+              <button class="btn btn-sm btn-secondary date-preset" data-preset="july">Jul 2026</button>
+              <button class="btn btn-sm btn-secondary date-preset" data-preset="august">Aug 2026</button>
+              <button class="btn btn-sm btn-secondary date-preset" data-preset="all">All Time</button>
+            </div>
+            <div class="active-filter-badge" id="activeFilterBadge" style="display:none;">
+              <span id="activeFilterText"></span>
+              <button class="badge-clear" id="badgeClearFilter">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="metrics-grid" id="metricsGrid">
+          <!-- Populated by JS -->
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">📂</div>
+            <div class="empty-title">Upload Payment Files to Get Started</div>
+            <div class="empty-description">
+              Upload your marketplace payment .xlsx files to see profit analysis, 
+              SKU performance, and return analytics.
+            </div>
+            <button class="btn btn-primary upload-trigger" style="margin-top: 16px;">📂 Upload Payment File</button>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-title">
+              Order Status Distribution
+              <span>All orders</span>
+            </div>
+            <div style="height: 300px; position: relative;">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">
+              Profit Breakdown
+              <span>Settlement vs Costs</span>
+            </div>
+            <div style="height: 300px; position: relative;">
+              <canvas id="profitChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">
+              SKU-wise Net Profit
+              <span>Top 15 SKUs</span>
+            </div>
+            <div style="height: 340px; position: relative;">
+              <canvas id="skuProfitChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">
+              Monthly Comparison
+              <span>Delivered vs Returns</span>
+            </div>
+            <div style="height: 340px; position: relative;">
+              <canvas id="monthlyChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group-level Summary Table -->
+        <div class="table-container">
+          <div class="table-header">
+            <h3>📁 SKU Group Performance</h3>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Group</th>
+                  <th>SKUs</th>
+                  <th>Raw Cost</th>
+                  <th>Orders</th>
+                  <th>Delivered</th>
+                  <th>Returns</th>
+                  <th>Settlement</th>
+                  <th>Return Charges</th>
+                  <th>Cost Spend</th>
+                  <th>Net Profit</th>
+                  <th>Return %</th>
+                </tr>
+              </thead>
+              <tbody id="groupTableBody">
+                <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  Upload payment files to see group analytics
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SKU Analytics Section ══ -->
+      <section id="skuAnalytics" class="section">
+        <div class="page-header">
+          <div>
+            <h1>SKU Analytics</h1>
+            <p class="subtitle">Detailed per-SKU performance data</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3>📦 SKU Performance Table</h3>
+            <div class="table-controls">
+              <input type="text" class="search-input" id="skuSearch" placeholder="🔍 Search SKU or product...">
+              <select class="filter-select" id="skuFilter">
+                <option value="all">All SKUs</option>
+                <option value="profitable">Profitable Only</option>
+                <option value="loss">Loss Only</option>
+                <option value="high-return">High Return Rate (>30%)</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>SKU <span class="sort-icon">↕</span></th>
+                  <th>Group</th>
+                  <th>Orders <span class="sort-icon">↕</span></th>
+                  <th>Delivered</th>
+                  <th>Returns</th>
+                  <th>RTO</th>
+                  <th>Settlement <span class="sort-icon">↕</span></th>
+                  <th>Return Charges</th>
+                  <th>Raw Cost</th>
+                  <th>Net Profit <span class="sort-icon">↕</span></th>
+                  <th>Return % <span class="sort-icon">↕</span></th>
+                </tr>
+              </thead>
+              <tbody id="skuTableBody">
+                <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  Upload payment files to see SKU analytics
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ Returns Analysis Section ══ -->
+      <section id="returns" class="section">
+        <div class="page-header">
+          <div>
+            <h1>Returns Analysis</h1>
+            <p class="subtitle">Return & RTO charges breakdown by SKU & Group</p>
+          </div>
+        </div>
+
+        <div class="return-summary-cards" id="returnSummaryCards">
+          <div class="return-card">
+            <div class="return-value">0</div>
+            <div class="return-label">Total Returns + RTO</div>
+          </div>
+          <div class="return-card">
+            <div class="return-value">0%</div>
+            <div class="return-label">Overall Return Rate</div>
+          </div>
+          <div class="return-card">
+            <div class="return-value">₹0</div>
+            <div class="return-label">Total Return Charges</div>
+          </div>
+        </div>
+
+        <!-- Return Charts -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-title">
+              Return Rate by SKU
+              <span>Min 3 orders</span>
+            </div>
+            <div style="height: 340px; position: relative;">
+              <canvas id="returnRateChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">
+              Return Charges by SKU
+              <span>Return + RTO charges</span>
+            </div>
+            <div style="height: 340px; position: relative;">
+              <canvas id="returnChargesChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Return Detail Table -->
+        <div class="table-container mt-lg">
+          <div class="table-header">
+            <h3>🔄 Return Charges Breakdown (SKU-wise)</h3>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Group</th>
+                  <th>Total Orders</th>
+                  <th>Returns</th>
+                  <th>RTO</th>
+                  <th>Return Charges</th>
+                  <th>RTO Charges</th>
+                  <th>Return Rate</th>
+                </tr>
+              </thead>
+              <tbody id="returnTableBody">
+                <tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  Upload payment files to see return analysis
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Group Return Chart -->
+        <div class="charts-grid mt-lg">
+          <div class="chart-card" style="grid-column: 1 / -1;">
+            <div class="chart-title">
+              Group-wise Return Charges
+              <span>Aggregated by SKU group</span>
+            </div>
+            <div style="height: 340px; position: relative;">
+              <canvas id="groupReturnChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group-wise Return Table -->
+        <div class="table-container mt-lg">
+          <div class="table-header">
+            <h3>📁 Group-wise Return Analysis</h3>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Group</th>
+                  <th>SKUs</th>
+                  <th>Total Orders</th>
+                  <th>Delivered</th>
+                  <th>Returns</th>
+                  <th>RTO</th>
+                  <th>Return Charges</th>
+                  <th>RTO Charges</th>
+                  <th>Total Loss</th>
+                  <th>Return Rate</th>
+                </tr>
+              </thead>
+              <tbody id="groupReturnTableBody">
+                <tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  Create SKU groups to see group-wise return analysis
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SKU Groups & Costing Section ══ -->
+      <section id="skuManager" class="section">
+        <div class="page-header">
+          <div>
+            <h1>SKU Groups & Costing</h1>
+            <p class="subtitle">Create groups, assign SKUs, and set raw product costs</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" id="createGroupBtn">+ Create Group</button>
+          </div>
+        </div>
+
+        <div class="sku-manager-layout">
+          <!-- Groups List Panel -->
+          <div class="sku-groups-panel">
+            <div class="panel-header">
+              <h3>SKU Groups</h3>
+            </div>
+            <div class="sku-groups-list" id="skuGroupsList">
+              <div class="empty-state" style="padding: 24px;">
+                <div class="empty-icon">📁</div>
+                <div class="empty-title">No Groups Yet</div>
+                <div class="empty-description">Create your first SKU group to organize products and assign raw costs</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group Detail Panel -->
+          <div class="sku-detail-panel" id="skuDetailPanel">
+            <div class="panel-header"><h3>Select a Group</h3></div>
+            <div class="panel-body">
+              <div class="empty-state">
+                <div class="empty-icon">👈</div>
+                <div class="empty-title">Select a group</div>
+                <div class="empty-description">Click a group from the left panel to view and edit details</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Costing Info Box -->
+        <div class="costing-info-box mt-lg">
+          <div class="costing-info-icon">ℹ️</div>
+          <div class="costing-info-content">
+            <strong>How Raw Costing Works</strong>
+            <p>Raw cost is applied only to <strong>Delivered + Shipped</strong> orders. Returned, RTO, and Cancelled orders are excluded from cost calculation since those products come back to you.</p>
+            <p><strong>Formula:</strong> Net Profit = Net Settlement − Return Charges − (Delivered + Shipped units × Raw Cost per unit) − Ads Spend</p>
+          </div>
+        </div>
+
+        <!-- Group Costing Summary Table -->
+        <div class="table-container mt-lg">
+          <div class="table-header">
+            <h3>💰 Group-wise Costing Summary</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Cost applies to Delivered + Shipped only</span>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Group</th>
+                  <th>SKUs</th>
+                  <th>Raw Cost / Unit</th>
+                  <th>Total Orders</th>
+                  <th>Delivered + Shipped</th>
+                  <th>Total Raw Cost</th>
+                  <th>Net Settlement</th>
+                  <th>Return Charges</th>
+                  <th>Net Profit</th>
+                  <th>Profit / Unit</th>
+                </tr>
+              </thead>
+              <tbody id="costingTableBody">
+                <tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  Create SKU groups and set raw costs to see costing summary
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ Export & Data Section ══ -->
+      <section id="exportSection" class="section">
+        <div class="page-header">
+          <div>
+            <h1>Export & Data Management</h1>
+            <p class="subtitle">Export analytics and manage uploaded data</p>
+          </div>
+        </div>
+
+        <div class="table-container" style="margin-bottom: 24px;">
+          <div class="table-header">
+            <h3>📂 Loaded Files</h3>
+          </div>
+          <div style="padding: 16px;" id="uploadedFilesList">
+            <div class="empty-state" style="padding: 24px;">
+              <div class="empty-icon">📂</div>
+              <div class="empty-title">No files loaded</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3>📥 Export Data</h3>
+          </div>
+          <div style="padding: 24px;">
+            <div class="export-options">
+              <div class="export-option" id="exportCSV">
+                <div class="export-icon">📄</div>
+                <div class="export-label">Export CSV</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">SKU analytics as spreadsheet</div>
+              </div>
+              <div class="export-option" id="exportJSON">
+                <div class="export-icon">📋</div>
+                <div class="export-label">Export JSON</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Full analytics report</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-glass);">
+              <h4 style="color: var(--color-danger); margin-bottom: 12px;">⚠️ Danger Zone</h4>
+              <button class="btn btn-danger" id="clearDataBtn">🗑 Clear All Data</button>
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
+                This will remove all uploaded data and reset the dashboard. SKU groups and costs will be preserved.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ═══ Upload Modal ═══ -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>📂 Upload Payment Files</h2>
+        <button class="modal-close">✕</button>
+      </div>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">📊</div>
+        <div class="upload-text">Drop .xlsx files here or click to browse</div>
+        <div class="upload-hint">Supports Meesho & Flipkart payment files</div>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" multiple style="display: none;">
+
+      <div class="upload-file-list" id="pendingFilesList"></div>
+
+      <button class="btn btn-primary" id="processFilesBtn" style="width: 100%; margin-top: 16px; display: none;">
+        🚀 Process & Load Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ Create Group Modal ═══ -->
+  <div class="modal-overlay" id="createGroupModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>📁 Create SKU Group</h2>
+        <button class="modal-close">✕</button>
+      </div>
+
+      <form id="createGroupForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Group Name</label>
+            <input type="text" class="form-input" id="newGroupName" placeholder="e.g., Anarkali Collection" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Raw Cost (₹ per unit)</label>
+            <input type="number" class="form-input" id="newGroupCost" placeholder="e.g., 250" min="0" step="1" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select SKUs to Add</label>
+          <div class="chip-selector" id="newGroupSkuSelector">
+            <div style="color: var(--text-muted); font-size: 0.8rem; padding: 8px;">
+              Upload payment files first to see available SKUs
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+          ✓ Create Group
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Toast Container ═══ -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ═══ App Script ═══ -->
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
