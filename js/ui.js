@@ -744,6 +744,34 @@ function downloadFile(content, filename, mimeType) {
 }
 
 /**
+ * Mobile Sidebar Drawer Controls
+ */
+export function closeMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (sidebar) sidebar.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('active');
+  document.body.classList.remove('sidebar-open');
+}
+
+export function openMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (sidebar) sidebar.classList.add('open');
+  if (backdrop) backdrop.classList.add('active');
+  document.body.classList.add('sidebar-open');
+}
+
+export function toggleMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar && sidebar.classList.contains('open')) {
+    closeMobileSidebar();
+  } else {
+    openMobileSidebar();
+  }
+}
+
+/**
  * Switch between sections
  */
 export function switchSection(sectionId) {
@@ -759,6 +787,9 @@ export function switchSection(sectionId) {
   if (navItem) {
     navItem.classList.add('active');
   }
+
+  // Close mobile sidebar drawer when navigating
+  closeMobileSidebar();
 
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;

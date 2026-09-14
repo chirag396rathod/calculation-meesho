@@ -42,7 +42,9 @@ import {
   updateActiveSessionBadge,
   exportCSV,
   exportJSON,
-  switchSection
+  switchSection,
+  toggleMobileSidebar,
+  closeMobileSidebar
 } from './ui.js';
 
 // ── App State ──
@@ -147,6 +149,31 @@ function setupNavigation() {
         refreshSessionsView();
       }
     });
+  });
+
+  // Mobile sidebar drawer triggers
+  const mobileToggle = document.getElementById('mobileMenuToggle');
+  const mobileClose = document.getElementById('mobileSidebarClose');
+  const backdrop = document.getElementById('sidebarBackdrop');
+
+  mobileToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMobileSidebar();
+  });
+
+  mobileClose?.addEventListener('click', () => {
+    closeMobileSidebar();
+  });
+
+  backdrop?.addEventListener('click', () => {
+    closeMobileSidebar();
+  });
+
+  // Close drawer on ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeMobileSidebar();
+    }
   });
 }
 
@@ -399,10 +426,10 @@ async function handleFiles(files) {
       // Enhance UI with Report Name input
       item.innerHTML = `
         <span class="file-icon">📊</span>
-        <div class="file-info" style="width: 100%;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="file-info">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; width: 100%;">
             <div class="file-name">${file.name}</div>
-            <span class="file-status success">✓ ${result.orders.length} orders</span>
+            <span class="file-status success" style="flex-shrink: 0; white-space: nowrap;">✓ ${result.orders.length} orders</span>
           </div>
           <div class="file-size" style="margin-top: 2px;">${(file.size / 1024).toFixed(1)} KB · ${result.month} · ${result.platform}</div>
           <div class="report-name-input-wrapper">
