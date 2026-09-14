@@ -53,10 +53,11 @@ export function renderMetrics(analytics) {
     <div class="metric-card profit">
       <div class="metric-header">
         <div class="metric-icon" style="--icon-bg: rgba(16, 185, 129, 0.15)">💰</div>
+        ${(analytics.totalClaimsAndCompensation || 0) > 0 ? `<span class="metric-change positive" title="Reimbursements received for damaged/lost returns">+${formatCurrency(analytics.totalClaimsAndCompensation)} claims</span>` : ''}
       </div>
       <div class="metric-value text-success">${formatCurrency(analytics.netSettlement)}</div>
       <div class="metric-label">Net Settlement</div>
-      <div class="metric-sub">Received: ${formatCurrency(analytics.totalPositiveSettlement)}</div>
+      <div class="metric-sub">Received: ${formatCurrency(analytics.totalPositiveSettlement)}${(analytics.totalClaimsAndCompensation || 0) > 0 ? ` · Incl. Claims: +${formatCurrency(analytics.totalClaimsAndCompensation)}` : ''}</div>
     </div>
 
     <div class="metric-card loss">
@@ -100,7 +101,7 @@ export function renderMetrics(analytics) {
         ${formatCurrency(analytics.netProfit)}
       </div>
       <div class="metric-label">Net Profit</div>
-      <div class="metric-sub">Settlement - Returns - Cost - Ads</div>
+      <div class="metric-sub">Settlement (incl. Claims) - Returns - Cost - Ads</div>
     </div>
   `;
 }
@@ -151,7 +152,10 @@ export function renderSkuTable(skuAnalytics, filter = 'all', search = '') {
       <td><span class="status-badge delivered">${s.delivered}</span></td>
       <td><span class="status-badge return">${s.returned}</span></td>
       <td><span class="status-badge rto">${s.rto}</span></td>
-      <td class="amount ${s.totalSettlement >= 0 ? 'positive' : 'negative'}">${formatCurrency(s.totalSettlement)}</td>
+      <td class="amount ${s.totalSettlement >= 0 ? 'positive' : 'negative'}">
+        ${formatCurrency(s.totalSettlement)}
+        ${s.claimsAndCompensation > 0 ? `<div style="font-size: 0.70rem; color: var(--accent-emerald, #10b981); font-weight: 600;" title="Claims & Compensation reimbursed for this SKU">+${formatCurrency(s.claimsAndCompensation)} claim</div>` : ''}
+      </td>
       <td class="amount negative">${s.totalReturnCharges > 0 ? '-' + formatCurrency(s.totalReturnCharges) : '₹0'}</td>
       <td class="amount neutral">${formatCurrency(s.rawCostTotal)}</td>
       <td class="amount ${s.netProfit >= 0 ? 'positive' : 'negative'}">${formatCurrency(s.netProfit)}</td>
@@ -196,6 +200,9 @@ export function renderReturnAnalysis(analytics) {
     ? ((totalReturns / analytics.totalOrders) * 100)
     : 0;
 
+  const claimsTotal = analytics.totalClaimsAndCompensation || 0;
+  const claimsCount = analytics.claimsCount || 0;
+
   container.innerHTML = `
     <div class="return-card">
       <div class="return-value">${totalReturns}</div>
@@ -208,6 +215,11 @@ export function renderReturnAnalysis(analytics) {
     <div class="return-card">
       <div class="return-value text-danger">-${formatCurrency(analytics.totalReturnCharges)}</div>
       <div class="return-label">Total Return Charges</div>
+    </div>
+    <div class="return-card" style="border-left: 3px solid var(--accent-emerald, #10b981);">
+      <div class="return-value" style="color: var(--accent-emerald, #10b981);">+${formatCurrency(claimsTotal)}</div>
+      <div class="return-label">Claims & Compensation Received</div>
+      <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;">${claimsCount} orders reimbursed</div>
     </div>
   `;
 }

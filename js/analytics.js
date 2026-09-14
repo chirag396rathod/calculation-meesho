@@ -75,6 +75,13 @@ export function calculateAnalytics(orders, ads = []) {
   const totalTCS = orders.reduce((sum, o) => sum + Math.abs(o.tcs || 0), 0);
   const totalTDS = orders.reduce((sum, o) => sum + Math.abs(o.tds || 0), 0);
 
+  // ── Claims & Compensation (Reimbursements for damaged/lost/wrong returns) ──
+  const totalClaims = orders.reduce((sum, o) => sum + (o.claims || 0), 0);
+  const totalCompensation = orders.reduce((sum, o) => sum + (o.compensation || 0), 0);
+  const totalRecovery = orders.reduce((sum, o) => sum + (o.recovery || 0), 0);
+  const totalClaimsAndCompensation = totalClaims + totalCompensation;
+  const claimsCount = orders.filter(o => (o.claims || 0) > 0 || (o.compensation || 0) > 0).length;
+
   // ── SKU-wise Analytics ──
   const skuAnalytics = calculateSkuAnalytics(orders, ads);
 
@@ -116,6 +123,13 @@ export function calculateAnalytics(orders, ads = []) {
     totalAdsSpend,
     netProfit,
     profitMargin,
+
+    // Claims & Compensation
+    totalClaims,
+    totalCompensation,
+    totalRecovery,
+    totalClaimsAndCompensation,
+    claimsCount,
 
     // Deductions breakdown
     totalCommissions,
@@ -162,6 +176,10 @@ function calculateSkuAnalytics(orders) {
         rawCost: skuManager.getCostForSku(sku),
         rawCostTotal: 0,
         quantity: 0,
+        claims: 0,
+        compensation: 0,
+        recovery: 0,
+        claimsAndCompensation: 0,
         group: skuManager.getGroupForSku(sku)?.name || 'Ungrouped'
       };
     }
@@ -171,6 +189,10 @@ function calculateSkuAnalytics(orders) {
     s.quantity += order.quantity;
     s.totalSettlement += order.settlementAmount;
     s.totalSaleAmount += order.totalSaleAmount || 0;
+    s.claims += order.claims || 0;
+    s.compensation += order.compensation || 0;
+    s.recovery += order.recovery || 0;
+    s.claimsAndCompensation += (order.claims || 0) + (order.compensation || 0);
 
     if (order.settlementAmount > 0) {
       s.positiveSettlement += order.settlementAmount;
@@ -378,6 +400,11 @@ function getEmptyAnalytics() {
     totalAdsSpend: 0,
     netProfit: 0,
     profitMargin: 0,
+    totalClaims: 0,
+    totalCompensation: 0,
+    totalRecovery: 0,
+    totalClaimsAndCompensation: 0,
+    claimsCount: 0,
     totalCommissions: 0,
     totalShippingCharges: 0,
     totalReturnShipping: 0,
