@@ -25,13 +25,36 @@ import {
  * @param {Function} next
  */
 export async function handleApiRequest(req, res, next) {
-  const url = req.url || '';
-  if (!url.startsWith('/api/')) {
-    return next();
+  // Determine actual requested API path (supports Vite, Vercel rewrites, and serverless catch-alls)
+  let rawUrl = req.url || '';
+  if (req.headers && req.headers['x-forwarded-uri']) {
+    rawUrl = req.headers['x-forwarded-uri'];
+  } else if (req.query && req.query.path) {
+    const p = Array.isArray(req.query.path) ? req.query.path.join('/') : req.query.path;
+    rawUrl = `/api/${p}`;
   }
 
-  // Parse body helper for JSON
+  const [pathOnly] = rawUrl.split('?');
+
+  if (!pathOnly.startsWith('/api/') && pathOnly !== '/api') {
+    if (next) return next();
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ success: false, error: 'Endpoint not found' }));
+  }
+
+  // Parse body helper for JSON (supports both streams and pre-parsed Vercel bodies)
   const getBody = () => new Promise((resolve, reject) => {
+    if (req.body && typeof req.body === 'object') {
+      return resolve(req.body);
+    }
+    if (typeof req.body === 'string') {
+      try {
+        return resolve(req.body ? JSON.parse(req.body) : {});
+      } catch (e) {
+        return reject(new Error('Invalid JSON payload'));
+      }
+    }
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', () => {
@@ -57,7 +80,14 @@ export async function handleApiRequest(req, res, next) {
     return sendJson(200, { ok: true });
   }
 
-  const [pathOnly] = url.split('?');
+  // Health check on /api
+  if (pathOnly === '/api' || pathOnly === '/api/') {
+    return sendJson(200, {
+      success: true,
+      message: 'FC Analytics Backend API is live on Turso Database',
+      endpoints: ['/api/sku-groups', '/api/sku-costs/:sku', '/api/sessions']
+    });
+  }
 
   try {
     // ═══════════════════════════════════════════

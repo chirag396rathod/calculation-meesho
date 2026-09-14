@@ -14,95 +14,125 @@ dotenv.config({ path: path.resolve(__dirname, '../.env.local'), override: true }
 const DATA_FILE = path.resolve(__dirname, '../data/sku_groups.json');
 const SESSIONS_DIR = path.resolve(__dirname, '../data/sessions');
 
-const databaseUrl = process.env.DATABASE_URL;
-const authToken = process.env.DATABASE_AUTH_TOKEN;
+const DEFAULT_TURSO_URL = 'libsql://fc-analytics-chirag-rathod-8866.aws-ap-south-1.turso.io';
+const DEFAULT_TURSO_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODkzODM5OTQsImlkIjoiMDFhMDlmOTgtMDUwMS03MTAyLTljZDYtMGEzMjgxNjY2N2FiIiwia2lkIjoiVGpBQ0syTnRGVHVPS0Nqd2YybHlHQjViWEJHb0F6amZ0RXQ1cVFLNVZCTSIsInJpZCI6IjkwOTE5YjMxLThhMzQtNDVhNi1iYTRhLThjMDhlN2UxYmU4MCJ9.MZqTuMOTlO2k1Zp9at_eXN6iLeQoUJ5ehcAXJU4qvH43xAKL0SqTa1AslX80ZSOAQIxKI5C8q_-3USLdpEjQCQ';
+
+const databaseUrl = process.env.DATABASE_URL || DEFAULT_TURSO_URL;
+const authToken = process.env.DATABASE_AUTH_TOKEN || DEFAULT_TURSO_TOKEN;
 const useLocalDbOnly = process.env.USE_LOCAL_DB === 'true';
 
 let client = null;
 let isInitialized = false;
 
-// ── Local File Fallback Helpers ──
+// ── Local File Fallback Helpers (safe for read-only serverless filesystems) ──
 function ensureLocalDirs() {
-  const dataDir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  if (!fs.existsSync(SESSIONS_DIR)) fs.mkdirSync(SESSIONS_DIR, { recursive: true });
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify({ groups: [], skuCosts: {}, updatedAt: new Date().toISOString() }, null, 2), 'utf8');
+  try {
+    const dataDir = path.dirname(DATA_FILE);
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    if (!fs.existsSync(SESSIONS_DIR)) fs.mkdirSync(SESSIONS_DIR, { recursive: true });
+    if (!fs.existsSync(DATA_FILE)) {
+      fs.writeFileSync(DATA_FILE, JSON.stringify({ groups: [], skuCosts: {}, updatedAt: new Date().toISOString() }, null, 2), 'utf8');
+    }
+  } catch (err) {
+    // Read-only filesystem on Vercel
   }
 }
 
 function readLocalSkuData() {
   ensureLocalDirs();
   try {
-    const raw = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(raw);
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf8');
+      return JSON.parse(raw);
+    }
   } catch (err) {
     console.error('[DB-Local] Error reading SKU JSON:', err);
-    return { groups: [], skuCosts: {} };
   }
+  return { groups: [], skuCosts: {} };
 }
 
 function writeLocalSkuData(data) {
-  ensureLocalDirs();
-  data.updatedAt = new Date().toISOString();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+  try {
+    ensureLocalDirs();
+    data.updatedAt = new Date().toISOString();
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    // Read-only filesystem on Vercel
+  }
   return data;
 }
 
 function listLocalSessions() {
   ensureLocalDirs();
-  const files = fs.readdirSync(SESSIONS_DIR).filter(f => f.endsWith('.json'));
-  const sessions = [];
-  for (const file of files) {
-    try {
-      const full = path.join(SESSIONS_DIR, file);
-      const data = JSON.parse(fs.readFileSync(full, 'utf8'));
-      sessions.push({
-        id: data.id,
-        name: data.name || 'Untitled Session',
-        month: data.month || '',
-        notes: data.notes || '',
-        orderCount: data.orderCount ?? (data.orders ? data.orders.length : 0),
-        fileCount: data.fileCount ?? (data.parsedFiles ? data.parsedFiles.length : 0),
-        netSettlement: data.netSettlement || 0,
-        netProfit: data.netProfit || 0,
-        returnRate: data.returnRate || 0,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt
-      });
-    } catch (e) {
-      console.error('[DB-Local] Error reading session:', file, e);
+  try {
+    if (!fs.existsSync(SESSIONS_DIR)) return [];
+    const files = fs.readdirSync(SESSIONS_DIR).filter(f => f.endsWith('.json'));
+    const sessions = [];
+    for (const file of files) {
+      try {
+        const full = path.join(SESSIONS_DIR, file);
+        const data = JSON.parse(fs.readFileSync(full, 'utf8'));
+        sessions.push({
+          id: data.id,
+          name: data.name || 'Untitled Session',
+          month: data.month || '',
+          notes: data.notes || '',
+          orderCount: data.orderCount ?? (data.orders ? data.orders.length : 0),
+          fileCount: data.fileCount ?? (data.parsedFiles ? data.parsedFiles.length : 0),
+          netSettlement: data.netSettlement || 0,
+          netProfit: data.netProfit || 0,
+          returnRate: data.returnRate || 0,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt
+        });
+      } catch (e) {
+        console.error('[DB-Local] Error reading session:', file, e);
+      }
     }
+    return sessions.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  } catch (err) {
+    return [];
   }
-  return sessions.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }
 
 function getLocalSession(id) {
   ensureLocalDirs();
-  const safeId = path.basename(id);
-  const filePath = path.join(SESSIONS_DIR, `${safeId}.json`);
-  if (!fs.existsSync(filePath)) return null;
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  try {
+    const safeId = path.basename(id);
+    const filePath = path.join(SESSIONS_DIR, `${safeId}.json`);
+    if (!fs.existsSync(filePath)) return null;
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (err) {
+    return null;
+  }
 }
 
 function saveLocalSession(sessionData) {
-  ensureLocalDirs();
-  const id = sessionData.id || `sess_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-  sessionData.id = id;
-  sessionData.updatedAt = new Date().toISOString();
-  if (!sessionData.createdAt) sessionData.createdAt = sessionData.updatedAt;
-  const safeId = path.basename(id);
-  fs.writeFileSync(path.join(SESSIONS_DIR, `${safeId}.json`), JSON.stringify(sessionData, null, 2), 'utf8');
+  try {
+    ensureLocalDirs();
+    const id = sessionData.id || `sess_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    sessionData.id = id;
+    sessionData.updatedAt = new Date().toISOString();
+    if (!sessionData.createdAt) sessionData.createdAt = sessionData.updatedAt;
+    const safeId = path.basename(id);
+    fs.writeFileSync(path.join(SESSIONS_DIR, `${safeId}.json`), JSON.stringify(sessionData, null, 2), 'utf8');
+  } catch (err) {
+    // Read-only filesystem on Vercel
+  }
   return sessionData;
 }
 
 function deleteLocalSession(id) {
-  ensureLocalDirs();
-  const safeId = path.basename(id);
-  const filePath = path.join(SESSIONS_DIR, `${safeId}.json`);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    return true;
+  try {
+    ensureLocalDirs();
+    const safeId = path.basename(id);
+    const filePath = path.join(SESSIONS_DIR, `${safeId}.json`);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      return true;
+    }
+  } catch (err) {
+    // Read-only filesystem on Vercel
   }
   return false;
 }
