@@ -773,18 +773,28 @@ function triggerSaveSessionModal() {
  * Handle Save Session form submit
  */
 async function handleSaveSession({ name, month, notes }) {
+  const cleanFiles = (state.parsedFiles || []).map(f => ({
+    id: f.id,
+    reportName: f.reportName || f.filename,
+    filename: f.filename,
+    month: f.month,
+    platform: f.platform,
+    orderCount: f.orderCount || 0,
+    uploadedAt: f.uploadedAt || new Date().toISOString()
+  }));
+
   const payload = {
     name,
     month: month || (state.parsedFiles[0]?.month || ''),
     notes: notes || '',
     orderCount: state.allOrders.length,
-    fileCount: state.parsedFiles.length,
+    fileCount: cleanFiles.length,
     netSettlement: state.analytics?.totalSettlement || 0,
     netProfit: state.analytics?.netProfit || 0,
     returnRate: state.analytics?.returnRate || 0,
     orders: state.allOrders,
     ads: state.allAds,
-    parsedFiles: state.parsedFiles,
+    parsedFiles: cleanFiles,
     dateFilter: state.dateFilter
   };
 
@@ -844,15 +854,25 @@ async function handleUpdateSessionData(sessionId) {
   }
 
   try {
+    const cleanFiles = (state.parsedFiles || []).map(f => ({
+      id: f.id,
+      reportName: f.reportName || f.filename,
+      filename: f.filename,
+      month: f.month,
+      platform: f.platform,
+      orderCount: f.orderCount || 0,
+      uploadedAt: f.uploadedAt || new Date().toISOString()
+    }));
+
     await sessionManager.updateSession(sessionId, {
       orderCount: state.allOrders.length,
-      fileCount: state.parsedFiles.length,
+      fileCount: cleanFiles.length,
       netSettlement: state.analytics?.totalSettlement || 0,
       netProfit: state.analytics?.netProfit || 0,
       returnRate: state.analytics?.returnRate || 0,
       orders: state.allOrders,
       ads: state.allAds,
-      parsedFiles: state.parsedFiles,
+      parsedFiles: cleanFiles,
       dateFilter: state.dateFilter
     });
     showToast(`Session "${name}" updated with current data!`, 'success');

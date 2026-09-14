@@ -119,6 +119,8 @@ export async function handleApiRequest(req, res, next) {
         netSettlement: body.netSettlement || 0,
         netProfit: body.netProfit || 0,
         returnRate: body.returnRate || 0,
+        isCompressed: !!body.isCompressed,
+        compressedData: body.compressedData || null,
         parsedFiles: body.parsedFiles || [],
         orders: body.orders || [],
         ads: body.ads || [],

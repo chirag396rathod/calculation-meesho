@@ -689,6 +689,8 @@ export async function dbGetSession(id) {
       netSettlement: Number(row.net_settlement || 0),
       netProfit: Number(row.net_profit || 0),
       returnRate: Number(row.return_rate || 0),
+      isCompressed: !!data.isCompressed,
+      compressedData: data.compressedData || null,
       orders: data.orders || [],
       ads: data.ads || [],
       parsedFiles: data.parsedFiles || [],
@@ -713,10 +715,12 @@ export async function dbSaveSession(sessionData) {
   sessionData.updatedAt = now;
 
   const dataJson = JSON.stringify({
-    orders: sessionData.orders || [],
-    ads: sessionData.ads || [],
-    parsedFiles: sessionData.parsedFiles || [],
-    dateFilter: sessionData.dateFilter || null
+    isCompressed: !!sessionData.isCompressed,
+    compressedData: sessionData.compressedData || null,
+    orders: sessionData.isCompressed ? [] : (sessionData.orders || []),
+    ads: sessionData.isCompressed ? [] : (sessionData.ads || []),
+    parsedFiles: sessionData.isCompressed ? [] : (sessionData.parsedFiles || []),
+    dateFilter: sessionData.isCompressed ? null : (sessionData.dateFilter || null)
   });
 
   // Always mirror to local backup
