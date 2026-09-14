@@ -1,19 +1,23 @@
 /**
- * skuManager.js — SKU Groups & Costing Module
- * Manages SKU groups, raw cost assignments, and localStorage persistence
+ * skuManager.js — SKU Groups & Costing Module (API-Powered)
+ * Connects to the backend REST API (/api/sku-groups, /api/sku-costs)
+ * with local caching and offline resilience.
  */
 
 const STORAGE_KEY = 'fc_sku_groups';
 const COST_STORAGE_KEY = 'fc_sku_costs';
+const API_BASE = '/api/sku-groups';
 
 /**
  * SKU Manager class
  */
 class SKUManager {
   constructor() {
-    this.groups = this.loadGroups();
-    this.skuCosts = this.loadCosts();
+    // Initial in-memory cache loaded from localStorage for instant initial render
+    this.groups = this.loadLocalGroups();
+    this.skuCosts = this.loadLocalCosts();
     this.listeners = [];
+    this.isInitialized = false;
   }
 
   /**
@@ -27,13 +31,19 @@ class SKUManager {
   }
 
   _notify() {
-    this.listeners.forEach(cb => cb(this.groups, this.skuCosts));
+    this.listeners.forEach(cb => {
+      try {
+        cb(this.groups, this.skuCosts);
+      } catch (err) {
+        console.error('[SKUManager] Listener error:', err);
+      }
+    });
   }
 
   /**
-   * Load groups from localStorage
+   * Load from localStorage (fallback / instant cache)
    */
-  loadGroups() {
+  loadLocalGroups() {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       return data ? JSON.parse(data) : [];
@@ -42,18 +52,7 @@ class SKUManager {
     }
   }
 
-  /**
-   * Save groups to localStorage
-   */
-  saveGroups() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.groups));
-    this._notify();
-  }
-
-  /**
-   * Load individual SKU costs
-   */
-  loadCosts() {
+  loadLocalCosts() {
     try {
       const data = localStorage.getItem(COST_STORAGE_KEY);
       return data ? JSON.parse(data) : {};
@@ -62,194 +61,261 @@ class SKUManager {
     }
   }
 
+  saveLocalCache() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.groups));
+      localStorage.setItem(COST_STORAGE_KEY, JSON.stringify(this.skuCosts));
+    } catch (e) {
+      console.warn('[SKUManager] Failed to write local cache:', e);
+    }
+  }
+
   /**
-   * Save costs to localStorage
+   * Initialize and fetch from backend API
    */
-  saveCosts() {
-    localStorage.setItem(COST_STORAGE_KEY, JSON.stringify(this.skuCosts));
+  async init() {
+    try {
+      const res = await fetch(API_BASE);
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const json = await res.json();
+
+      if (json.success && json.data) {
+        const apiGroups = json.data.groups || [];
+        const apiCosts = json.data.skuCosts || {};
+
+        // If backend is empty but local storage has groups, auto-migrate to API
+        if (apiGroups.length === 0 && this.groups.length > 0) {
+          console.log('[SKUManager] Seeding backend API with existing local groups...');
+          await this.syncToBackend(this.groups, this.skuCosts);
+        } else {
+          this.groups = apiGroups;
+          this.skuCosts = apiCosts;
+          this.saveLocalCache();
+        }
+      }
+    } catch (err) {
+      console.warn('[SKUManager] Could not connect to API, using local storage:', err.message);
+    } finally {
+      this.isInitialized = true;
+      this._notify();
+    }
+    return this.groups;
+  }
+
+  /**
+   * Sync local data to backend
+   */
+  async syncToBackend(groups, skuCosts) {
+    try {
+      const res = await fetch(`${API_BASE}/bulk-sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groups, skuCosts })
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        this.groups = json.data.groups;
+        this.skuCosts = json.data.skuCosts;
+        this.saveLocalCache();
+      }
+    } catch (err) {
+      console.error('[SKUManager] Bulk sync error:', err);
+    }
+  }
+
+  /**
+   * Create a new SKU group via API
+   */
+  async createGroup(name, rawCost = 0, skus = []) {
+    const trimmedName = (name || '').trim();
+    if (!trimmedName) throw new Error('Group name is required');
+
+    if (this.groups.some(g => g.name.toLowerCase() === trimmedName.toLowerCase())) {
+      throw new Error('A group with this name already exists');
+    }
+
+    const payload = {
+      name: trimmedName,
+      rawCost: parseFloat(rawCost) || 0,
+      skus: [...new Set(skus)]
+    };
+
+    let newGroup = null;
+
+    try {
+      const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to create group on server');
+      }
+
+      newGroup = json.data;
+    } catch (err) {
+      console.warn('[SKUManager] API create failed, falling back to local:', err.message);
+      // Fallback local creation
+      newGroup = {
+        id: `grp_${Date.now()}`,
+        name: payload.name,
+        rawCost: payload.rawCost,
+        skus: payload.skus,
+        createdAt: new Date().toISOString()
+      };
+    }
+
+    this.groups.push(newGroup);
+    newGroup.skus.forEach(sku => {
+      this.skuCosts[sku] = newGroup.rawCost;
+    });
+
+    this.saveLocalCache();
+    this._notify();
+    return newGroup;
+  }
+
+  /**
+   * Update an existing group via API
+   */
+  async updateGroup(groupId, updates) {
+    const group = this.groups.find(g => g.id === groupId);
+    if (!group) throw new Error('Group not found');
+
+    if (updates.name && updates.name.trim() !== group.name) {
+      const newName = updates.name.trim();
+      if (this.groups.some(g => g.id !== groupId && g.name.toLowerCase() === newName.toLowerCase())) {
+        throw new Error('A group with this name already exists');
+      }
+    }
+
+    let updatedGroup = null;
+
+    try {
+      const res = await fetch(`${API_BASE}/${groupId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to update group on server');
+      }
+
+      updatedGroup = json.data;
+    } catch (err) {
+      console.warn('[SKUManager] API update failed, applying locally:', err.message);
+      updatedGroup = { ...group };
+      if (updates.name) updatedGroup.name = updates.name.trim();
+      if (updates.rawCost !== undefined) updatedGroup.rawCost = parseFloat(updates.rawCost) || 0;
+      if (updates.skus) updatedGroup.skus = [...new Set(updates.skus)];
+    }
+
+    // Update in-memory state
+    const index = this.groups.findIndex(g => g.id === groupId);
+    if (index !== -1) {
+      this.groups[index] = updatedGroup;
+    }
+
+    // Reconcile skuCosts
+    if (updates.skus) {
+      const removed = (group.skus || []).filter(s => !updatedGroup.skus.includes(s));
+      removed.forEach(sku => { delete this.skuCosts[sku]; });
+    }
+    (updatedGroup.skus || []).forEach(sku => {
+      this.skuCosts[sku] = updatedGroup.rawCost;
+    });
+
+    this.saveLocalCache();
+    this._notify();
+    return updatedGroup;
+  }
+
+  /**
+   * Delete a group via API
+   */
+  async deleteGroup(groupId) {
+    const group = this.groups.find(g => g.id === groupId);
+    if (!group) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/${groupId}`, {
+        method: 'DELETE'
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        console.warn('[SKUManager] Server delete failed:', json.error);
+      }
+    } catch (err) {
+      console.warn('[SKUManager] API delete request error, removing locally:', err.message);
+    }
+
+    (group.skus || []).forEach(sku => {
+      delete this.skuCosts[sku];
+    });
+    this.groups = this.groups.filter(g => g.id !== groupId);
+
+    this.saveLocalCache();
     this._notify();
   }
 
   /**
-   * Create a new SKU group
-   * @param {string} name - Group name
-   * @param {number} rawCost - Raw cost per unit for this group
-   * @param {string[]} skus - Array of SKU codes
+   * Set cost for an individual SKU via API
    */
-  createGroup(name, rawCost = 0, skus = []) {
-    if (!name.trim()) throw new Error('Group name is required');
-    if (this.groups.find(g => g.name.toLowerCase() === name.trim().toLowerCase())) {
-      throw new Error('A group with this name already exists');
-    }
+  async setSkuCost(sku, cost) {
+    const numCost = parseFloat(cost) || 0;
+    this.skuCosts[sku] = numCost;
 
-    const group = {
-      id: `grp_${Date.now()}`,
-      name: name.trim(),
-      rawCost: parseFloat(rawCost) || 0,
-      skus: [...new Set(skus)],
-      createdAt: new Date().toISOString()
-    };
-
-    this.groups.push(group);
-    
-    // Update individual SKU costs
-    group.skus.forEach(sku => {
-      this.skuCosts[sku] = group.rawCost;
-    });
-
-    this.saveGroups();
-    this.saveCosts();
-    return group;
-  }
-
-  /**
-   * Update an existing group
-   */
-  updateGroup(groupId, updates) {
-    const group = this.groups.find(g => g.id === groupId);
-    if (!group) throw new Error('Group not found');
-
-    // If name changed, check for duplicates
-    if (updates.name && updates.name !== group.name) {
-      if (this.groups.find(g => g.id !== groupId && g.name.toLowerCase() === updates.name.trim().toLowerCase())) {
-        throw new Error('A group with this name already exists');
-      }
-      group.name = updates.name.trim();
-    }
-
-    if (updates.rawCost !== undefined) {
-      group.rawCost = parseFloat(updates.rawCost) || 0;
-      // Update all SKU costs in this group
-      group.skus.forEach(sku => {
-        this.skuCosts[sku] = group.rawCost;
-      });
-    }
-
-    if (updates.skus) {
-      // Remove old SKU costs that are no longer in group
-      const removedSkus = group.skus.filter(s => !updates.skus.includes(s));
-      removedSkus.forEach(sku => {
-        delete this.skuCosts[sku];
-      });
-
-      group.skus = [...new Set(updates.skus)];
-      // Apply cost to new SKUs
-      group.skus.forEach(sku => {
-        this.skuCosts[sku] = group.rawCost;
-      });
-    }
-
-    this.saveGroups();
-    this.saveCosts();
-    return group;
-  }
-
-  /**
-   * Delete a group
-   */
-  deleteGroup(groupId) {
-    const group = this.groups.find(g => g.id === groupId);
+    const group = this.getGroupForSku(sku);
     if (group) {
-      group.skus.forEach(sku => {
-        delete this.skuCosts[sku];
+      group.rawCost = numCost;
+      (group.skus || []).forEach(s => {
+        this.skuCosts[s] = numCost;
       });
-      this.groups = this.groups.filter(g => g.id !== groupId);
-      this.saveGroups();
-      this.saveCosts();
     }
+
+    try {
+      await fetch(`/api/sku-costs/${encodeURIComponent(sku)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cost: numCost })
+      });
+    } catch (err) {
+      console.warn('[SKUManager] API SKU cost update failed:', err.message);
+    }
+
+    this.saveLocalCache();
+    this._notify();
   }
 
-  /**
-   * Add SKUs to a group
-   */
-  addSkusToGroup(groupId, skus) {
-    const group = this.groups.find(g => g.id === groupId);
-    if (!group) throw new Error('Group not found');
+  // ═══════════════════════════════════════════
+  //  SYNCHRONOUS GETTERS (Used by analytics.js)
+  // ═══════════════════════════════════════════
 
-    skus.forEach(sku => {
-      if (!group.skus.includes(sku)) {
-        group.skus.push(sku);
-        this.skuCosts[sku] = group.rawCost;
-      }
-    });
-
-    this.saveGroups();
-    this.saveCosts();
-  }
-
-  /**
-   * Remove a SKU from a group
-   */
-  removeSkuFromGroup(groupId, sku) {
-    const group = this.groups.find(g => g.id === groupId);
-    if (!group) return;
-    
-    group.skus = group.skus.filter(s => s !== sku);
-    delete this.skuCosts[sku];
-    
-    this.saveGroups();
-    this.saveCosts();
-  }
-
-  /**
-   * Get the group a SKU belongs to
-   */
-  getGroupForSku(sku) {
-    return this.groups.find(g => g.skus.includes(sku)) || null;
-  }
-
-  /**
-   * Get raw cost for a specific SKU
-   */
-  getCostForSku(sku) {
-    return this.skuCosts[sku] || 0;
-  }
-
-  /**
-   * Get all unassigned SKUs (from order data)
-   */
-  getUnassignedSkus(allSkus) {
-    const assignedSkus = new Set(this.groups.flatMap(g => g.skus));
-    return allSkus.filter(sku => !assignedSkus.has(sku));
-  }
-
-  /**
-   * Get all groups
-   */
   getGroups() {
     return [...this.groups];
   }
 
-  /**
-   * Get group by ID
-   */
   getGroup(groupId) {
     return this.groups.find(g => g.id === groupId) || null;
   }
 
-  /**
-   * Set individual SKU cost (outside of groups)
-   */
-  setSkuCost(sku, cost) {
-    this.skuCosts[sku] = parseFloat(cost) || 0;
-    
-    // Also update the group's cost if SKU belongs to one
-    const group = this.getGroupForSku(sku);
-    if (group) {
-      group.rawCost = parseFloat(cost) || 0;
-      // Apply to all SKUs in group
-      group.skus.forEach(s => {
-        this.skuCosts[s] = group.rawCost;
-      });
-      this.saveGroups();
-    }
-    
-    this.saveCosts();
+  getGroupForSku(sku) {
+    return this.groups.find(g => (g.skus || []).includes(sku)) || null;
   }
 
-  /**
-   * Export group data as JSON
-   */
+  getCostForSku(sku) {
+    return this.skuCosts[sku] || 0;
+  }
+
+  getUnassignedSkus(allSkus) {
+    const assignedSkus = new Set(this.groups.flatMap(g => g.skus || []));
+    return allSkus.filter(sku => !assignedSkus.has(sku));
+  }
+
   exportData() {
     return {
       groups: this.groups,
@@ -258,17 +324,10 @@ class SKUManager {
     };
   }
 
-  /**
-   * Import group data from JSON
-   */
-  importData(data) {
-    if (data.groups) {
-      this.groups = data.groups;
-      this.saveGroups();
-    }
-    if (data.skuCosts) {
-      this.skuCosts = data.skuCosts;
-      this.saveCosts();
+  async importData(data) {
+    if (data.groups && Array.isArray(data.groups)) {
+      await this.syncToBackend(data.groups, data.skuCosts || {});
+      this._notify();
     }
   }
 }

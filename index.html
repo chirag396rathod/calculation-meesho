@@ -39,12 +39,18 @@
           <span class="nav-badge">0</span>
         </div>
 
+        <div class="nav-item" data-section="sessionsSection">
+          <span class="nav-icon">📁</span>
+          <span class="nav-label">Monthly Sessions</span>
+          <span class="nav-badge" id="sessionsNavBadge">0</span>
+        </div>
+
         <div class="nav-section-title">Manage</div>
 
         <div class="nav-item" data-section="skuManager">
           <span class="nav-icon">⚙️</span>
           <span class="nav-label">SKU Groups & Costing</span>
-          <span class="nav-badge">0</span>
+          <span class="nav-badge" id="skuNavBadge">0</span>
         </div>
 
         <div class="nav-item" data-section="exportSection">
@@ -71,15 +77,73 @@
             <p class="subtitle">E-Commerce Profit & Performance Analytics</p>
           </div>
           <div class="header-actions">
-            <div class="header-badge" id="dataBadge">
-              <span class="dot" style="background: var(--color-warning)"></span> No data loaded
+            <div class="session-pill" id="headerActiveSessionPill" style="display: none;" title="Current active session">
+              <span class="session-pill-dot"></span>
+              <span class="session-pill-label" id="headerActiveSessionLabel">Session: Default</span>
             </div>
+            <button class="btn btn-primary btn-sm" id="headerCreateSessionBtn" title="Create a new monthly session">➕ Create New Session</button>
+            <button class="btn btn-secondary btn-sm" id="headerSaveSessionBtn" title="Save current data as a monthly session">💾 Save Session</button>
+            <button class="btn btn-secondary btn-sm" id="headerClearDashboardBtn" title="Clear dashboard and return to fresh welcome screen" style="display: none;">🧹 Clear</button>
             <button class="btn btn-primary upload-trigger">📂 Upload Files</button>
           </div>
         </div>
 
-        <!-- Date Range Filter Bar -->
-        <div class="date-filter-bar" id="dateFilterBar">
+        <!-- ══ Minimalist Clean Welcome & Quick-Start Hub ══ -->
+        <div class="dashboard-welcome-hero" id="dashboardWelcomeHero">
+          <div class="welcome-hero-content">
+            <div class="welcome-hero-badge">
+              <span class="welcome-sparkle">✨</span>
+              <span>FC Analytics · Business Intelligence</span>
+            </div>
+            <h2 class="welcome-hero-title">Welcome to Business Analytics</h2>
+            <p class="welcome-hero-subtitle">
+              Start a fresh monthly session, upload your marketplace payment files, or quickly switch to an existing saved month.
+            </p>
+
+            <!-- Quick Action Cards Grid -->
+            <div class="welcome-actions-grid">
+              <div class="welcome-action-card highlight" id="welcomeCardNewSession">
+                <div class="welcome-card-icon">➕</div>
+                <div class="welcome-card-body">
+                  <h3>Start New Session</h3>
+                  <p>Create a clean, dedicated workspace for a new month (e.g. August 2026).</p>
+                </div>
+                <button class="btn btn-primary btn-sm welcome-card-btn" id="welcomeCreateSessionBtn">➕ Create Session</button>
+              </div>
+
+              <div class="welcome-action-card" id="welcomeCardUpload">
+                <div class="welcome-card-icon">📂</div>
+                <div class="welcome-card-body">
+                  <h3>Upload Payment File</h3>
+                  <p>Directly upload your marketplace Excel payment sheet to parse orders and settlement.</p>
+                </div>
+                <button class="btn btn-secondary btn-sm welcome-card-btn upload-trigger">📂 Upload File</button>
+              </div>
+
+              <div class="welcome-action-card" id="welcomeCardSessions">
+                <div class="welcome-card-icon">📁</div>
+                <div class="welcome-card-body">
+                  <h3>Browse Monthly Sessions</h3>
+                  <p>Load previous months with all analytics, SKU groups, and profit calculations intact.</p>
+                </div>
+                <button class="btn btn-secondary btn-sm welcome-card-btn" id="welcomeBrowseSessionsBtn">📁 View Sessions</button>
+              </div>
+            </div>
+
+            <!-- Recent Sessions Quick Jump Bar -->
+            <div class="welcome-recent-sessions" id="welcomeRecentSessions" style="display: none;">
+              <span class="recent-sessions-label">⚡ Quick Jump to Saved Month:</span>
+              <div class="recent-sessions-chips" id="welcomeRecentChips">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ Main Analytics Content Wrapper ══ -->
+        <div id="dashboardAnalyticsContent">
+          <!-- Date Range Filter Bar -->
+          <div class="date-filter-bar" id="dateFilterBar">
           <div class="date-filter-left">
             <span class="date-filter-icon">📅</span>
             <span class="date-filter-label">Filter by Order Date:</span>
@@ -114,7 +178,10 @@
               Upload your marketplace payment .xlsx files to see profit analysis, 
               SKU performance, and return analytics.
             </div>
-            <button class="btn btn-primary upload-trigger" style="margin-top: 16px;">📂 Upload Payment File</button>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap;">
+              <button class="btn btn-primary upload-trigger">📂 Upload Payment File</button>
+              <button class="btn btn-secondary" id="emptyCreateSessionBtn">➕ Create New Session</button>
+            </div>
           </div>
         </div>
 
@@ -191,56 +258,57 @@
             </table>
           </div>
         </div>
-      </section>
+      </div><!-- end #dashboardAnalyticsContent -->
+    </section>
 
-      <!-- ══ SKU Analytics Section ══ -->
-      <section id="skuAnalytics" class="section">
-        <div class="page-header">
-          <div>
-            <h1>SKU Analytics</h1>
-            <p class="subtitle">Detailed per-SKU performance data</p>
+    <!-- ══ SKU Analytics Section ══ -->
+    <section id="skuAnalytics" class="section">
+      <div class="page-header">
+        <div>
+          <h1>SKU Analytics</h1>
+          <p class="subtitle">Detailed per-SKU performance data</p>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <h3>📦 SKU Performance Table</h3>
+          <div class="table-controls">
+            <input type="text" class="search-input" id="skuSearch" placeholder="🔍 Search SKU or product...">
+            <select class="filter-select" id="skuFilter">
+              <option value="all">All SKUs</option>
+              <option value="profitable">Profitable Only</option>
+              <option value="loss">Loss Only</option>
+              <option value="high-return">High Return Rate (>30%)</option>
+            </select>
           </div>
         </div>
-
-        <div class="table-container">
-          <div class="table-header">
-            <h3>📦 SKU Performance Table</h3>
-            <div class="table-controls">
-              <input type="text" class="search-input" id="skuSearch" placeholder="🔍 Search SKU or product...">
-              <select class="filter-select" id="skuFilter">
-                <option value="all">All SKUs</option>
-                <option value="profitable">Profitable Only</option>
-                <option value="loss">Loss Only</option>
-                <option value="high-return">High Return Rate (>30%)</option>
-              </select>
-            </div>
-          </div>
-          <div class="table-scroll">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>SKU <span class="sort-icon">↕</span></th>
-                  <th>Group</th>
-                  <th>Orders <span class="sort-icon">↕</span></th>
-                  <th>Delivered</th>
-                  <th>Returns</th>
-                  <th>RTO</th>
-                  <th>Settlement <span class="sort-icon">↕</span></th>
-                  <th>Return Charges</th>
-                  <th>Raw Cost</th>
-                  <th>Net Profit <span class="sort-icon">↕</span></th>
-                  <th>Return % <span class="sort-icon">↕</span></th>
-                </tr>
-              </thead>
-              <tbody id="skuTableBody">
-                <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                  Upload payment files to see SKU analytics
-                </td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>SKU <span class="sort-icon">↕</span></th>
+                <th>Group</th>
+                <th>Orders <span class="sort-icon">↕</span></th>
+                <th>Delivered</th>
+                <th>Returns</th>
+                <th>RTO</th>
+                <th>Settlement <span class="sort-icon">↕</span></th>
+                <th>Return Charges</th>
+                <th>Raw Cost</th>
+                <th>Net Profit <span class="sort-icon">↕</span></th>
+                <th>Return % <span class="sort-icon">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="skuTableBody">
+              <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                Upload payment files to see SKU analytics
+              </td></tr>
+            </tbody>
+          </table>
         </div>
-      </section>
+      </div>
+    </section>
 
       <!-- ══ Returns Analysis Section ══ -->
       <section id="returns" class="section">
@@ -443,6 +511,27 @@
         </div>
       </section>
 
+      <!-- ══ Monthly Sessions Section ══ -->
+      <section id="sessionsSection" class="section">
+        <div class="page-header">
+          <div>
+            <h1>📁 Monthly Sessions Manager</h1>
+            <p class="subtitle">Save, view, edit, and switch between your month-wise business datasets</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" id="sessionsBackToDashboardBtn">← Back to Dashboard</button>
+            <button class="btn btn-primary" id="sessionsSectionCreateBtn">➕ Create New Session</button>
+            <button class="btn btn-secondary" id="sessionsSectionSaveBtn">💾 Save Current Data</button>
+          </div>
+        </div>
+
+        <div class="sessions-container">
+          <div class="sessions-grid" id="sessionsGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
       <!-- ══ Export & Data Section ══ -->
       <section id="exportSection" class="section">
         <div class="page-header">
@@ -552,6 +641,152 @@
           ✓ Create Group
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- ═══ Rename Report Modal ═══ -->
+  <div class="modal-overlay" id="renameReportModal">
+    <div class="modal" style="max-width: 440px;">
+      <div class="modal-header">
+        <h2>✏️ Rename Report</h2>
+        <button class="modal-close">✕</button>
+      </div>
+      <form id="renameReportForm">
+        <input type="hidden" id="renameReportId">
+        <div class="form-group">
+          <label class="form-label">Report Name</label>
+          <input type="text" class="form-input" id="renameReportInput" placeholder="e.g., July 2026 Payment Batch" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
+          ✓ Save Report Name
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Create Session Modal ═══ -->
+  <div class="modal-overlay" id="createSessionModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>➕ Create New Session</h2>
+        <button class="modal-close">✕</button>
+      </div>
+      <form id="createSessionForm">
+        <div class="form-group">
+          <label class="form-label">Session Name</label>
+          <input type="text" class="form-input" id="createSessionName" placeholder="e.g., August 2026 Payment Batch" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Month / Period</label>
+          <input type="text" class="form-input" id="createSessionMonth" placeholder="e.g., August 2026">
+        </div>
+        <div class="form-group" id="createSessionModeGroup">
+          <label class="form-label">Session Workspace Mode</label>
+          <div class="session-choice-grid">
+            <label class="session-choice-card">
+              <input type="radio" name="createSessionMode" value="fresh" checked>
+              <div class="session-choice-content">
+                <span class="session-choice-title">🌱 Start Fresh Session</span>
+                <span class="session-choice-desc">Start clean for a new month. Clears the screen and opens file upload for this session.</span>
+              </div>
+            </label>
+            <label class="session-choice-card" id="createSessionCurrentCard">
+              <input type="radio" name="createSessionMode" value="current">
+              <div class="session-choice-content">
+                <span class="session-choice-title">📦 Snapshot Current Data</span>
+                <span class="session-choice-desc" id="createSessionCurrentDesc">Save currently loaded orders into this new session.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Remarks (Optional)</label>
+          <textarea class="form-input" id="createSessionNotes" rows="2" placeholder="e.g., Initial payment file for August reconciliation"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px;">
+          ✓ Create Session
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Save Session Modal ═══ -->
+  <div class="modal-overlay" id="saveSessionModal">
+    <div class="modal" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2>💾 Save Monthly Session</h2>
+        <button class="modal-close">✕</button>
+      </div>
+      <form id="saveSessionForm">
+        <div class="form-group">
+          <label class="form-label">Session Name</label>
+          <input type="text" class="form-input" id="saveSessionName" placeholder="e.g., July 2026 Payment Batch" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Month / Period</label>
+          <input type="text" class="form-input" id="saveSessionMonth" placeholder="e.g., July 2026">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Remarks (Optional)</label>
+          <textarea class="form-input" id="saveSessionNotes" rows="2" placeholder="e.g., Final payment file after reconciling return charges"></textarea>
+        </div>
+        <div class="session-save-summary" id="saveSessionSummary">
+          <div class="summary-item">Orders to save: <strong id="saveSummaryOrders">0</strong></div>
+          <div class="summary-item">Files: <strong id="saveSummaryFiles">0</strong></div>
+          <div class="summary-item">Net Settlement: <strong id="saveSummarySettlement">₹0</strong></div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px;">
+          ✓ Save Session
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Edit Session Modal ═══ -->
+  <div class="modal-overlay" id="editSessionModal">
+    <div class="modal" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2>✏️ Edit Session Details</h2>
+        <button class="modal-close">✕</button>
+      </div>
+      <form id="editSessionForm">
+        <input type="hidden" id="editSessionId">
+        <div class="form-group">
+          <label class="form-label">Session Name</label>
+          <input type="text" class="form-input" id="editSessionName" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Month / Period</label>
+          <input type="text" class="form-input" id="editSessionMonth">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Remarks</label>
+          <textarea class="form-input" id="editSessionNotes" rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px;">
+          ✓ Update Session
+        </button>
+        <button type="button" class="btn btn-secondary" id="editModalBrowseAllBtn" style="width: 100%; margin-top: 8px;">
+          📁 View All Saved Monthly Sessions
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Clear Dashboard Confirmation Modal ═══ -->
+  <div class="modal-overlay" id="clearDashboardModal">
+    <div class="modal" style="max-width: 440px; text-align: center;">
+      <div style="font-size: 2.6rem; margin-bottom: 12px;">🧹</div>
+      <h2 style="font-size: 1.35rem; margin-bottom: 8px;">Clear Dashboard Workspace?</h2>
+      <p style="color: var(--text-secondary); font-size: var(--font-sm); line-height: 1.5; margin-bottom: 20px;">
+        This will clear current orders from the screen and return to the fresh Welcome Hub.
+        <br><br>
+        <span style="color: #34d399; font-weight: 600;">✓ Your saved monthly sessions and SKU groups will stay safe on disk.</span>
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn btn-secondary" id="cancelClearDashboardBtn" style="flex: 1;">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmClearDashboardBtn" style="flex: 1;">✓ Clear Workspace</button>
+      </div>
     </div>
   </div>
 

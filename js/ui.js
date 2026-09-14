@@ -424,10 +424,11 @@ export function renderGroupDetail(groupId, allSkus, onUpdate) {
   const assignedByOthers = new Set(
     skuManager.getGroups()
       .filter(g => g.id !== groupId)
-      .flatMap(g => g.skus)
+      .flatMap(g => g.skus || [])
   );
 
-  const availableSkus = allSkus.filter(sku => !assignedByOthers.has(sku));
+  const candidateSkus = [...new Set([...(group.skus || []), ...(allSkus || [])])];
+  const availableSkus = candidateSkus.filter(sku => !assignedByOthers.has(sku)).sort();
 
   panel.innerHTML = `
     <div class="panel-header">
@@ -478,26 +479,36 @@ export function renderGroupDetail(groupId, allSkus, onUpdate) {
   });
 
   // Save button
-  panel.querySelector('#saveGroupBtn').addEventListener('click', () => {
+  panel.querySelector('#saveGroupBtn').addEventListener('click', async () => {
+    const saveBtn = panel.querySelector('#saveGroupBtn');
     const selectedSkus = [...panel.querySelectorAll('.chip.selected')].map(c => c.dataset.sku);
     const name = panel.querySelector('#editGroupName').value;
     const cost = panel.querySelector('#editGroupCost').value;
     
     try {
-      skuManager.updateGroup(groupId, { name, rawCost: cost, skus: selectedSkus });
+      saveBtn.disabled = true;
+      saveBtn.textContent = '⏳ Saving...';
+      await skuManager.updateGroup(groupId, { name, rawCost: cost, skus: selectedSkus });
       showToast(`Group "${name}" updated successfully!`, 'success');
       onUpdate();
     } catch (err) {
       showToast(err.message, 'error');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '💾 Save Changes';
     }
   });
 
   // Delete button
-  panel.querySelector('#deleteGroupBtn').addEventListener('click', () => {
+  panel.querySelector('#deleteGroupBtn').addEventListener('click', async () => {
     if (confirm(`Delete group "${group.name}"?`)) {
-      skuManager.deleteGroup(groupId);
-      showToast(`Group "${group.name}" deleted`, 'info');
-      onUpdate();
+      try {
+        await skuManager.deleteGroup(groupId);
+        showToast(`Group "${group.name}" deleted`, 'info');
+        onUpdate();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
     }
   });
 }
@@ -512,7 +523,8 @@ export function setupCreateGroupModal(allSkus, onCreated) {
   const form = document.getElementById('createGroupForm');
   
   btn.addEventListener('click', () => {
-    renderCreateGroupSkuSelector(allSkus);
+    const skus = typeof allSkus === 'function' ? allSkus() : (allSkus || []);
+    renderCreateGroupSkuSelector(skus);
     modal.classList.add('active');
   });
 
@@ -521,21 +533,27 @@ export function setupCreateGroupModal(allSkus, onCreated) {
     if (e.target === modal) modal.classList.remove('active');
   });
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     const name = document.getElementById('newGroupName').value;
     const cost = document.getElementById('newGroupCost').value;
     const selectedSkus = [...document.querySelectorAll('#newGroupSkuSelector .chip.selected')]
       .map(c => c.dataset.sku);
 
     try {
-      skuManager.createGroup(name, cost, selectedSkus);
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Creating...';
+      await skuManager.createGroup(name, cost, selectedSkus);
       showToast(`Group "${name}" created with ${selectedSkus.length} SKUs!`, 'success');
       modal.classList.remove('active');
       form.reset();
       onCreated();
     } catch (err) {
       showToast(err.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Create Group';
     }
   });
 }
@@ -566,35 +584,125 @@ function renderCreateGroupSkuSelector(allSkus) {
 }
 
 /**
- * Render file upload list
+ * Setup Rename Report Modal
  */
-export function renderUploadedFiles(files) {
-  const container = document.getElementById('uploadedFilesList');
-  if (!container) return;
+export function setupRenameModal(onRenamed) {
+  const modal = document.getElementById('renameReportModal');
+  if (!modal) return;
+  const closeBtn = modal.querySelector('.modal-close');
+  const form = document.getElementById('renameReportForm');
+  const input = document.getElementById('renameReportInput');
+  const idInput = document.getElementById('renameReportId');
 
-  container.innerHTML = files.map(f => `
-    <div class="upload-file-item">
-      <span class="file-icon">📊</span>
-      <div class="file-info">
-        <div class="file-name">${f.filename}</div>
-        <div class="file-size">${f.orders.length} orders · ${f.month} · ${f.platform}</div>
-      </div>
-      <span class="file-status success">✓ Parsed</span>
-    </div>
-  `).join('');
+  closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const idx = parseInt(idInput.value, 10);
+    const newName = input.value.trim();
+    if (newName && !isNaN(idx)) {
+      onRenamed(idx, newName);
+      modal.classList.remove('active');
+    }
+  });
+}
+
+export function openRenameModal(index, currentName) {
+  const modal = document.getElementById('renameReportModal');
+  const input = document.getElementById('renameReportInput');
+  const idInput = document.getElementById('renameReportId');
+  if (modal && input && idInput) {
+    idInput.value = index;
+    input.value = currentName || '';
+    modal.classList.add('active');
+    setTimeout(() => input.focus(), 80);
+  }
 }
 
 /**
- * Update header badge with data status
+ * Render loaded files list with Report Names and Management
  */
-export function updateHeaderBadge(orderCount, fileCount) {
+export function renderUploadedFiles(files, { onRename, onDelete } = {}) {
+  const container = document.getElementById('uploadedFilesList');
+  if (!container) return;
+
+  if (!files || files.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding: 24px;">
+        <div class="empty-icon">📂</div>
+        <div class="empty-title">No files loaded</div>
+        <div class="empty-description">Upload payment files to see saved reports here</div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="reports-list">
+      ${files.map((f, idx) => {
+        const reportName = f.reportName || f.filename;
+        const uploadDate = f.uploadedAt
+          ? new Date(f.uploadedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+          : '';
+        const count = f.orderCount || (f.orders ? f.orders.length : 0);
+        return `
+          <div class="report-card-item" data-index="${idx}">
+            <div class="report-card-left">
+              <span class="file-icon" style="font-size: 1.5rem;">📊</span>
+              <div class="file-info">
+                <div class="report-title-row">
+                  <span class="report-name">${reportName}</span>
+                  <span class="file-status success">✓ Loaded</span>
+                </div>
+                <div class="report-meta-row">
+                  <span class="file-filename" title="Source File">📄 ${f.filename}</span>
+                  ${f.month ? `<span class="meta-dot">·</span> <span>${f.month}</span>` : ''}
+                  ${f.platform ? `<span class="meta-dot">·</span> <span>${f.platform}</span>` : ''}
+                  <span class="meta-dot">·</span>
+                  <span class="meta-highlight">${formatNumber(count)} orders</span>
+                  ${uploadDate ? `<span class="meta-dot">·</span> <span class="meta-date">Saved ${uploadDate}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="report-card-actions">
+              <button class="btn btn-secondary btn-sm rename-report-btn" data-index="${idx}" title="Rename Report">✏️ Rename</button>
+              <button class="btn btn-danger btn-sm delete-report-btn" data-index="${idx}" title="Remove Report">🗑 Remove</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+
+  // Bind rename
+  container.querySelectorAll('.rename-report-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.index, 10);
+      if (onRename) onRename(idx);
+    });
+  });
+
+  // Bind delete
+  container.querySelectorAll('.delete-report-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.index, 10);
+      if (onDelete) onDelete(idx);
+    });
+  });
+}
+
+/**
+ * Update header badge with data status and report names
+ */
+export function updateHeaderBadge(orderCount, fileCount, activeReports = []) {
   const badge = document.getElementById('dataBadge');
   if (badge) {
-    if (orderCount > 0) {
-      badge.innerHTML = `<span class="dot"></span> ${formatNumber(orderCount)} orders · ${fileCount} file${fileCount > 1 ? 's' : ''}`;
-    } else {
-      badge.innerHTML = `<span class="dot" style="background: var(--color-warning)"></span> No data loaded`;
-    }
+    badge.remove();
   }
 }
 
@@ -651,4 +759,336 @@ export function switchSection(sectionId) {
   if (navItem) {
     navItem.classList.add('active');
   }
+
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
+
+// ═══════════════════════════════════════════
+//  MONTHLY SESSIONS UI HELPERS
+// ═══════════════════════════════════════════
+
+/**
+ * Render list of monthly session cards
+ */
+export function renderSessionsList(sessions, activeSessionId, { onSwitch, onEdit, onUpdateData, onDelete } = {}) {
+  const container = document.getElementById('sessionsGrid');
+  if (!container) return;
+
+  if (!sessions || sessions.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 48px 24px;">
+        <div class="empty-icon">📁</div>
+        <div class="empty-title">No Monthly Sessions Saved</div>
+        <div class="empty-description">
+          Save your current month's loaded files and analytics as a session to easily revisit, view, and compare anytime!
+        </div>
+        <button class="btn btn-primary" id="emptySaveSessionBtn" style="margin-top: 16px;">💾 Save Current as Session</button>
+      </div>
+    `;
+
+    document.getElementById('emptySaveSessionBtn')?.addEventListener('click', () => {
+      document.getElementById('sessionsSectionSaveBtn')?.click();
+    });
+    return;
+  }
+
+  container.innerHTML = sessions.map(sess => {
+    const isActive = sess.id === activeSessionId;
+    const createdFmt = sess.createdAt ? new Date(sess.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    const profitClass = (sess.netProfit || 0) >= 0 ? 'text-success' : 'text-danger';
+
+    return `
+      <div class="session-card ${isActive ? 'active' : ''}" data-id="${sess.id}">
+        <div>
+          <div class="session-card-header">
+            <div class="session-title-group">
+              <div class="session-name">
+                📁 ${sess.name}
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                ${sess.month ? `<span class="session-month-badge">📅 ${sess.month}</span>` : ''}
+                <span style="font-size: 0.75rem; color: var(--text-muted);">${createdFmt}</span>
+              </div>
+            </div>
+            ${isActive ? `
+              <span class="session-active-tag">
+                <span class="dot-pulse"></span> Active
+              </span>
+            ` : ''}
+          </div>
+
+          ${sess.notes ? `<div class="session-card-notes">${sess.notes}</div>` : ''}
+
+          <div class="session-card-metrics">
+            <div class="session-metric-cell">
+              <div class="session-metric-val">${formatNumber(sess.orderCount || 0)}</div>
+              <div class="session-metric-lbl">Total Orders</div>
+            </div>
+            <div class="session-metric-cell">
+              <div class="session-metric-val">${formatCurrency(sess.netSettlement || 0)}</div>
+              <div class="session-metric-lbl">Net Settlement</div>
+            </div>
+            <div class="session-metric-cell">
+              <div class="session-metric-val ${profitClass}">${formatCurrency(sess.netProfit || 0)}</div>
+              <div class="session-metric-lbl">Net Profit</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="session-card-footer">
+          <div class="session-footer-actions">
+            ${isActive ? `
+              <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.8; cursor: default;">✓ Currently Loaded</button>
+              <button class="btn btn-secondary btn-sm session-update-btn" data-id="${sess.id}" title="Overwrite this session with current loaded data">🔄 Update Data</button>
+            ` : `
+              <button class="btn btn-primary btn-sm session-switch-btn" data-id="${sess.id}">👁️ View / Switch</button>
+            `}
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm session-edit-btn" data-id="${sess.id}" title="Edit Name & Notes">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm session-delete-btn" data-id="${sess.id}" title="Delete Session">🗑 Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Bind Switch
+  container.querySelectorAll('.session-switch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (onSwitch) onSwitch(btn.dataset.id);
+    });
+  });
+
+  // Bind Update Content
+  container.querySelectorAll('.session-update-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (onUpdateData) onUpdateData(btn.dataset.id);
+    });
+  });
+
+  // Bind Edit
+  container.querySelectorAll('.session-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (onEdit) onEdit(btn.dataset.id);
+    });
+  });
+
+  // Bind Delete
+  container.querySelectorAll('.session-delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (onDelete) onDelete(btn.dataset.id);
+    });
+  });
+}
+
+/**
+ * Setup Create Session Modal
+ */
+export function setupCreateSessionModal(onCreate) {
+  const modal = document.getElementById('createSessionModal');
+  if (!modal) return;
+
+  const closeBtn = modal.querySelector('.modal-close');
+  const form = document.getElementById('createSessionForm');
+
+  closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const name = document.getElementById('createSessionName').value.trim();
+    const month = document.getElementById('createSessionMonth').value.trim();
+    const notes = document.getElementById('createSessionNotes').value.trim();
+    const mode = form.querySelector('input[name="createSessionMode"]:checked')?.value || 'fresh';
+
+    if (!name) return;
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Creating Session...';
+      await onCreate({ name, month, notes, mode });
+      modal.classList.remove('active');
+      form.reset();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Create Session';
+    }
+  });
+}
+
+/**
+ * Open Create Session Modal
+ */
+export function openCreateSessionModal({ currentOrderCount = 0, currentMonth = '' } = {}) {
+  const modal = document.getElementById('createSessionModal');
+  if (!modal) return;
+
+  const nameInput = document.getElementById('createSessionName');
+  const monthInput = document.getElementById('createSessionMonth');
+  const currentCard = document.getElementById('createSessionCurrentCard');
+  const currentDesc = document.getElementById('createSessionCurrentDesc');
+  const freshRadio = modal.querySelector('input[name="createSessionMode"][value="fresh"]');
+  const currentRadio = modal.querySelector('input[name="createSessionMode"][value="current"]');
+
+  // Default suggested month and name
+  const now = new Date();
+  const nextMonthName = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  if (nameInput) nameInput.value = currentMonth ? `${currentMonth} Session` : `${nextMonthName} Session`;
+  if (monthInput) monthInput.value = currentMonth || nextMonthName;
+
+  if (currentCard && currentDesc) {
+    if (currentOrderCount > 0) {
+      currentCard.classList.remove('disabled');
+      if (currentRadio) currentRadio.disabled = false;
+      currentDesc.textContent = `Save currently loaded ${formatNumber(currentOrderCount)} orders into this new session.`;
+    } else {
+      currentCard.classList.add('disabled');
+      if (currentRadio) currentRadio.disabled = true;
+      if (freshRadio) freshRadio.checked = true;
+      currentDesc.textContent = `No orders currently loaded in memory.`;
+    }
+  }
+
+  modal.classList.add('active');
+  setTimeout(() => nameInput?.focus(), 80);
+}
+
+/**
+ * Setup Save Session Modal
+ */
+export function setupSaveSessionModal(onSave) {
+  const modal = document.getElementById('saveSessionModal');
+  if (!modal) return;
+
+  const closeBtn = modal.querySelector('.modal-close');
+  const form = document.getElementById('saveSessionForm');
+
+  closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const name = document.getElementById('saveSessionName').value.trim();
+    const month = document.getElementById('saveSessionMonth').value.trim();
+    const notes = document.getElementById('saveSessionNotes').value.trim();
+
+    if (!name) return;
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Saving Session...';
+      await onSave({ name, month, notes });
+      modal.classList.remove('active');
+      form.reset();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Save Session';
+    }
+  });
+}
+
+/**
+ * Open Save Session Modal with current summaries
+ */
+export function openSaveSessionModal({ orderCount = 0, fileCount = 0, netSettlement = 0, defaultMonth = '', defaultName = '' }) {
+  const modal = document.getElementById('saveSessionModal');
+  if (!modal) return;
+
+  const nameInput = document.getElementById('saveSessionName');
+  const monthInput = document.getElementById('saveSessionMonth');
+  const ordersEl = document.getElementById('saveSummaryOrders');
+  const filesEl = document.getElementById('saveSummaryFiles');
+  const settlementEl = document.getElementById('saveSummarySettlement');
+
+  if (nameInput) nameInput.value = defaultName || (defaultMonth ? `${defaultMonth} Session` : `Session ${new Date().toLocaleDateString('en-IN')}`);
+  if (monthInput) monthInput.value = defaultMonth || '';
+  if (ordersEl) ordersEl.textContent = formatNumber(orderCount);
+  if (filesEl) filesEl.textContent = fileCount;
+  if (settlementEl) settlementEl.textContent = formatCurrency(netSettlement);
+
+  modal.classList.add('active');
+  setTimeout(() => nameInput?.focus(), 80);
+}
+
+/**
+ * Setup Edit Session Modal
+ */
+export function setupEditSessionModal(onEditSave) {
+  const modal = document.getElementById('editSessionModal');
+  if (!modal) return;
+
+  const closeBtn = modal.querySelector('.modal-close');
+  const form = document.getElementById('editSessionForm');
+
+  closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const id = document.getElementById('editSessionId').value;
+    const name = document.getElementById('editSessionName').value.trim();
+    const month = document.getElementById('editSessionMonth').value.trim();
+    const notes = document.getElementById('editSessionNotes').value.trim();
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Updating...';
+      await onEditSave(id, { name, month, notes });
+      modal.classList.remove('active');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Update Session';
+    }
+  });
+}
+
+/**
+ * Open Edit Session Modal
+ */
+export function openEditSessionModal(session) {
+  const modal = document.getElementById('editSessionModal');
+  if (!modal || !session) return;
+
+  document.getElementById('editSessionId').value = session.id;
+  document.getElementById('editSessionName').value = session.name || '';
+  document.getElementById('editSessionMonth').value = session.month || '';
+  document.getElementById('editSessionNotes').value = session.notes || '';
+
+  modal.classList.add('active');
+  setTimeout(() => document.getElementById('editSessionName')?.focus(), 80);
+}
+
+/**
+ * Update active session pill in header
+ */
+export function updateActiveSessionBadge(sessionName) {
+  const pill = document.getElementById('headerActiveSessionPill');
+  const label = document.getElementById('headerActiveSessionLabel');
+  if (pill && label) {
+    if (sessionName) {
+      label.textContent = `Session: ${sessionName}`;
+      pill.style.display = 'inline-flex';
+    } else {
+      pill.style.display = 'none';
+    }
+  }
+}
+

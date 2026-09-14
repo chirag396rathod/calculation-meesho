@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
     "chart.js": "^4.4.8",
+    "dotenv": "^17.4.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

@@ -1,11 +1,12 @@
 /**
  * app.js — Main Application Controller
- * Orchestrates file parsing, analytics, UI rendering, and state management
+ * Orchestrates file parsing, analytics, UI rendering, report management, session management, and state management
  */
 
 import { parsePaymentFile } from './fileParser.js';
 import { calculateAnalytics, formatCurrency } from './analytics.js';
 import { skuManager } from './skuManager.js';
+import { sessionManager } from './sessionManager.js';
 import {
   renderStatusChart,
   renderProfitBreakdownChart,
@@ -29,6 +30,16 @@ import {
   setupCreateGroupModal,
   renderUploadedFiles,
   updateHeaderBadge,
+  setupRenameModal,
+  openRenameModal,
+  renderSessionsList,
+  setupCreateSessionModal,
+  openCreateSessionModal,
+  setupSaveSessionModal,
+  openSaveSessionModal,
+  setupEditSessionModal,
+  openEditSessionModal,
+  updateActiveSessionBadge,
   exportCSV,
   exportJSON,
   switchSection
@@ -57,19 +68,50 @@ const state = {
 /**
  * Initialize the application
  */
-function init() {
+async function init() {
   setupNavigation();
   setupUploadModal();
   setupSkuManager();
   setupSkuTableControls();
   setupExportButtons();
   setupDateFilter();
-  
+  setupRenameModal(handleRenameReport);
+  setupSessionHandlers();
+
+  // Initialize SKU Groups from backend REST API
+  try {
+    await skuManager.init();
+    refreshSkuManager();
+    updateSkuNavBadge();
+  } catch (err) {
+    console.warn('[App] SKU Manager API init error:', err);
+    refreshSkuManager();
+    updateSkuNavBadge();
+  }
+
+  // Initialize Monthly Sessions from backend REST API
+  try {
+    await sessionManager.fetchSessions();
+    updateSessionNavBadge();
+    updateActiveSessionBadge(sessionManager.getActiveSessionName());
+  } catch (err) {
+    console.warn('[App] Session Manager init error:', err);
+  }
+
   // Listen for SKU cost changes to recalculate
   skuManager.onChange(() => {
+    updateSkuNavBadge();
+    refreshSkuManager();
     if (state.allOrders.length > 0) {
       recalculate();
     }
+  });
+
+  // Listen for Session changes
+  sessionManager.onChange(() => {
+    updateSessionNavBadge();
+    refreshSessionsView();
+    updateActiveSessionBadge(sessionManager.getActiveSessionName());
   });
 
   // Show dashboard section
@@ -78,6 +120,7 @@ function init() {
 
   // Check if we have stored data
   loadStoredFiles();
+  updateDashboardWelcomeView();
 }
 
 /**
@@ -89,13 +132,19 @@ function setupNavigation() {
       const sectionId = item.dataset.section;
       state.currentSection = sectionId;
       switchSection(sectionId);
-      
+
       // Re-render charts when switching to their sections
       if (sectionId === 'dashboard' && state.analytics) {
         renderCharts();
       }
       if (sectionId === 'returns' && state.analytics) {
         renderReturnCharts();
+      }
+      if (sectionId === 'skuManager') {
+        refreshSkuManager();
+      }
+      if (sectionId === 'sessionsSection') {
+        refreshSessionsView();
       }
     });
   });
@@ -117,85 +166,80 @@ function setupDateFilter() {
   const presetBtns = document.querySelectorAll('.date-preset');
 
   // Apply date filter
-  applyBtn.addEventListener('click', () => {
-    const start = startInput.value ? new Date(startInput.value + 'T00:00:00') : null;
-    const end = endInput.value ? new Date(endInput.value + 'T23:59:59') : null;
-    
-    if (!start && !end) {
-      showToast('Please select at least a start or end date', 'error');
+  applyBtn?.addEventListener('click', () => {
+    const startVal = startInput.value;
+    const endVal = endInput.value;
+
+    if (!startVal && !endVal) {
+      showToast('Please select a start or end date', 'info');
+      return;
+    }
+
+    const start = startVal ? new Date(startVal + 'T00:00:00') : null;
+    const end = endVal ? new Date(endVal + 'T23:59:59') : null;
+
+    if (start && end && start > end) {
+      showToast('Start date cannot be after end date', 'error');
       return;
     }
 
     applyDateFilter(start, end);
-    
-    // Clear active preset styling
     presetBtns.forEach(b => b.classList.remove('active'));
   });
 
   // Clear date filter
-  clearBtn.addEventListener('click', () => {
-    clearDateFilter();
+  clearBtn?.addEventListener('click', () => {
     startInput.value = '';
     endInput.value = '';
     presetBtns.forEach(b => b.classList.remove('active'));
+    clearDateFilter();
   });
 
-  // Badge clear button
-  badgeClear.addEventListener('click', () => {
-    clearDateFilter();
+  badgeClear?.addEventListener('click', () => {
     startInput.value = '';
     endInput.value = '';
     presetBtns.forEach(b => b.classList.remove('active'));
+    clearDateFilter();
   });
 
-  // Preset buttons
+  // Quick preset buttons (e.g. Jul 2026, Aug 2026, All Time)
   presetBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const preset = btn.dataset.preset;
       presetBtns.forEach(b => b.classList.remove('active'));
-      
+      btn.classList.add('active');
+
+      const preset = btn.dataset.preset;
       if (preset === 'all') {
-        clearDateFilter();
         startInput.value = '';
         endInput.value = '';
-        btn.classList.add('active');
+        clearDateFilter();
         return;
       }
 
-      let start, end;
-      if (preset === 'july') {
-        start = new Date('2026-07-01T00:00:00');
-        end = new Date('2026-07-31T23:59:59');
+      if (preset === 'jul2026' || preset === 'july') {
         startInput.value = '2026-07-01';
         endInput.value = '2026-07-31';
-      } else if (preset === 'august') {
-        start = new Date('2026-08-01T00:00:00');
-        end = new Date('2026-08-31T23:59:59');
+        applyDateFilter(new Date('2026-07-01T00:00:00'), new Date('2026-07-31T23:59:59'));
+      } else if (preset === 'aug2026' || preset === 'august') {
         startInput.value = '2026-08-01';
         endInput.value = '2026-08-31';
-      } else if (preset === 'june') {
-        start = new Date('2026-06-01T00:00:00');
-        end = new Date('2026-06-30T23:59:59');
-        startInput.value = '2026-06-01';
-        endInput.value = '2026-06-30';
+        applyDateFilter(new Date('2026-08-01T00:00:00'), new Date('2026-08-31T23:59:59'));
       }
-
-      btn.classList.add('active');
-      applyDateFilter(start, end);
     });
   });
 }
 
 /**
- * Apply date filter and recalculate
+ * Apply date filter to orders
  */
 function applyDateFilter(start, end) {
   state.dateFilter = { start, end, active: true };
-  
-  // Filter orders by order date
+
   state.filteredOrders = state.allOrders.filter(order => {
     if (!order.orderDate) return false;
     const orderDate = new Date(order.orderDate);
+    if (isNaN(orderDate.getTime())) return false;
+
     if (start && orderDate < start) return false;
     if (end && orderDate > end) return false;
     return true;
@@ -204,15 +248,16 @@ function applyDateFilter(start, end) {
   // Update active filter badge
   const badge = document.getElementById('activeFilterBadge');
   const text = document.getElementById('activeFilterText');
-  badge.style.display = 'inline-flex';
-  
-  const fmt = (d) => d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  if (start && end) {
-    text.textContent = `📅 ${fmt(start)} → ${fmt(end)} (${state.filteredOrders.length} orders)`;
-  } else if (start) {
-    text.textContent = `📅 From ${fmt(start)} (${state.filteredOrders.length} orders)`;
-  } else {
-    text.textContent = `📅 Until ${fmt(end)} (${state.filteredOrders.length} orders)`;
+  if (badge && text) {
+    badge.style.display = 'inline-flex';
+    const fmt = (d) => d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    if (start && end) {
+      text.textContent = `📅 ${fmt(start)} → ${fmt(end)} (${state.filteredOrders.length} orders)`;
+    } else if (start) {
+      text.textContent = `📅 From ${fmt(start)} (${state.filteredOrders.length} orders)`;
+    } else {
+      text.textContent = `📅 Until ${fmt(end)} (${state.filteredOrders.length} orders)`;
+    }
   }
 
   recalculate();
@@ -225,24 +270,26 @@ function applyDateFilter(start, end) {
 function clearDateFilter() {
   state.dateFilter = { start: null, end: null, active: false };
   state.filteredOrders = [...state.allOrders];
-  
+
   const badge = document.getElementById('activeFilterBadge');
-  badge.style.display = 'none';
+  if (badge) badge.style.display = 'none';
 
   recalculate();
   showToast('Date filter cleared — showing all orders', 'info');
 }
 
 /**
- * Get the currently active orders (filtered or all)
+ * Get active orders
  */
 function getActiveOrders() {
   return state.dateFilter.active ? state.filteredOrders : state.allOrders;
 }
 
 // ═══════════════════════════════════════════
-//  FILE UPLOAD
+//  FILE UPLOAD & REPORT NAMING
 // ═══════════════════════════════════════════
+
+let pendingParsedFiles = [];
 
 /**
  * Setup file upload modal
@@ -250,7 +297,7 @@ function getActiveOrders() {
 function setupUploadModal() {
   const modal = document.getElementById('uploadModal');
   const uploadBtns = document.querySelectorAll('.upload-trigger');
-  const closeBtn = modal.querySelector('.modal-close');
+  const closeBtn = modal?.querySelector('.modal-close');
   const zone = document.getElementById('uploadZone');
   const fileInput = document.getElementById('fileInput');
   const processBtn = document.getElementById('processFilesBtn');
@@ -258,30 +305,34 @@ function setupUploadModal() {
   // Open modal
   uploadBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      modal.classList.add('active');
+      pendingParsedFiles = [];
+      const list = document.getElementById('pendingFilesList');
+      if (list) list.innerHTML = '';
+      if (processBtn) processBtn.style.display = 'none';
+      modal?.classList.add('active');
     });
   });
 
   // Close modal
-  closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-  modal.addEventListener('click', (e) => {
+  closeBtn?.addEventListener('click', () => modal?.classList.remove('active'));
+  modal?.addEventListener('click', (e) => {
     if (e.target === modal) modal.classList.remove('active');
   });
 
   // Drag & drop
-  zone.addEventListener('dragover', (e) => {
+  zone?.addEventListener('dragover', (e) => {
     e.preventDefault();
     zone.classList.add('drag-over');
   });
 
-  zone.addEventListener('dragleave', () => {
+  zone?.addEventListener('dragleave', () => {
     zone.classList.remove('drag-over');
   });
 
-  zone.addEventListener('drop', (e) => {
+  zone?.addEventListener('drop', (e) => {
     e.preventDefault();
     zone.classList.remove('drag-over');
-    const files = [...e.dataTransfer.files].filter(f => 
+    const files = [...e.dataTransfer.files].filter(f =>
       f.name.endsWith('.xlsx') || f.name.endsWith('.xls')
     );
     if (files.length > 0) {
@@ -292,8 +343,8 @@ function setupUploadModal() {
   });
 
   // Click to browse
-  zone.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => {
+  zone?.addEventListener('click', () => fileInput.click());
+  fileInput?.addEventListener('change', () => {
     const files = [...fileInput.files];
     if (files.length > 0) {
       handleFiles(files);
@@ -301,10 +352,10 @@ function setupUploadModal() {
   });
 
   // Process button
-  processBtn.addEventListener('click', () => {
-    if (state.parsedFiles.length > 0) {
+  processBtn?.addEventListener('click', () => {
+    if (pendingParsedFiles.length > 0) {
       processAllData();
-      modal.classList.remove('active');
+      modal?.classList.remove('active');
     }
   });
 }
@@ -317,7 +368,6 @@ async function handleFiles(files) {
   const processBtn = document.getElementById('processFilesBtn');
 
   for (const file of files) {
-    // Show processing state
     const item = document.createElement('div');
     item.className = 'upload-file-item';
     item.innerHTML = `
@@ -332,13 +382,36 @@ async function handleFiles(files) {
 
     try {
       const result = await parsePaymentFile(file);
-      state.parsedFiles.push(result);
-      
-      // Update UI
-      item.querySelector('.file-status').className = 'file-status success';
-      item.querySelector('.file-status').textContent = `✓ ${result.orders.length} orders`;
-      item.querySelector('.file-size').textContent += ` · ${result.month} · ${result.platform}`;
-      
+      const defaultReportName = result.month
+        ? `${result.month} - ${result.platform || 'Payment'} Report`
+        : file.name.replace(/\.[^/.]+$/, '');
+
+      result.id = `rep_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      result.reportName = defaultReportName;
+      result.uploadedAt = new Date().toISOString();
+
+      // Tag orders and ads with this report's ID
+      result.orders.forEach(o => { o._reportId = result.id; });
+      result.ads.forEach(a => { a._reportId = result.id; });
+
+      pendingParsedFiles.push(result);
+
+      // Enhance UI with Report Name input
+      item.innerHTML = `
+        <span class="file-icon">📊</span>
+        <div class="file-info" style="width: 100%;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="file-name">${file.name}</div>
+            <span class="file-status success">✓ ${result.orders.length} orders</span>
+          </div>
+          <div class="file-size" style="margin-top: 2px;">${(file.size / 1024).toFixed(1)} KB · ${result.month} · ${result.platform}</div>
+          <div class="report-name-input-wrapper">
+            <label>Report Name (saved with this file):</label>
+            <input type="text" class="form-input report-name-input" data-id="${result.id}" value="${defaultReportName}">
+          </div>
+        </div>
+      `;
+
       showToast(`Parsed ${result.orders.length} orders from ${file.name}`, 'success');
     } catch (err) {
       item.querySelector('.file-status').className = 'file-status error';
@@ -347,35 +420,493 @@ async function handleFiles(files) {
     }
   }
 
-  processBtn.style.display = state.parsedFiles.length > 0 ? 'flex' : 'none';
+  if (processBtn) {
+    processBtn.style.display = pendingParsedFiles.length > 0 ? 'flex' : 'none';
+  }
 }
 
 /**
  * Process all parsed data and render dashboard
  */
 function processAllData() {
-  // Combine all orders and ads
-  state.allOrders = state.parsedFiles.flatMap(f => f.orders);
-  state.allAds = state.parsedFiles.flatMap(f => f.ads);
-  state.filteredOrders = [...state.allOrders];
+  // Read any customized report names from inputs
+  document.querySelectorAll('.report-name-input').forEach(input => {
+    const reportId = input.dataset.id;
+    const fileObj = pendingParsedFiles.find(f => f.id === reportId);
+    if (fileObj && input.value.trim()) {
+      fileObj.reportName = input.value.trim();
+    }
+  });
 
-  // Extract unique SKUs
-  state.allSkus = [...new Set(state.allOrders.map(o => o.sku))].sort();
+  // Add newly parsed files to state
+  state.parsedFiles = [...state.parsedFiles, ...pendingParsedFiles];
+  pendingParsedFiles = [];
 
-  // Auto-detect date range from data and set input hints
-  setDateRangeHints();
+  // Rebuild orders and ads collections
+  refreshOrderCollections();
 
-  // Save file info for persistence
-  localStorage.setItem('fc_file_info', JSON.stringify(
-    state.parsedFiles.map(f => ({ filename: f.filename, month: f.month, platform: f.platform, orderCount: f.orders.length }))
-  ));
-
-  // Save raw order data for persistence
-  localStorage.setItem('fc_orders', JSON.stringify(state.allOrders));
-  localStorage.setItem('fc_ads', JSON.stringify(state.allAds));
+  // Save to persistence
+  saveStateToStorage();
 
   recalculate();
-  showToast(`Dashboard loaded with ${state.allOrders.length} orders!`, 'success');
+  showToast(`Loaded ${state.allOrders.length} orders across ${state.parsedFiles.length} reports!`, 'success');
+}
+
+/**
+ * Re-aggregate orders, ads, and SKUs from parsedFiles
+ */
+function refreshOrderCollections() {
+  state.allOrders = state.parsedFiles.flatMap(f => f.orders || []);
+  state.allAds = state.parsedFiles.flatMap(f => f.ads || []);
+  state.filteredOrders = [...state.allOrders];
+  state.allSkus = [...new Set(state.allOrders.map(o => o.sku))].sort();
+  setDateRangeHints();
+}
+
+/**
+ * Save current state to localStorage
+ */
+function saveStateToStorage() {
+  localStorage.setItem('fc_file_info', JSON.stringify(
+    state.parsedFiles.map(f => ({
+      id: f.id,
+      reportName: f.reportName || f.filename,
+      filename: f.filename,
+      month: f.month,
+      platform: f.platform,
+      orderCount: (f.orders || []).length,
+      uploadedAt: f.uploadedAt || new Date().toISOString()
+    }))
+  ));
+
+  localStorage.setItem('fc_orders', JSON.stringify(state.allOrders));
+  localStorage.setItem('fc_ads', JSON.stringify(state.allAds));
+}
+
+/**
+ * Handle renaming a report
+ */
+function handleRenameReport(index, newName) {
+  const file = state.parsedFiles[index];
+  if (!file) return;
+
+  file.reportName = newName;
+  saveStateToStorage();
+  renderUploadedFiles(state.parsedFiles, { onRename: onReportRenameClick, onDelete: handleDeleteReport });
+  updateHeaderBadge(getActiveOrders().length, state.parsedFiles.length, state.parsedFiles);
+  showToast(`Report renamed to "${newName}"`, 'success');
+}
+
+function onReportRenameClick(index) {
+  const file = state.parsedFiles[index];
+  if (file) {
+    openRenameModal(index, file.reportName || file.filename);
+  }
+}
+
+/**
+ * Handle deleting a report
+ */
+function handleDeleteReport(index) {
+  const file = state.parsedFiles[index];
+  if (!file) return;
+
+  const displayName = file.reportName || file.filename;
+  if (!confirm(`Delete report "${displayName}"? This will remove its orders from the dashboard.`)) {
+    return;
+  }
+
+  const reportId = file.id;
+  state.parsedFiles.splice(index, 1);
+
+  // Filter out orders that belong to this report
+  if (reportId) {
+    state.allOrders = state.allOrders.filter(o => o._reportId !== reportId);
+    state.allAds = state.allAds.filter(a => a._reportId !== reportId);
+  } else {
+    // Fallback: re-aggregate remaining
+    refreshOrderCollections();
+  }
+
+  state.filteredOrders = [...state.allOrders];
+  state.allSkus = [...new Set(state.allOrders.map(o => o.sku))].sort();
+
+  saveStateToStorage();
+  recalculate();
+  showToast(`Report "${displayName}" removed`, 'info');
+}
+
+// ═══════════════════════════════════════════
+//  MONTHLY SESSIONS MANAGEMENT
+// ═══════════════════════════════════════════
+
+/**
+ * Setup Monthly Session Handlers
+ */
+function setupSessionHandlers() {
+  // Create New Session Buttons
+  document.getElementById('headerCreateSessionBtn')?.addEventListener('click', triggerCreateSessionModal);
+  document.getElementById('emptyCreateSessionBtn')?.addEventListener('click', triggerCreateSessionModal);
+  document.getElementById('sessionsSectionCreateBtn')?.addEventListener('click', triggerCreateSessionModal);
+  document.getElementById('welcomeCreateSessionBtn')?.addEventListener('click', triggerCreateSessionModal);
+
+  // Save Session Buttons
+  document.getElementById('headerSaveSessionBtn')?.addEventListener('click', triggerSaveSessionModal);
+  document.getElementById('sessionsSectionSaveBtn')?.addEventListener('click', triggerSaveSessionModal);
+
+  // Clear Dashboard Button (Minimalist fresh start)
+  document.getElementById('headerClearDashboardBtn')?.addEventListener('click', () => {
+    if (state.allOrders.length === 0) return;
+    document.getElementById('clearDashboardModal')?.classList.add('active');
+  });
+
+  document.getElementById('cancelClearDashboardBtn')?.addEventListener('click', () => {
+    document.getElementById('clearDashboardModal')?.classList.remove('active');
+  });
+
+  document.getElementById('confirmClearDashboardBtn')?.addEventListener('click', () => {
+    executeClearDashboard();
+    document.getElementById('clearDashboardModal')?.classList.remove('active');
+  });
+
+  // Welcome Hero Browse Sessions
+  document.getElementById('welcomeBrowseSessionsBtn')?.addEventListener('click', () => {
+    switchSection('sessionsSection');
+  });
+
+  // Header Active Session Pill -> Click to view/edit active session details
+  document.getElementById('headerActiveSessionPill')?.addEventListener('click', () => {
+    const activeId = sessionManager.getActiveSessionId();
+    const activeSession = sessionManager.sessions.find(s => s.id === activeId);
+    if (activeSession) {
+      openEditSessionModal(activeSession);
+    } else {
+      switchSection('sessionsSection');
+      refreshSessionsView();
+    }
+  });
+
+  // Edit Modal -> Browse All Sessions button
+  document.getElementById('editModalBrowseAllBtn')?.addEventListener('click', () => {
+    document.getElementById('editSessionModal')?.classList.remove('active');
+    switchSection('sessionsSection');
+    refreshSessionsView();
+  });
+
+  // Sessions Section -> Back to Dashboard button
+  document.getElementById('sessionsBackToDashboardBtn')?.addEventListener('click', () => {
+    switchSection('dashboard');
+  });
+
+  // Backdrop click for Clear Dashboard Modal
+  const clearModal = document.getElementById('clearDashboardModal');
+  clearModal?.addEventListener('click', (e) => {
+    if (e.target === clearModal) clearModal.classList.remove('active');
+  });
+
+  // Setup Modals
+  setupCreateSessionModal(handleCreateSession);
+  setupSaveSessionModal(handleSaveSession);
+  setupEditSessionModal(handleEditSession);
+}
+
+/**
+ * Execute Clear Dashboard
+ */
+function executeClearDashboard() {
+  // Clear current active state
+  state.allOrders = [];
+  state.allAds = [];
+  state.parsedFiles = [];
+  state.filteredOrders = [];
+  state.allSkus = [];
+  state.analytics = null;
+  state.dateFilter = { start: null, end: null, active: false };
+
+  // Clear cache from storage
+  localStorage.removeItem('fc_orders');
+  localStorage.removeItem('fc_ads');
+  localStorage.removeItem('fc_file_info');
+
+  // Deactivate active session
+  sessionManager.setActiveSession(null, null);
+  updateActiveSessionBadge(null);
+
+  recalculate();
+  showToast('Dashboard cleared. Welcome to fresh workspace!', 'info');
+}
+
+/**
+ * Update Dashboard Welcome Hero vs Analytics View
+ */
+function updateDashboardWelcomeView() {
+  const welcomeHero = document.getElementById('dashboardWelcomeHero');
+  const analyticsContent = document.getElementById('dashboardAnalyticsContent');
+  const clearBtn = document.getElementById('headerClearDashboardBtn');
+  const saveBtn = document.getElementById('headerSaveSessionBtn');
+  const hasOrders = state.allOrders.length > 0;
+
+  if (hasOrders) {
+    if (welcomeHero) welcomeHero.style.display = 'none';
+    if (analyticsContent) analyticsContent.style.display = 'block';
+    if (clearBtn) clearBtn.style.display = 'inline-flex';
+    if (saveBtn) saveBtn.style.display = 'inline-flex';
+  } else {
+    if (welcomeHero) welcomeHero.style.display = 'block';
+    if (analyticsContent) analyticsContent.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (saveBtn) saveBtn.style.display = 'none';
+
+    renderWelcomeRecentSessions();
+  }
+}
+
+/**
+ * Render quick jump chips for saved monthly sessions in Welcome Hero
+ */
+function renderWelcomeRecentSessions() {
+  const container = document.getElementById('welcomeRecentSessions');
+  const chipsList = document.getElementById('welcomeRecentChips');
+  if (!container || !chipsList) return;
+
+  const sessions = sessionManager.sessions || [];
+  if (sessions.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'flex';
+  chipsList.innerHTML = sessions.slice(0, 5).map(sess => `
+    <button class="recent-session-chip" data-id="${sess.id}" title="Load session: ${sess.name}">
+      <span class="chip-tag">${sess.month || 'Month'}</span>
+      <span>${sess.name}</span>
+      <span style="opacity: 0.6">· ${(sess.orderCount || 0).toLocaleString('en-IN')} orders</span>
+    </button>
+  `).join('');
+
+  chipsList.querySelectorAll('.recent-session-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      handleSwitchSession(btn.dataset.id);
+    });
+  });
+}
+
+/**
+ * Open Create Session Modal
+ */
+function triggerCreateSessionModal() {
+  const currentMonth = state.parsedFiles[0]?.month || '';
+  openCreateSessionModal({
+    currentOrderCount: state.allOrders.length,
+    currentMonth
+  });
+}
+
+/**
+ * Handle Create Session form submit
+ */
+async function handleCreateSession({ name, month, notes, mode }) {
+  if (mode === 'current') {
+    await handleSaveSession({ name, month, notes });
+    return;
+  }
+
+  // Fresh Session Mode for a new month
+  const payload = {
+    name,
+    month: month || '',
+    notes: notes || '',
+    orderCount: 0,
+    fileCount: 0,
+    netSettlement: 0,
+    netProfit: 0,
+    returnRate: 0,
+    orders: [],
+    ads: [],
+    parsedFiles: [],
+    dateFilter: { start: null, end: null, active: false }
+  };
+
+  const saved = await sessionManager.saveSession(payload);
+  sessionManager.setActiveSession(saved.id, saved.name);
+  updateActiveSessionBadge(saved.name);
+
+  // Clear current workspace in memory and storage for the new month
+  state.allOrders = [];
+  state.allAds = [];
+  state.parsedFiles = [];
+  state.filteredOrders = [];
+  state.allSkus = [];
+  state.analytics = null;
+  state.dateFilter = { start: null, end: null, active: false };
+
+  saveStateToStorage();
+  recalculate();
+  switchSection('dashboard');
+  refreshSessionsView();
+
+  showToast(`New session "${name}" created! Please upload payment files.`, 'success');
+
+  // Automatically open the upload modal for this new session
+  setTimeout(() => {
+    document.getElementById('uploadModal')?.classList.add('active');
+  }, 400);
+}
+
+/**
+ * Open Save Session Modal with current state data
+ */
+function triggerSaveSessionModal() {
+  const defaultMonth = state.parsedFiles[0]?.month || '';
+  const defaultName = defaultMonth ? `${defaultMonth} Session` : `Session ${new Date().toLocaleDateString('en-IN')}`;
+
+  openSaveSessionModal({
+    orderCount: state.allOrders.length,
+    fileCount: state.parsedFiles.length,
+    netSettlement: state.analytics?.totalSettlement || 0,
+    defaultMonth,
+    defaultName
+  });
+}
+
+/**
+ * Handle Save Session form submit
+ */
+async function handleSaveSession({ name, month, notes }) {
+  const payload = {
+    name,
+    month: month || (state.parsedFiles[0]?.month || ''),
+    notes: notes || '',
+    orderCount: state.allOrders.length,
+    fileCount: state.parsedFiles.length,
+    netSettlement: state.analytics?.totalSettlement || 0,
+    netProfit: state.analytics?.netProfit || 0,
+    returnRate: state.analytics?.returnRate || 0,
+    orders: state.allOrders,
+    ads: state.allAds,
+    parsedFiles: state.parsedFiles,
+    dateFilter: state.dateFilter
+  };
+
+  const saved = await sessionManager.saveSession(payload);
+  updateActiveSessionBadge(saved.name);
+  showToast(`Session "${name}" saved successfully!`, 'success');
+  refreshSessionsView();
+}
+
+/**
+ * Handle Switch / View Session
+ */
+async function handleSwitchSession(sessionId) {
+  try {
+    showToast('Loading session...', 'info');
+    const session = await sessionManager.fetchSession(sessionId);
+
+    state.allOrders = session.orders || [];
+    state.allAds = session.ads || [];
+    state.parsedFiles = session.parsedFiles || [];
+    state.filteredOrders = [...state.allOrders];
+    state.allSkus = [...new Set(state.allOrders.map(o => o.sku))].sort();
+    state.dateFilter = session.dateFilter || { start: null, end: null, active: false };
+
+    sessionManager.setActiveSession(session.id, session.name);
+    updateActiveSessionBadge(session.name);
+
+    // Save to local storage cache
+    saveStateToStorage();
+
+    recalculate();
+    switchSection('dashboard');
+    showToast(`Switched to session "${session.name}" (${state.allOrders.length} orders loaded)`, 'success');
+  } catch (err) {
+    showToast(`Error loading session: ${err.message}`, 'error');
+  }
+}
+
+/**
+ * Handle Edit Session Details
+ */
+async function handleEditSession(sessionId, { name, month, notes }) {
+  await sessionManager.updateSession(sessionId, { name, month, notes });
+  showToast('Session details updated!', 'success');
+  refreshSessionsView();
+}
+
+/**
+ * Handle Overwrite Session with Current Loaded Data
+ */
+async function handleUpdateSessionData(sessionId) {
+  const session = sessionManager.sessions.find(s => s.id === sessionId);
+  const name = session ? session.name : 'this session';
+
+  if (!confirm(`Overwrite "${name}" with currently loaded dashboard data (${state.allOrders.length} orders)?`)) {
+    return;
+  }
+
+  try {
+    await sessionManager.updateSession(sessionId, {
+      orderCount: state.allOrders.length,
+      fileCount: state.parsedFiles.length,
+      netSettlement: state.analytics?.totalSettlement || 0,
+      netProfit: state.analytics?.netProfit || 0,
+      returnRate: state.analytics?.returnRate || 0,
+      orders: state.allOrders,
+      ads: state.allAds,
+      parsedFiles: state.parsedFiles,
+      dateFilter: state.dateFilter
+    });
+    showToast(`Session "${name}" updated with current data!`, 'success');
+    refreshSessionsView();
+  } catch (err) {
+    showToast(`Failed to update session: ${err.message}`, 'error');
+  }
+}
+
+/**
+ * Handle Delete Session
+ */
+async function handleDeleteSession(sessionId) {
+  const session = sessionManager.sessions.find(s => s.id === sessionId);
+  const name = session ? session.name : 'this session';
+
+  if (!confirm(`Delete session "${name}" permanently?`)) {
+    return;
+  }
+
+  try {
+    await sessionManager.deleteSession(sessionId);
+    showToast(`Session "${name}" deleted`, 'info');
+    refreshSessionsView();
+  } catch (err) {
+    showToast(`Error deleting session: ${err.message}`, 'error');
+  }
+}
+
+/**
+ * Refresh Sessions UI list and badges
+ */
+function refreshSessionsView() {
+  renderSessionsList(sessionManager.sessions, sessionManager.getActiveSessionId(), {
+    onSwitch: handleSwitchSession,
+    onEdit: (id) => {
+      const sess = sessionManager.sessions.find(s => s.id === id);
+      if (sess) openEditSessionModal(sess);
+    },
+    onUpdateData: handleUpdateSessionData,
+    onDelete: handleDeleteSession
+  });
+  updateSessionNavBadge();
+  renderWelcomeRecentSessions();
+}
+
+/**
+ * Update navigation counter badge for sessions
+ */
+function updateSessionNavBadge() {
+  const badge = document.getElementById('sessionsNavBadge');
+  if (badge) {
+    badge.textContent = sessionManager.sessions.length;
+  }
 }
 
 /**
@@ -390,20 +921,20 @@ function setDateRangeHints() {
 
   const minDate = new Date(Math.min(...dates));
   const maxDate = new Date(Math.max(...dates));
-  
+
   const fmt = (d) => d.toISOString().split('T')[0];
-  
+
   const startInput = document.getElementById('dateStart');
   const endInput = document.getElementById('dateEnd');
-  
-  startInput.min = fmt(minDate);
-  startInput.max = fmt(maxDate);
-  endInput.min = fmt(minDate);
-  endInput.max = fmt(maxDate);
-  
-  // Set placeholder hints
-  startInput.title = `Start Date (earliest: ${fmt(minDate)})`;
-  endInput.title = `End Date (latest: ${fmt(maxDate)})`;
+
+  if (startInput && endInput) {
+    startInput.min = fmt(minDate);
+    startInput.max = fmt(maxDate);
+    endInput.min = fmt(minDate);
+    endInput.max = fmt(maxDate);
+    startInput.title = `Start Date (earliest: ${fmt(minDate)})`;
+    endInput.title = `End Date (latest: ${fmt(maxDate)})`;
+  }
 }
 
 /**
@@ -420,15 +951,19 @@ function loadStoredFiles() {
       state.allAds = ads ? JSON.parse(ads) : [];
       state.filteredOrders = [...state.allOrders];
       state.allSkus = [...new Set(state.allOrders.map(o => o.sku))].sort();
-      
+
       if (fileInfo) {
         const info = JSON.parse(fileInfo);
         state.parsedFiles = info.map(f => ({
+          id: f.id || `rep_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+          reportName: f.reportName || f.filename,
           filename: f.filename,
           month: f.month,
           platform: f.platform,
-          orders: state.allOrders.filter(() => true), // Will be combined anyway
-          ads: state.allAds
+          orderCount: f.orderCount || 0,
+          uploadedAt: f.uploadedAt || new Date().toISOString(),
+          orders: state.allOrders.filter(o => !f.id || o._reportId === f.id),
+          ads: state.allAds.filter(a => !f.id || a._reportId === f.id)
         }));
       }
 
@@ -438,7 +973,7 @@ function loadStoredFiles() {
       }
     }
   } catch (err) {
-    console.warn('Could not load stored data:', err);
+    console.warn('[App] Could not load stored data:', err);
   }
 }
 
@@ -452,13 +987,10 @@ function loadStoredFiles() {
 function recalculate() {
   const activeOrders = getActiveOrders();
   state.analytics = calculateAnalytics(activeOrders, state.allAds);
-  
-  // Update all views
-  const label = state.dateFilter.active
-    ? `${activeOrders.length} of ${state.allOrders.length} orders`
-    : `${state.allOrders.length} orders`;
-  updateHeaderBadge(activeOrders.length, state.parsedFiles.length || 1);
-  
+
+  // Header badge with active reports
+  updateHeaderBadge(activeOrders.length, state.parsedFiles.length || (activeOrders.length > 0 ? 1 : 0), state.parsedFiles);
+
   renderMetrics(state.analytics);
   renderSkuTable(state.analytics.skuAnalytics, state.skuTableFilter, state.skuTableSearch);
   renderGroupTable(state.analytics.groupAnalytics);
@@ -466,20 +998,22 @@ function recalculate() {
   renderReturnTable(state.analytics.skuAnalytics);
   renderGroupReturnTable(state.analytics.groupAnalytics);
   renderCostingTable(state.analytics.groupAnalytics);
-  renderUploadedFiles(state.parsedFiles);
-  
+  renderUploadedFiles(state.parsedFiles, { onRename: onReportRenameClick, onDelete: handleDeleteReport });
+
   // Update SKU count badge
-  const skuBadge = document.querySelector('.nav-item[data-section="skuManager"] .nav-badge');
-  if (skuBadge) skuBadge.textContent = state.allSkus.length;
+  updateSkuNavBadge();
 
   // Render charts
   renderCharts();
-  
-  // Update SKU manager
+
+  // Update SKU manager view
   refreshSkuManager();
 
   // Update nav badges
   updateNavBadges();
+
+  // Toggle Welcome vs Analytics dashboard view
+  updateDashboardWelcomeView();
 }
 
 /**
@@ -487,7 +1021,7 @@ function recalculate() {
  */
 function renderCharts() {
   if (!state.analytics) return;
-  
+
   setTimeout(() => {
     renderStatusChart('statusChart', state.analytics.statusDistribution);
     renderProfitBreakdownChart('profitChart', state.analytics);
@@ -501,7 +1035,7 @@ function renderCharts() {
  */
 function renderReturnCharts() {
   if (!state.analytics) return;
-  
+
   setTimeout(() => {
     renderReturnRateChart('returnRateChart', state.analytics.skuAnalytics);
     renderReturnChargesChart('returnChargesChart', state.analytics.skuAnalytics);
@@ -509,52 +1043,61 @@ function renderReturnCharts() {
   }, 100);
 }
 
-// ═══════════════════════════════════════════
-//  SKU MANAGER & CONTROLS
-// ═══════════════════════════════════════════
-
 /**
- * Setup SKU Manager section
+ * Get all known SKUs: both from uploaded orders and all configured SKU groups
  */
-function setupSkuManager() {
-  setupCreateGroupModal(state.allSkus, () => {
-    refreshSkuManager();
-    recalculate();
-  });
+function getAllKnownSkus() {
+  const skusFromGroups = skuManager.getGroups().flatMap(g => g.skus || []);
+  return [...new Set([...state.allSkus, ...skusFromGroups])].sort();
 }
 
+/**
+ * Update SKU navigation badge with the count of SKU groups
+ */
+function updateSkuNavBadge() {
+  const badge = document.getElementById('skuNavBadge') || document.querySelector('.nav-item[data-section="skuManager"] .nav-badge');
+  if (badge) {
+    badge.textContent = skuManager.getGroups().length;
+  }
+}
+
+/**
+ * Refresh SKU manager view
+ */
 function refreshSkuManager() {
-  renderSkuGroups(state.allSkus, (groupId) => {
+  const allSkus = getAllKnownSkus();
+  renderSkuGroups(allSkus, (groupId) => {
     state.selectedGroupId = groupId;
-    renderGroupDetail(groupId, state.allSkus, () => {
+    renderGroupDetail(groupId, allSkus, () => {
       refreshSkuManager();
       recalculate();
     });
   });
 
   if (state.selectedGroupId) {
-    renderGroupDetail(state.selectedGroupId, state.allSkus, () => {
+    renderGroupDetail(state.selectedGroupId, allSkus, () => {
       refreshSkuManager();
       recalculate();
     });
-  } else {
-    // Show empty state for detail panel
-    renderGroupDetail(null, state.allSkus, () => {});
-  }
-
-  // Update create modal's available SKUs  
-  const newSkuSelector = document.getElementById('newGroupSkuSelector');
-  if (newSkuSelector && state.allSkus.length > 0) {
-    // Will be updated when modal opens
   }
 }
 
 /**
- * Setup SKU table filter and search controls
+ * Setup SKU Manager section
+ */
+function setupSkuManager() {
+  setupCreateGroupModal(getAllKnownSkus, () => {
+    refreshSkuManager();
+    recalculate();
+  });
+}
+
+/**
+ * Setup SKU table search and filters
  */
 function setupSkuTableControls() {
-  const searchInput = document.getElementById('skuSearch');
-  const filterSelect = document.getElementById('skuFilter');
+  const searchInput = document.getElementById('skuSearchInput');
+  const filterSelect = document.getElementById('skuFilterSelect');
 
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -588,7 +1131,7 @@ function setupExportButtons() {
   });
 
   document.getElementById('clearDataBtn')?.addEventListener('click', () => {
-    if (confirm('Clear all loaded data? This will reset the dashboard.')) {
+    if (confirm('Clear all loaded data? This will reset the dashboard. Saved monthly sessions and SKU groups will be preserved.')) {
       localStorage.removeItem('fc_orders');
       localStorage.removeItem('fc_ads');
       localStorage.removeItem('fc_file_info');
@@ -598,6 +1141,7 @@ function setupExportButtons() {
       state.allAds = [];
       state.allSkus = [];
       state.analytics = null;
+      sessionManager.setActiveSession(null, null);
       location.reload();
     }
   });
@@ -608,7 +1152,7 @@ function setupExportButtons() {
  */
 function updateNavBadges() {
   if (!state.analytics) return;
-  
+
   const returnBadge = document.querySelector('.nav-item[data-section="returns"] .nav-badge');
   if (returnBadge) {
     returnBadge.textContent = state.analytics.returnCount + state.analytics.rtoCount;
