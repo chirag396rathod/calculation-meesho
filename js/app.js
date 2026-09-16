@@ -7,6 +7,8 @@ import { parsePaymentFile } from './fileParser.js';
 import { calculateAnalytics, formatCurrency } from './analytics.js';
 import { skuManager } from './skuManager.js';
 import { sessionManager } from './sessionManager.js';
+import { initLabelSorter, mountLabelSorter } from './labelSorter.js';
+import { initLandingPage, navigateTo } from './landing.js';
 import {
   renderStatusChart,
   renderProfitBreakdownChart,
@@ -79,6 +81,8 @@ async function init() {
   setupDateFilter();
   setupRenameModal(handleRenameReport);
   setupSessionHandlers();
+  initLabelSorter();
+  initLandingPage();
 
   // Initialize SKU Groups from backend REST API
   try {
@@ -132,6 +136,12 @@ function setupNavigation() {
   document.querySelectorAll('.nav-item[data-section]').forEach(item => {
     item.addEventListener('click', () => {
       const sectionId = item.dataset.section;
+      if (sectionId === 'labelSorter') {
+        mountLabelSorter('dashboard');
+        state.currentSection = 'labelSorter';
+        switchSection('labelSorterSection');
+        return;
+      }
       state.currentSection = sectionId;
       switchSection(sectionId);
 
@@ -599,6 +609,13 @@ function setupSessionHandlers() {
   // Welcome Hero Browse Sessions
   document.getElementById('welcomeBrowseSessionsBtn')?.addEventListener('click', () => {
     switchSection('sessionsSection');
+  });
+
+  // Welcome Hero Label Sort & Print
+  document.getElementById('welcomeLabelSortBtn')?.addEventListener('click', () => {
+    mountLabelSorter('dashboard');
+    state.currentSection = 'labelSorter';
+    switchSection('labelSorterSection');
   });
 
   // Header Active Session Pill -> Click to view/edit active session details

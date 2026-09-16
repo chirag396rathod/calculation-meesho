@@ -790,12 +790,14 @@ export function switchSection(sectionId) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   
-  const section = document.getElementById(sectionId);
+  const targetId = (sectionId === 'labelSorter') ? 'labelSorterSection' : sectionId;
+  const section = document.getElementById(targetId);
   if (section) {
     section.classList.add('active');
   }
 
-  const navItem = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
+  const navKey = (sectionId === 'labelSorterSection') ? 'labelSorter' : sectionId;
+  const navItem = document.querySelector(`.nav-item[data-section="${navKey}"]`);
   if (navItem) {
     navItem.classList.add('active');
   }

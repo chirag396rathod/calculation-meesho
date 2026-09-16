@@ -82,9 +82,11 @@ export async function handleApiRequest(req, res, next) {
 
   // Health check on /api
   if (pathOnly === '/api' || pathOnly === '/api/') {
+    const isLocalDb = process.env.USE_LOCAL_DB === 'true';
     return sendJson(200, {
       success: true,
-      message: 'FC Analytics Backend API is live on Turso Database',
+      message: `FC Analytics Backend API is live (${isLocalDb ? 'Local File DB' : 'Turso Cloud DB'})`,
+      databaseMode: isLocalDb ? 'local' : 'turso',
       endpoints: ['/api/sku-groups', '/api/sku-costs/:sku', '/api/sessions']
     });
   }

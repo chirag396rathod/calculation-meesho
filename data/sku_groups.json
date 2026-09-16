@@ -18,6 +18,7 @@
         "MONICA 15/6 #2",
         "MONICA 15/6 #3",
         "MONIKA",
+        "MONIKKA-06",
         "MONNIKKAA",
         "MOUNIK-A-05",
         "Monika",
@@ -39,6 +40,7 @@
         "A-NNARKALI 04",
         "AN AR KA LI 03",
         "ANA-RKALI-05",
+        "ANAKRLI001 M",
         "ANARK-LI 05",
         "ANARK-LI 07",
         "ANARK-LI002",
@@ -110,6 +112,7 @@
         "Swadesh Gown 1ST",
         "Swadesh Gown 2nd",
         "Swadesh3Gown 3nd",
+        "march 2 gown 2nd",
         "march gown",
         "march gown 2nd",
         "march gown 3rd t"
@@ -141,10 +144,12 @@
       "name": "Other",
       "rawCost": 400,
       "skus": [
+        "Blue cotset gurukrupa",
         "Bottal Vel top emb",
         "Brown Round Emb",
         "FENCY GOWN NEW PURPEL",
         "Sequinse Black Saree",
+        "Yelloow cotset gurukrupa",
         "sequence saree 3",
         "sequence saree 5"
       ],
@@ -249,7 +254,12 @@
     "GK-A N A R K L I - #1": 480,
     "MAROON ANARKALI": 480,
     "MRUNANARKALI 004": 480,
-    "anarkali mrun 0002": 480
+    "anarkali mrun 0002": 480,
+    "MONIKKA-06": 290,
+    "ANAKRLI001 M": 480,
+    "march 2 gown 2nd": 520,
+    "Blue cotset gurukrupa": 400,
+    "Yelloow cotset gurukrupa": 400
   },
-  "updatedAt": "2026-09-14T14:04:45.133Z"
+  "updatedAt": "2026-09-15T17:26:14.748Z"
 }

@@ -10,16 +10,1542 @@
   <meta name="description" content="E-Commerce Business Analytics Dashboard — Track profits, return charges, SKU performance, and raw costs from your marketplace payment files.">
   <title>FC Analytics — E-Commerce Business Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Raleway:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/landing.css">
+  <link rel="stylesheet" href="/css/infoPages.css">
+  <link rel="stylesheet" href="/css/login.css">
+  <link rel="stylesheet" href="/css/labelCrop.css">
 </head>
 <body>
-  <div class="app-layout">
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PUBLIC MARKETING & INFORMATION EXPERIENCE
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div id="publicSite">
+    <!-- Header -->
+    <header class="sb-header">
+      <div class="sb-container">
+        <div class="sb-header-inner">
+          <a class="sb-logo" href="#" data-sb-route="home">
+            <div class="sb-logo-box">📊</div>
+            <span>FC Analytics</span>
+          </a>
+
+          <!-- Sleek, Minimalist Professional Header Menu -->
+          <nav class="sb-nav-links">
+            <a class="sb-nav-link" href="#features">Features</a>
+            <a class="sb-nav-link" href="#" data-sb-route="label-sort">Labels Tool</a>
+          </nav>
+
+          <div class="sb-header-actions">
+            <button class="sb-btn sb-btn-outline" data-sb-route="login" id="sbHeaderLoginBtn" style="padding: 7px 16px; border-radius: 10px; font-weight: 600; font-size: 0.86rem; border: 1.5px solid var(--sb-border); background: #FFFFFF; color: #1A1A1A; cursor: pointer;">
+              Login
+            </button>
+            <button class="sb-btn sb-btn-primary" data-sb-route="dashboard">
+              Open Dashboard →
+            </button>
+            <button class="sb-hamburger" id="sbMobileMenuToggle" aria-label="Toggle navigation">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Drawer -->
+    <div id="sbMobileDrawer" style="display: none; background: white; border-bottom: 1px solid var(--sb-border); padding: 16px 20px;">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <a class="sb-nav-link" href="#features">Features</a>
+        <a class="sb-nav-link" href="#" data-sb-route="label-sort">Labels Tool</a>
+        <a class="sb-nav-link" href="#login" data-sb-route="login">Login</a>
+        <button class="sb-btn sb-btn-primary" data-sb-route="dashboard" style="width: 100%; margin-top: 6px;">
+          Open Dashboard →
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ Marketing Landing View (Hero, Features, Calculator, FAQ) ═══ -->
+    <div class="sb-landing-view" id="landingView">
+      <!-- ═══ Hero Section ═══ -->
+      <section class="sb-hero-section">
+      <div class="sb-container">
+        <div class="sb-hero-grid">
+          <div class="sb-hero-content">
+            <div class="sb-pill-badge">
+              <span class="sb-pulse-dot"></span>
+              <span>All-in-One E-Commerce Command Center</span>
+            </div>
+
+            <h1 class="sb-hero-title">
+              The Free Meesho Seller Dashboard:
+              <span class="sb-highlight">Label Crop, Sort & Profit Tracking</span>
+            </h1>
+
+            <p class="sb-hero-desc">
+              Track Meesho orders, calculate real SKU net margins, reconcile marketplace payouts, and crop & sort shipping labels for 3x faster dispatch — completely free and 100% private.
+            </p>
+
+            <div class="sb-hero-actions">
+              <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard">
+                Get Started for Free →
+              </button>
+              <button class="sb-btn sb-btn-outline sb-btn-lg" data-sb-route="label-sort">
+                🏷️ Sort & Crop Labels
+              </button>
+            </div>
+
+            <div class="sb-marketplace-proof">
+              <span class="sb-proof-label">Marketplaces</span>
+              <div class="sb-market-tags">
+                <span class="sb-market-tag sb-tag-meesho">
+                  🛍️ Meesho <span class="sb-badge-live">✓ Live</span>
+                </span>
+                <span class="sb-market-tag sb-tag-disabled">
+                  📦 Amazon <span class="sb-badge-coming-soon">Coming Soon</span>
+                </span>
+                <span class="sb-market-tag sb-tag-disabled">
+                  ⚡ Flipkart <span class="sb-badge-coming-soon">Coming Soon</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Visual Mockup -->
+          <div class="sb-hero-visual">
+            <div class="sb-mockup-card">
+              <div class="sb-mockup-header">
+                <div class="sb-mockup-dots">
+                  <span></span><span></span><span></span>
+                </div>
+                <span class="sb-mockup-title">FC Analytics Live Workspace</span>
+              </div>
+
+              <div class="sb-mockup-stats-row">
+                <div class="sb-preview-metric">
+                  <div class="sb-metric-caption">Net Profit Margin</div>
+                  <div class="sb-metric-val green">+29.4%</div>
+                </div>
+                <div class="sb-preview-metric">
+                  <div class="sb-metric-caption">Labels Processed</div>
+                  <div class="sb-metric-val blue">14,280</div>
+                </div>
+              </div>
+
+              <div class="sb-preview-label-card">
+                <div class="sb-label-crop-indicator">
+                  <span>✂️ Crop Below Product Details</span>
+                  <span style="font-size: 0.76rem; background: white; padding: 2px 8px; border-radius: 6px;">Active</span>
+                </div>
+                <div class="sb-dummy-label-table">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700;">
+                    <span>COURIER: Xpress Bees</span>
+                    <span>SKU: FLOWER-PRINT-KURTI</span>
+                  </div>
+                  <div class="sb-dummy-row w-80"></div>
+                  <div class="sb-dummy-row w-60"></div>
+                  <div class="sb-dummy-row w-40"></div>
+                </div>
+              </div>
+
+              <div class="sb-floating-badge-bottom">
+                <span>🔒 Enterprise Data Privacy • High Speed Processing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 3-Step Workflow Section ═══ -->
+    <section class="sb-section" id="steps">
+      <div class="sb-container">
+        <div class="sb-section-header">
+          <div class="sb-pill-badge" style="margin: 0 auto 16px;">
+            <span class="sb-pulse-dot"></span>
+            <span>From Supplier Panel to Clarity</span>
+          </div>
+          <h2 class="sb-section-title">Simple setup. Powerful results for online sellers.</h2>
+          <p class="sb-section-subtitle">Transform your raw Meesho exports and shipping label PDFs into a professional operations center in minutes.</p>
+        </div>
+
+        <div class="sb-steps-grid">
+          <div class="sb-step-card">
+            <span class="sb-step-badge">Step 1</span>
+            <div class="sb-step-icon-wrap">📂</div>
+            <h3 class="sb-step-title">Upload Supplier Data</h3>
+            <p class="sb-step-desc">Import order and payment Excel files directly from your Meesho or marketplace supplier panel into the dashboard.</p>
+          </div>
+
+          <div class="sb-step-card">
+            <span class="sb-step-badge">Step 2</span>
+            <div class="sb-step-icon-wrap">💰</div>
+            <h3 class="sb-step-title">Calculate Real Margins</h3>
+            <p class="sb-step-desc">Add SKU manufacturing and packaging costs to instantly reveal true net profit per product after returns and shipping deductions.</p>
+          </div>
+
+          <div class="sb-step-card">
+            <span class="sb-step-badge">Step 3</span>
+            <div class="sb-step-icon-wrap">🏷️</div>
+            <h3 class="sb-step-title">Crop, Sort & Dispatch</h3>
+            <p class="sb-step-desc">Batch crop shipping labels below product details, sort by courier partner, attach custom messages & QR codes, and print clean PDFs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Live Stats Bar ═══ -->
+    <section class="sb-stats-section">
+      <div class="sb-container">
+        <div class="sb-stats-card">
+          <div class="sb-stats-grid">
+            <div class="sb-stat-item">
+              <div class="sb-stat-icon-box">👥</div>
+              <div>
+                <div class="sb-stat-num">5,000+</div>
+                <div class="sb-stat-label">Active Sellers</div>
+              </div>
+            </div>
+            <div class="sb-stat-item">
+              <div class="sb-stat-icon-box">🏷️</div>
+              <div>
+                <div class="sb-stat-num">2.5M+</div>
+                <div class="sb-stat-label">Labels Sorted & Cropped</div>
+              </div>
+            </div>
+            <div class="sb-stat-item">
+              <div class="sb-stat-icon-box">📦</div>
+              <div>
+                <div class="sb-stat-num">8.4M+</div>
+                <div class="sb-stat-label">Orders Reconciled</div>
+              </div>
+            </div>
+            <div class="sb-stat-item">
+              <div class="sb-stat-icon-box">₹</div>
+              <div>
+                <div class="sb-stat-num">₹120Cr+</div>
+                <div class="sb-stat-label">Order Value Processed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Marketplace Shipping Label Tool Selection ═══ -->
+    <section class="sb-section" style="padding: 40px 0 20px;">
+      <div class="sb-container">
+        <div class="sb-section-header" style="margin-bottom: 30px;">
+          <div class="sb-pill-badge" style="margin: 0 auto 14px;">
+            <span class="sb-pulse-dot"></span>
+            <span>Dedicated Dispatch Tools</span>
+          </div>
+          <h2 class="sb-section-title">Marketplace Shipping Label Tools</h2>
+          <p class="sb-section-subtitle">Select your marketplace to crop, sort, and prepare clean thermal PDF labels for daily packing.</p>
+        </div>
+
+        <div class="sb-market-tools-grid">
+          <!-- Meesho (ACTIVE) -->
+          <div class="sb-market-card active">
+            <div>
+              <div class="sb-market-card-top">
+                <div class="sb-market-icon-name" style="color: var(--sb-primary);">
+                  <span style="font-size: 1.5rem;">🛍️</span> Meesho Labels
+                </div>
+                <span class="sb-badge-live">✓ Live Now</span>
+              </div>
+              <p class="sb-market-card-desc">
+                Crop below product details, 4×4 standard thermal trim, auto-group by courier (Xpress Bees, Valmo, Shadowfax), with custom seller message & QR code generator.
+              </p>
+            </div>
+            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort" style="width: 100%;">
+              Open Meesho Cropper →
+            </button>
+          </div>
+
+          <!-- Amazon (COMING SOON) -->
+          <div class="sb-market-card disabled">
+            <div>
+              <div class="sb-market-card-top">
+                <div class="sb-market-icon-name" style="color: #6B7280;">
+                  <span style="font-size: 1.5rem;">📦</span> Amazon Labels
+                </div>
+                <span class="sb-badge-coming-soon">Coming Soon</span>
+              </div>
+              <p class="sb-market-card-desc">
+                Batch sort Amazon EasyShip labels by SKU, automatically drop duplicate invoice pages, and stamp SKU pick lists directly onto shipping labels.
+              </p>
+            </div>
+            <button class="sb-btn sb-btn-outline" disabled style="width: 100%; opacity: 0.6; cursor: not-allowed;">
+              Coming Soon
+            </button>
+          </div>
+
+          <!-- Flipkart (COMING SOON) -->
+          <div class="sb-market-card disabled">
+            <div>
+              <div class="sb-market-card-top">
+                <div class="sb-market-icon-name" style="color: #6B7280;">
+                  <span style="font-size: 1.5rem;">⚡</span> Flipkart Labels
+                </div>
+                <span class="sb-badge-coming-soon">Coming Soon</span>
+              </div>
+              <p class="sb-market-card-desc">
+                Flipkart thermal label cutter, auto-grouping by logistics partner (Ekart, Delhivery, Shadowfax), and multi-order consignment sorting.
+              </p>
+            </div>
+            <button class="sb-btn sb-btn-outline" disabled style="width: 100%; opacity: 0.6; cursor: not-allowed;">
+              Coming Soon
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Feature Showcase Module ═══ -->
+    <section class="sb-showcase-section" id="features">
+      <div class="sb-container">
+        <div class="sb-section-header">
+          <h2 class="sb-section-title">Everything you need to scale your marketplace business.</h2>
+          <p class="sb-section-subtitle">Automate label sorting, track order lifecycles, and master SKU profitability in one streamlined workspace.</p>
+        </div>
+
+        <div class="sb-feature-tabs">
+          <button class="sb-tab-btn active" data-tab="label">🏷️ Label Crop & Sort</button>
+          <button class="sb-tab-btn" data-tab="profit">📊 Profit & Loss Engine</button>
+          <button class="sb-tab-btn" data-tab="orders">🔄 Order & RTO Tracking</button>
+          <button class="sb-tab-btn" data-tab="reconciliation">⚖️ Settlement Reconciliation</button>
+        </div>
+
+        <div class="sb-showcase-box">
+          <div class="sb-showcase-grid">
+            <div class="sb-showcase-info">
+              <h3 id="sbShowcaseTitle">Meesho & Marketplace Shipping Label Crop & Sorter</h3>
+              <p id="sbShowcaseDesc">Automatically crop unnecessary invoice sections, arrange labels strictly by SKU or courier partner, and stamp custom messages & scannable QR codes for 3x faster dispatch packing.</p>
+              
+              <ul class="sb-feature-checklist" id="sbShowcaseBullets">
+                <li><span class="sb-check-icon">✓</span> Dynamic cropping right below product details (Crop1 reference)</li>
+                <li><span class="sb-check-icon">✓</span> Standard 4×4 thermal crop with whitespace trim</li>
+                <li><span class="sb-check-icon">✓</span> Instant Courier partner grouping (Xpress Bees, Valmo, Shadowfax, Delhivery)</li>
+                <li><span class="sb-check-icon">✓</span> Live scannable QR code generator for social / warranty links</li>
+                <li><span class="sb-check-icon">✓</span> Zero server upload — 100% private & client-side</li>
+              </ul>
+
+              <div style="display: flex; gap: 14px;">
+                <button class="sb-btn sb-btn-primary" data-sb-route="label-sort">
+                  Open Label Tool Now →
+                </button>
+                <button class="sb-btn sb-btn-outline" data-sb-route="dashboard">
+                  Explore Full Dashboard
+                </button>
+              </div>
+            </div>
+
+            <div class="sb-showcase-preview-frame" id="sbShowcasePreview">
+              <div style="background: white; border-radius: 16px; padding: 18px; border: 1.5px solid #E2E8F0; box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #F1F4F9; padding-bottom: 8px;">
+                  <span style="font-weight: 700; color: #8B1874; font-size: 0.88rem;">🏷️ Meesho Thermal Label Preview</span>
+                  <span style="background: #FBF0F7; color: #8B1874; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 8px;">Cropped Below Details</span>
+                </div>
+                <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 12px; padding: 14px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <strong style="font-size: 0.85rem;">COURIER: Xpress Bees</strong>
+                    <span style="font-size: 0.8rem; color: #64748B;">SKU: KURTI-RED-XL</span>
+                  </div>
+                  <div style="height: 38px; background: #0A0A0A; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 10px;">
+                    ||||| 892019482910 |||||
+                  </div>
+                  <div style="display: flex; gap: 8px; align-items: center; background: white; padding: 8px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                    <div style="width: 32px; height: 32px; background: #FBF0F7; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;">📱</div>
+                    <div style="font-size: 0.78rem; line-height: 1.3;">
+                      <strong>Custom Message + QR:</strong><br><span style="color: #64748B;">Thank you for your order! Please leave a 5-star review.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Interactive Live Profit Calculator ═══ -->
+    <section class="sb-section" id="calculator" style="background: #FFFFFF;">
+      <div class="sb-container">
+        <div class="sb-section-header">
+          <div class="sb-pill-badge" style="margin: 0 auto 16px;">
+            <span class="sb-pulse-dot"></span>
+            <span>Interactive Margin Tool</span>
+          </div>
+          <h2 class="sb-section-title">Meesho Profit & Margin Calculator</h2>
+          <p class="sb-section-subtitle">Simulate real profitability including return freight penalties, marketplace commission, and GST.</p>
+        </div>
+
+        <div class="sb-calc-card">
+          <div class="sb-calc-grid">
+            <div class="sb-calc-inputs">
+              <div class="sb-input-group">
+                <label for="calcSalePrice">Product Selling Price</label>
+                <div class="sb-input-wrapper">
+                  <span class="sb-input-prefix">₹</span>
+                  <input type="number" id="calcSalePrice" value="399" min="0" step="1">
+                </div>
+              </div>
+
+              <div class="sb-input-group">
+                <label for="calcProductCost">Making / Sourcing Cost</label>
+                <div class="sb-input-wrapper">
+                  <span class="sb-input-prefix">₹</span>
+                  <input type="number" id="calcProductCost" value="140" min="0" step="1">
+                </div>
+              </div>
+
+              <div class="sb-input-group">
+                <label for="calcShippingCost">Estimated Shipping Cost</label>
+                <div class="sb-input-wrapper">
+                  <span class="sb-input-prefix">₹</span>
+                  <input type="number" id="calcShippingCost" value="65" min="0" step="1">
+                </div>
+              </div>
+
+              <div class="sb-input-group">
+                <label for="calcCommissionRate">Meesho Commission (%)</label>
+                <div class="sb-input-wrapper">
+                  <span class="sb-input-prefix">%</span>
+                  <input type="number" id="calcCommissionRate" value="0" min="0" max="100" step="0.5">
+                </div>
+              </div>
+
+              <div class="sb-input-group" style="grid-column: 1 / -1;">
+                <label for="calcReturnRate">Expected Return / RTO Rate (%)</label>
+                <div class="sb-input-wrapper">
+                  <span class="sb-input-prefix">%</span>
+                  <input type="number" id="calcReturnRate" value="18" min="0" max="100" step="1">
+                </div>
+              </div>
+            </div>
+
+            <div class="sb-calc-results">
+              <div>
+                <div style="font-weight: 700; font-size: 1rem; margin-bottom: 14px; color: var(--sb-text-dark);">
+                  Breakdown & Net Settlement
+                </div>
+
+                <div class="sb-calc-res-row">
+                  <span style="color: var(--sb-text-muted);">Platform Deductions (Fee + GST):</span>
+                  <strong id="calcResPlatformFee">₹0.0</strong>
+                </div>
+                <div class="sb-calc-res-row">
+                  <span style="color: var(--sb-text-muted);">Logistics Deductions (+18% GST):</span>
+                  <strong id="calcResShippingFee">₹76.7</strong>
+                </div>
+                <div class="sb-calc-res-row">
+                  <span style="color: var(--sb-text-muted);">Net Payout (Delivered):</span>
+                  <strong id="calcResPayoutDelivered">₹322.3</strong>
+                </div>
+                <div class="sb-calc-res-row">
+                  <span style="color: var(--sb-text-muted);">Gross Profit per Delivered:</span>
+                  <strong id="calcResProfitDelivered">₹182.3</strong>
+                </div>
+              </div>
+
+              <div class="sb-calc-profit-highlight">
+                <div>
+                  <div style="font-size: 0.8rem; font-weight: 700; color: var(--sb-text-muted); text-transform: uppercase;">
+                    Blended Net Profit / Unit (After RTO)
+                  </div>
+                  <div class="sb-profit-big" id="calcResBlendedProfit">₹132.0</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: var(--sb-text-muted); text-transform: uppercase;">
+                    Net Margin
+                  </div>
+                  <div style="font-size: 1.35rem; font-weight: 800; color: #10B981;" id="calcResMarginPercent">33.1%</div>
+                </div>
+              </div>
+
+              <button class="sb-btn sb-btn-primary" data-sb-route="dashboard" style="width: 100%; margin-top: 16px;">
+                Analyze Entire Catalog in Dashboard →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Benefits Grid (6 Cards) ═══ -->
+    <section class="sb-section">
+      <div class="sb-container">
+        <div class="sb-section-header">
+          <div class="sb-pill-badge" style="margin: 0 auto 16px;">
+            <span class="sb-pulse-dot"></span>
+            <span>Why Top Sellers Choose Us</span>
+          </div>
+          <h2 class="sb-section-title">Everything an e-commerce seller needs to sell smarter.</h2>
+        </div>
+
+        <div class="sb-benefits-grid">
+          <div class="sb-benefit-card">
+            <div class="sb-benefit-icon">📈</div>
+            <h3 class="sb-benefit-title">Live Order Tracking</h3>
+            <p class="sb-benefit-desc">Monitor every marketplace order, transit status, and delivery milestones from one centralized view.</p>
+          </div>
+
+          <div class="sb-benefit-card">
+            <div class="sb-benefit-icon">🏬</div>
+            <h3 class="sb-benefit-title">Multi-Store Management</h3>
+            <p class="sb-benefit-desc">Manage Meesho, Amazon, and Flipkart seller accounts simultaneously without tab-switching chaos.</p>
+          </div>
+
+          <div class="sb-benefit-card">
+            <div class="sb-benefit-icon">⚖️</div>
+            <h3 class="sb-benefit-title">Smart Reconciliation</h3>
+            <p class="sb-benefit-desc">Automatically cross-match marketplace remittance files against bank accounts to identify missing credits.</p>
+          </div>
+
+          <div class="sb-benefit-card">
+            <div class="sb-benefit-icon">📦</div>
+            <h3 class="sb-benefit-title">SKU Performance Analytics</h3>
+            <p class="sb-benefit-desc">Gain instant clarity on which product variants drive profits and which ones drain cash on return logistics.</p>
+          </div>
+
+          <div class="sb-benefit-card">
+            <div class="sb-benefit-icon">🔒</div>
+            <h3 class="sb-benefit-title">100% Client-Side Privacy</h3>
+            <p class="sb-benefit-desc">Your customer names, addresses, and financials never leave your browser. Zero third-party cloud data risks.</p>
+          </div>
+
+          <div class="sb-benefit-card">
+            <div class="sb-benefit-icon">💬</div>
+            <h3 class="sb-benefit-title">Dedicated Community & Support</h3>
+            <p class="sb-benefit-desc">Get prompt assistance, feature tutorials, and connect directly with other high-volume marketplace sellers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FAQ Accordion ═══ -->
+    <section class="sb-faq-section" id="faq">
+      <div class="sb-container">
+        <div class="sb-faq-layout">
+          <div>
+            <div class="sb-pill-badge">
+              <span class="sb-pulse-dot"></span>
+              <span>FAQs</span>
+            </div>
+            <h2 class="sb-section-title" style="text-align: left; margin-bottom: 20px;">
+              Got questions?<br><span style="color: var(--sb-primary);">We've got answers.</span>
+            </h2>
+            <p class="sb-section-subtitle" style="text-align: left; margin-bottom: 30px;">
+              Here is everything you need to know about label sorting, profit tracking, and account management.
+            </p>
+
+            <div style="background: white; border: 4px solid var(--sb-border); border-radius: 24px; padding: 24px;">
+              <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Still have questions?</h4>
+              <p style="color: var(--sb-text-muted); font-size: 0.92rem; margin-bottom: 16px;">Chat with our seller support team on WhatsApp.</p>
+              <a href="https://api.whatsapp.com/send?phone=917069051397&text=Hi+I+need+help+with+FC+Analytics" target="_blank" class="sb-btn sb-btn-primary" style="text-decoration: none;">
+                Chat on WhatsApp 💬
+              </a>
+            </div>
+          </div>
+
+          <div class="sb-faq-list">
+            <div class="sb-faq-item open">
+              <div class="sb-faq-question">
+                <span>1. What is FC Analytics?</span>
+                <span class="sb-faq-toggle-icon">▼</span>
+              </div>
+              <div class="sb-faq-answer">
+                FC Analytics is a free, high-performance operational workspace built specifically for Indian marketplace sellers (Meesho, Amazon, Flipkart). It provides fast thermal label cropping, courier-wise sorting, SKU profitability calculations, and monthly payment reconciliation.
+              </div>
+            </div>
+
+            <div class="sb-faq-item">
+              <div class="sb-faq-question">
+                <span>2. How does the Label Crop & Sort tool work?</span>
+                <span class="sb-faq-toggle-icon">▼</span>
+              </div>
+              <div class="sb-faq-answer">
+                Simply upload your raw Meesho label PDF. The tool automatically separates multi-page labels, crops away the unnecessary lower tax invoice (or standard 4×4 trim), sorts pages by SKU or Courier Partner (Xpress Bees, Valmo, Shadowfax, Delhivery), attaches your custom messages or scannable QR codes, and generates a print-ready PDF in seconds.
+              </div>
+            </div>
+
+            <div class="sb-faq-item">
+              <div class="sb-faq-question">
+                <span>3. Is my sensitive sales and customer data safe?</span>
+                <span class="sb-faq-toggle-icon">▼</span>
+              </div>
+              <div class="sb-faq-answer">
+                Yes, absolutely. All PDF label processing, text extraction, Excel parsing, and calculations execute 100% locally in your browser and local database. Your files are never sent to external servers or sold to third parties.
+              </div>
+            </div>
+
+            <div class="sb-faq-item">
+              <div class="sb-faq-question">
+                <span>4. Can I factor in RTO losses when calculating SKU profit?</span>
+                <span class="sb-faq-toggle-icon">▼</span>
+              </div>
+              <div class="sb-faq-answer">
+                Yes! FC Analytics distinguishes between delivered sales, customer returns, and courier RTOs. It calculates the freight penalty for each returned item and computes your real blended net margin so you never scale an unprofitable product.
+              </div>
+            </div>
+
+            <div class="sb-faq-item">
+              <div class="sb-faq-question">
+                <span>5. Which courier partners are recognized automatically?</span>
+                <span class="sb-faq-toggle-icon">▼</span>
+              </div>
+              <div class="sb-faq-answer">
+                Our parser automatically detects and groups all major Indian e-commerce logistics partners including Xpress Bees, Valmo, Shadowfax, Delhivery, Ecom Express, Bluedart, and DTDC.
+              </div>
+            </div>
+
+            <div class="sb-faq-item">
+              <div class="sb-faq-question">
+                <span>6. How does Monthly Session saving work?</span>
+                <span class="sb-faq-toggle-icon">▼</span>
+              </div>
+              <div class="sb-faq-answer">
+                You can save analyzed monthly data (such as January 2026, February 2026) directly into your local database. You can revisit past sessions anytime with 1 click, compare performance trends, and track long-term growth.
+              </div>
+            </div>
+
+            <div class="sb-faq-item">
+              <div class="sb-faq-question">
+                <span>7. Is FC Analytics free to use?</span>
+                <span class="sb-faq-toggle-icon">▼</span>
+              </div>
+              <div class="sb-faq-answer">
+                Yes, all core shipping label sorting, cropping, profit calculators, and business analytics dashboards are completely free to use. No credit card required.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ WhatsApp CTA Banner ═══ -->
+    <div class="sb-container">
+      <div class="sb-cta-banner">
+        <h2>Start selling smarter with complete operational clarity.</h2>
+        <p>Save hours of manual dispatch sorting and eliminate spreadsheet errors starting today.</p>
+        <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+          <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard">
+            Launch Free Dashboard →
+          </button>
+          <a href="https://api.whatsapp.com/send?phone=917069051397&text=Hi+I+need+help+with+FC+Analytics" target="_blank" class="sb-btn sb-btn-outline sb-btn-lg" style="text-decoration: none;">
+            Chat on WhatsApp 💬
+          </a>
+        </div>
+      </div>
+    </div>
+
+    </div> <!-- End of #landingView -->
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         INFORMATION PAGES VIEW (About Us, Privacy, Terms, Cookie, Disclaimer, Contact)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="sb-info-view" id="infoPageView" style="display: none;"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         AUTHENTICATION / LOGIN VIEW (SellerBox Style)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="sb-login-page" id="loginView" style="display: none;">
+      <div class="sb-login-bg-grid"></div>
+      <div class="sb-login-bg-glow"></div>
+      <div class="sb-login-container">
+        <!-- Header Text Area -->
+        <div class="sb-login-header">
+          <div class="sb-login-pill">
+            <span>Seller dashboard and label sorting</span>
+          </div>
+          <h1 class="sb-login-title">Welcome to FC Analytics</h1>
+          <p class="sb-login-subtitle">
+            Login to check your Meesho orders, profit, payments, and labels in one simple place.
+          </p>
+        </div>
+
+        <!-- Floating Login Card -->
+        <div class="sb-login-card">
+          <div class="sb-login-card-icon">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 256" height="28" width="28" xmlns="http://www.w3.org/2000/svg">
+              <path d="M225.6,62.65l-88-48.18a19.91,19.91,0,0,0-19.2,0l-88,48.17A20,20,0,0,0,20,80.19v95.62a20,20,0,0,0,10.4,17.55l88,48.17a19.89,19.89,0,0,0,19.2,0l88-48.18A20,20,0,0,0,236,175.81V80.19A20,20,0,0,0,225.6,62.65ZM164,152v47.72l-24,13.14V135.11l72-39.42v22.92l-41.76,22.86A12,12,0,0,0,164,152ZM85.76,141.47,44,118.61V95.69l72,39.42v77.75L92,199.72V152A12,12,0,0,0,85.76,141.47ZM83.13,61.13l39.1,21.4a11.95,11.95,0,0,0,11.52,0l39.1-21.4L199,75.45l-71,38.87L57,75.45ZM128,36.57l19.87,10.88L128,58.33,108.13,47.45ZM44,146l24,13.14v27.47L44,173.44Zm144,40.61V159.11L212,146v27.47Z"></path>
+            </svg>
+          </div>
+          <h2 class="sb-login-card-title">Login to FC Analytics</h2>
+          <p class="sb-login-card-desc">Use your Google account to continue.</p>
+
+          <!-- Google Sign-in Button -->
+          <button type="button" class="sb-google-btn" id="sbGoogleLoginBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span id="sbGoogleBtnText">Continue with Google</span>
+          </button>
+
+          <!-- Secure Login Divider -->
+          <div class="sb-login-divider">
+            <span>secure login</span>
+          </div>
+
+          <!-- Legal Footer in Card -->
+          <div class="sb-login-legal">
+            By continuing, you agree to our <a href="#terms" data-sb-route="terms">Terms</a> and <a href="#privacy" data-sb-route="privacy">Privacy Policy</a>.
+          </div>
+        </div>
+
+        <!-- Back to home -->
+        <a href="#home" class="sb-login-back-link" data-sb-route="home">
+          ← Back to home
+        </a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SHIPPING LABEL SORT & CROP VIEW (No Login Needed — SellerBox Spec)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="sb-label-crop-page" id="labelCropView" style="display: none;">
+      
+      <!-- 1. Hero Navy Banner -->
+      <section class="sb-label-hero">
+        <div class="sb-label-hero-container">
+          <div class="sb-label-hero-pill">
+            <span>✨</span>
+            <span>Advanced Label Sorting</span>
+          </div>
+          <h1 class="sb-label-hero-title">Shipping Label Sort & Crop Tool</h1>
+          <p class="sb-label-hero-subtitle">
+            Select your marketplace and prepare a cleaner PDF for daily packing — 100% free with no signup required.
+          </p>
+        </div>
+      </section>
+
+      <!-- 2. Marketplace Selection Cards -->
+      <section class="sb-label-platforms-section">
+        <div class="sb-label-platforms-container">
+          
+          <!-- Meesho Card (Active) -->
+          <div class="sb-platform-card">
+            <div class="sb-platform-graphic">
+              <div class="sb-platform-graphic-tag-top">Upload PDFs</div>
+              <div class="sb-mock-paper-stack">
+                <div class="sb-mock-paper-1"></div>
+                <div class="sb-mock-paper-2"></div>
+                <div class="sb-mock-paper-front">
+                  <div class="sb-mock-paper-header" style="background: #FDF4F9;"></div>
+                  <div class="sb-mock-paper-line" style="width: 90%;"></div>
+                  <div class="sb-mock-paper-line" style="width: 70%;"></div>
+                  <div class="sb-mock-paper-line" style="width: 50%;"></div>
+                  <div style="margin-top: 16px; display: flex; gap: 6px;">
+                    <div style="flex: 1; height: 32px; border: 1px dashed #E2E8F0; border-radius: 6px;"></div>
+                    <div style="flex: 1; height: 32px; border: 1px dashed #E2E8F0; border-radius: 6px;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="sb-platform-graphic-tag-bottom" style="background: #8B1874;">Sorted PDF</div>
+              <div class="sb-platform-graphic-icon-action" style="background: #8B1874;">
+                ✂️
+              </div>
+            </div>
+
+            <div class="sb-platform-info">
+              <div class="sb-platform-pill meesho">
+                <span>🏷️</span>
+                <span>Meesho shipping labels</span>
+              </div>
+              <h2 class="sb-platform-title">Meesho Shipping Label Sort & Crop Tool</h2>
+              <p class="sb-platform-desc">
+                Upload Meesho label PDFs, sort by SKU or courier partner, crop invoice space, and download a clean PDF for packing.
+              </p>
+              <div class="sb-platform-tag">SKU + courier sorting</div>
+              <button type="button" class="sb-platform-btn" data-sb-route="label-sort-crop/meesho" id="sbNavigateToMeeshoBtn">
+                Sort & crop Meesho shipping labels →
+              </button>
+            </div>
+          </div>
+
+          <!-- Amazon Card (Coming Soon) -->
+          <div class="sb-platform-card reverse">
+            <div class="sb-platform-graphic">
+              <div class="sb-platform-graphic-tag-top" style="background: #FFF7ED; color: #C2410C;">Upload PDFs</div>
+              <div class="sb-mock-paper-stack">
+                <div class="sb-mock-paper-1"></div>
+                <div class="sb-mock-paper-2"></div>
+                <div class="sb-mock-paper-front">
+                  <div class="sb-mock-paper-header" style="background: #FFF7ED;"></div>
+                  <div class="sb-mock-paper-line" style="width: 85%;"></div>
+                  <div class="sb-mock-paper-line" style="width: 65%;"></div>
+                  <div class="sb-mock-paper-line" style="width: 45%;"></div>
+                </div>
+              </div>
+              <div class="sb-platform-graphic-tag-bottom" style="background: #EA580C;">Sorted PDF</div>
+              <div class="sb-platform-graphic-icon-action" style="background: #EA580C;">
+                ✂️
+              </div>
+            </div>
+
+            <div class="sb-platform-info">
+              <div class="sb-platform-pill amazon">
+                <span>📦</span>
+                <span>Amazon shipping labels</span>
+              </div>
+              <h2 class="sb-platform-title">Amazon Shipping Label Sort Tool</h2>
+              <p class="sb-platform-desc">
+                Sort Amazon labels by SKU, remove invoice pages when needed, and stamp SKU details for faster product picking.
+              </p>
+              <div class="sb-platform-tag">SKU stamp + invoice drop</div>
+              <button class="sb-platform-btn disabled" disabled>
+                Coming Soon
+              </button>
+            </div>
+          </div>
+
+          <!-- Flipkart Card (Coming Soon) -->
+          <div class="sb-platform-card">
+            <div class="sb-platform-graphic">
+              <div class="sb-platform-graphic-tag-top" style="background: #EFF6FF; color: #1D4ED8;">Upload PDFs</div>
+              <div class="sb-mock-paper-stack">
+                <div class="sb-mock-paper-1"></div>
+                <div class="sb-mock-paper-2"></div>
+                <div class="sb-mock-paper-front">
+                  <div class="sb-mock-paper-header" style="background: #EFF6FF;"></div>
+                  <div class="sb-mock-paper-line" style="width: 90%;"></div>
+                  <div class="sb-mock-paper-line" style="width: 75%;"></div>
+                  <div class="sb-mock-paper-line" style="width: 55%;"></div>
+                </div>
+              </div>
+              <div class="sb-platform-graphic-tag-bottom" style="background: #2563EB;">Sorted PDF</div>
+              <div class="sb-platform-graphic-icon-action" style="background: #2563EB;">
+                ✂️
+              </div>
+            </div>
+
+            <div class="sb-platform-info">
+              <div class="sb-platform-pill flipkart">
+                <span>🛍️</span>
+                <span>Flipkart shipping labels</span>
+              </div>
+              <h2 class="sb-platform-title">Flipkart Label Crop & Cutter Tool</h2>
+              <p class="sb-platform-desc">
+                Crop pdf flipkart shipping labels to remove the invoice section, sort by SKU, and download a clean print-ready PDF for packing.
+              </p>
+              <div class="sb-platform-tag">Label crop + SKU sorting</div>
+              <button class="sb-platform-btn disabled" disabled>
+                Coming Soon
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+
+      <!-- 4. Advanced Features Built for Serious Sellers -->
+      <section class="sb-label-features-section">
+        <div class="sb-label-features-container">
+          <div class="sb-label-section-header">
+            <div class="sb-interactive-pill" style="margin: 0 auto 16px;">
+              <span>⚡</span>
+              <span>Features</span>
+            </div>
+            <h2 class="sb-interactive-title">Advanced Label Crop & Sort Features Built for Serious Sellers</h2>
+            <p class="sb-interactive-subtitle">
+              Crop invoices, clean white space, sort by SKU or courier partner, handle multiple accounts, and preview every batch before printing.
+            </p>
+          </div>
+
+          <div class="sb-label-features-grid">
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">✂️</div>
+              <h3>Invoice Removal & White Space Cleaning</h3>
+              <p>Trims unwanted invoice sections and white space to create a tighter label output optimized for 4×4 thermal rolls or A4 paper.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">📦</div>
+              <h3>Sort Labels by SKU</h3>
+              <p>Groups all orders for the same SKU sequentially so your packing team picks one product and packs all related orders together.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">🚚</div>
+              <h3>Sort by Courier Partner</h3>
+              <p>Separates Delhivery, Xpressbees, Shadowfax, and Valmo labels into designated batches for lightning-fast courier pickup handover.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">📁</div>
+              <h3>Multi-Account Label Handling</h3>
+              <p>Upload label PDFs from multiple Meesho seller accounts in one batch. Combine, sort, and export one consolidated print-ready PDF.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">🔢</div>
+              <h3>Multi-Quantity Order Visibility</h3>
+              <p>Highlights multi-piece orders clearly so your warehouse packers never miss extra units or send partial shipments.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">👁️</div>
+              <h3>Preview Map Before Every Download</h3>
+              <p>Visually review label arrangement, crop boundaries, and SKU counts before generating the final file to prevent misprints.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. How It Works (3 Steps) -->
+      <section class="sb-label-steps-section">
+        <div class="sb-label-steps-container">
+          <div class="sb-label-section-header">
+            <div class="sb-interactive-pill" style="margin: 0 auto 16px;">
+              <span>🚀</span>
+              <span>How It Works</span>
+            </div>
+            <h2 class="sb-interactive-title">How to Crop & Sort Meesho Labels in 3 Steps</h2>
+            <p class="sb-interactive-subtitle">
+              Upload your label PDF, choose your sorting order, and download a cleaner print-ready file for dispatch.
+            </p>
+          </div>
+
+          <div class="sb-steps-grid">
+            <div class="sb-step-card">
+              <div class="sb-step-header">
+                <div class="sb-step-icon">📤</div>
+                <div class="sb-step-num">1</div>
+              </div>
+              <h3>Upload Your Label PDF</h3>
+              <p>Drag and drop single or multi-page label PDFs directly into the upload zone. You can upload multiple PDFs at once from different seller accounts.</p>
+            </div>
+
+            <div class="sb-step-card">
+              <div class="sb-step-header">
+                <div class="sb-step-icon">⚙️</div>
+                <div class="sb-step-num">2</div>
+              </div>
+              <h3>Choose Sort & Crop Settings</h3>
+              <p>Select your sort type (SKU or Courier Partner), choose standard 4×4 or dynamic below-details cropping, and optionally attach a custom packaging note or QR code.</p>
+            </div>
+
+            <div class="sb-step-card">
+              <div class="sb-step-header">
+                <div class="sb-step-icon">🖨️</div>
+                <div class="sb-step-num">3</div>
+              </div>
+              <h3>Preview, Download & Print</h3>
+              <p>Review the visual preview map, click Generate Sorted PDF, and download your clean print-ready file. Print at 100% actual size for instant barcode scanning.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Comparison Table -->
+      <section class="sb-label-comparison-section">
+        <div class="sb-comparison-card">
+          <div style="padding: 32px 32px 20px; text-align: center;">
+            <h2 class="sb-interactive-title" style="font-size: 2rem;">More Than a Basic Label Crop Tool</h2>
+            <p class="sb-interactive-subtitle">See how FC Analytics compares with simple online PDF splitters.</p>
+          </div>
+          <table class="sb-comparison-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th class="center">Basic Crop Tools</th>
+                <th class="brand-col">FC Analytics</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Meesho label crop & invoice removal</strong></td>
+                <td class="center">✅</td>
+                <td class="brand-col">✅ Dynamic & 4×4</td>
+              </tr>
+              <tr>
+                <td><strong>Sort & group labels by SKU</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Auto-sorted</td>
+              </tr>
+              <tr>
+                <td><strong>Sort by Courier Partner (Xpress Bees, Valmo, etc.)</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ 1-Click Separate</td>
+              </tr>
+              <tr>
+                <td><strong>Multi-account batch processing</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Merge Multiple PDFs</td>
+              </tr>
+              <tr>
+                <td><strong>Multi-quantity order highlight badges</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Clear Warning Badges</td>
+              </tr>
+              <tr>
+                <td><strong>Custom packing message & live QR code generator</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Built-in</td>
+              </tr>
+              <tr>
+                <td><strong>Visual preview map before generating PDF</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Instant Interactive Map</td>
+              </tr>
+              <tr>
+                <td><strong>100% Free with No Signup Required</strong></td>
+                <td class="center">✅</td>
+                <td class="brand-col">✅ Free & Private</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 7. Call To Action Banner -->
+      <section class="sb-label-cta-section">
+        <div class="sb-label-cta-container">
+          <h2 class="sb-label-cta-title">Start shipping smarter with complete clarity.</h2>
+          <p class="sb-label-cta-subtitle">
+            Track every order, automate reconciliation, crop & sort labels, and scale your e-commerce business with confidence.
+          </p>
+          <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+            <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard">
+              Launch Free Dashboard →
+            </button>
+            <a href="https://api.whatsapp.com/send?phone=917069051397&text=Hi+I+need+help+with+shipping+label+sorting" target="_blank" class="sb-btn sb-btn-outline sb-btn-lg" style="text-decoration: none;">
+              Chat on WhatsApp 💬
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div> <!-- End of #labelCropView -->
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         DEDICATED MEESHO SEPARATE PAGE (sellerbox.in/label-sort-crop/meesho)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="sb-meesho-page" id="labelCropMeeshoView" style="display: none;">
+      
+      <!-- Top Marketplace Switcher Bar -->
+      <div class="sb-meesho-switcher-bar">
+        <div class="sb-meesho-switcher-pill">
+          <button type="button" class="sb-meesho-switch-item active" data-sb-route="label-sort-crop/meesho">
+            <span class="sb-meesho-switch-logo" style="color: #9E2A9C;">🏷️</span>
+            <span>Meesho</span>
+          </button>
+          <button type="button" class="sb-meesho-switch-item" data-sb-route="label-sort-crop" title="Amazon (Coming Soon)">
+            <span class="sb-meesho-switch-logo" style="color: #EA580C;">📦</span>
+            <span>Amazon</span>
+          </button>
+          <button type="button" class="sb-meesho-switch-item" data-sb-route="label-sort-crop" title="Flipkart (Coming Soon)">
+            <span class="sb-meesho-switch-logo" style="color: #2563EB;">🛍️</span>
+            <span>Flipkart</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Split Hero Section -->
+      <section class="sb-meesho-hero-section">
+        <div class="sb-meesho-hero-container">
+          <!-- Left Column -->
+          <div class="sb-meesho-hero-left">
+            <div class="sb-meesho-pill-badge">
+              <span class="sb-meesho-pill-dot"></span>
+              <span>Label Sorting Tool</span>
+            </div>
+
+            <h1 class="sb-meesho-hero-title">
+              Free Meesho Label Crop <br>
+              <span class="highlight">&amp; Sort Tool</span>
+            </h1>
+
+            <div class="sb-meesho-hero-desc">
+              <p>
+                Every Meesho seller faces the same daily problem: shipping label PDFs include both the shipping label and tax invoice on the same page.
+              </p>
+              <p>
+                FC Analytics helps you crop Meesho labels away from the invoice section, sort labels by SKU or courier partner, and download a clean, print-ready file for free with no signup needed.
+              </p>
+            </div>
+
+            <div class="sb-meesho-trust-tags">
+              <div class="sb-meesho-trust-tag">⚡ 100% Free • No Signup Needed</div>
+              <div class="sb-meesho-trust-tag">✂️ Crop Invoices or 4×4 Standard</div>
+              <div class="sb-meesho-trust-tag">📦 Sort by SKU or Courier</div>
+              <div class="sb-meesho-trust-tag">🔒 100% Private Client-Side</div>
+            </div>
+          </div>
+
+          <!-- Right Column: Upload & Sorter Card -->
+          <div class="sb-meesho-hero-right">
+            <div class="sb-meesho-upload-card" id="sbMeeshoUploadCard">
+              <div id="publicMeeshoLabelSorterMount">
+                <!-- Embedded Label Sorter Component -->
+                <section id="labelSorter" class="section active" style="display: block; padding: 0;">
+                <!-- Upload Panel -->
+                <div id="labelUploadPanel">
+                  <div class="label-upload-card" style="box-shadow: none; border: none; padding: 0; background: transparent;">
+                    <div class="label-upload-header" style="margin-bottom: 20px; text-align: center;">
+                      <h2 style="font-size: 1.6rem; font-weight: 800; color: #111827; margin: 0 0 6px;">Upload Shipping Labels</h2>
+                      <p style="color: #64748B; font-size: 0.92rem; margin: 0;">Upload your Meesho shipping label PDF to crop invoice space, sort labels, and prepare a cleaner print-ready file.</p>
+                    </div>
+
+                    <div class="label-upload-zone" id="labelUploadZone">
+                      <div id="labelUploadEmpty">
+                        <div class="label-upload-icon">📤</div>
+                        <div class="label-upload-text">Click here to upload or Drag &amp; Drop Meesho Label PDFs Here</div>
+                        <div class="label-upload-hint">Supported format: PDF</div>
+                      </div>
+                      <div id="labelFileList"></div>
+                      <a href="#" class="label-add-more" id="labelAddMoreFiles" style="display: none;">+ Add More Files</a>
+                    </div>
+                    <input type="file" id="labelFileInput" accept="application/pdf" multiple style="display: none;">
+
+                    <button class="btn btn-primary label-prepare-btn" id="labelPrepareBtn" style="display: none;">
+                      🚀 Upload &amp; Prepare Labels
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Sorting Panel (shown after processing) -->
+                <div id="labelSortPanel" style="display: none;">
+                  <!-- Stats Bar -->
+                  <div class="label-stats-bar">
+                    <div id="labelStatsBadges" class="label-stats-badges"></div>
+                    <div class="label-stats-actions">
+                      <button class="btn btn-secondary btn-sm" id="labelStartOver">🔄 Start Over</button>
+                      <button class="btn btn-primary btn-sm label-generate-btn" id="labelGeneratePdf">📥 Generate Sorted PDF</button>
+                    </div>
+                  </div>
+
+                  <div class="label-sorter-layout">
+                    <!-- Left: Sort Config Panel -->
+                    <div class="label-config-panel">
+                      <!-- Sort Type -->
+                      <div class="label-config-section">
+                        <div class="label-config-title">Sort Type</div>
+                        <div class="sort-type-tabs">
+                          <button class="sort-type-tab active" id="sortTypeSku">📦 SKU</button>
+                          <button class="sort-type-tab" id="sortTypeCourier">🚚 Courier Partner</button>
+                        </div>
+                      </div>
+
+                      <!-- Sort By -->
+                      <div class="label-config-section">
+                        <div class="label-config-row">
+                          <span class="label-config-label">Sort by</span>
+                          <div class="sort-by-options">
+                            <button class="sort-by-pill active" id="sortByName">SKU Name</button>
+                            <button class="sort-by-pill" id="sortByCount">No. of Labels</button>
+                          </div>
+                          <div class="sort-direction-btns">
+                            <button class="sort-dir-btn active" id="sortAsc" title="Ascending">↑</button>
+                            <button class="sort-dir-btn" id="sortDesc" title="Descending">↓</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Trim & Crop (2 Checkbox Options) -->
+                      <div class="label-config-section">
+                        <div class="label-config-title">Trim &amp; Crop</div>
+                        <label class="trim-option" id="cropInvoiceOptionLabel">
+                          <input type="checkbox" id="cropInvoiceCheckbox" name="cropInvoice" checked>
+                          <div class="trim-option-content">
+                            <span class="trim-option-title">✂️ Crop labels (remove invoice section)</span>
+                            <span class="trim-option-desc">Removes the tax-invoice block below the label.</span>
+                          </div>
+                        </label>
+                        <label class="trim-option" id="trim4x4OptionLabel">
+                          <input type="checkbox" id="trim4x4Checkbox" name="trim4x4">
+                          <div class="trim-option-content">
+                            <span class="trim-option-title">📐 Trim whitespace (4 X 4 label size)</span>
+                            <span class="trim-option-desc">Cuts extra outer border to save paper.</span>
+                          </div>
+                        </label>
+                      </div>
+
+                      <!-- Combo / Multi-qty Orders -->
+                      <div class="label-config-section">
+                        <div class="label-config-title">Combo / Multi-qty Orders</div>
+                        <div class="combo-btn-group">
+                          <button class="combo-btn active" data-combo="none">No preference</button>
+                          <button class="combo-btn" data-combo="keepOnTop">Keep on top</button>
+                          <button class="combo-btn" data-combo="separatePdf">Separate PDF</button>
+                        </div>
+                        <p class="label-config-hint">Combos mixed in normally with single-qty orders.</p>
+                      </div>
+
+                      <!-- Custom Message & QR Code (Hidden when Crop labels is selected) -->
+                      <div class="label-config-section" id="customMsgSection" style="display: none;">
+                        <div class="label-config-title">Custom Message &amp; QR Code</div>
+                        <label class="custom-msg-toggle">
+                          <input type="checkbox" id="customMsgCheckbox">
+                          <span>Print custom message on labels</span>
+                          <span class="custom-msg-sub">Prints your custom text at the bottom of each label.</span>
+                        </label>
+                        <div id="customMsgArea" style="display: none; margin-top: 10px;">
+                          <!-- Suggested Messages Dropdown -->
+                          <div style="margin-bottom: 8px;">
+                            <label style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 4px; display: block;">Suggested Messages (Click to apply):</label>
+                            <select id="customMsgPresets" style="width: 100%; padding: 8px 10px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 8px; color: #1F2937; font-size: 0.8rem; cursor: pointer; outline: none;">
+                              <option value="">-- Select a recommended message --</option>
+                              <option value="Thank you for your order! We appreciate your business.">❤️ Thank You: "Thank you for your order! We appreciate your business."</option>
+                              <option value="Handle with care - Fragile contents inside.">⚠️ Handle with Care: "Handle with care - Fragile contents inside."</option>
+                              <option value="Love your purchase? Please leave us a 5-star review!">⭐ Review Request: "Love your purchase? Please leave us a 5-star review!"</option>
+                              <option value="Follow us on Instagram @yourbrand for exclusive offers!">📸 Follow Us: "Follow us on Instagram @yourbrand for exclusive offers!"</option>
+                              <option value="Urgent Delivery - Please deliver on time!">🚀 Urgent Delivery: "Urgent Delivery - Please deliver on time!"</option>
+                              <option value="Happy Unboxing! Thank you for supporting our brand.">🎁 Happy Unboxing: "Happy Unboxing! Thank you for supporting our brand."</option>
+                            </select>
+                          </div>
+
+                          <div class="custom-msg-label">Message Text</div>
+                          <textarea class="custom-msg-input" id="customMsgText" rows="2" maxlength="200" placeholder="Type your custom message or choose from suggestions above..."></textarea>
+                          <div class="custom-msg-footer">
+                            <span class="custom-msg-hint">Printed clearly at the bottom of each label.</span>
+                            <span class="custom-msg-count" id="customMsgCharCount">0/200</span>
+                          </div>
+
+                          <!-- QR Code Option -->
+                          <div style="margin-top: 12px; padding: 12px; background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 12px;">
+                            <label class="custom-msg-toggle" style="margin: 0;">
+                              <input type="checkbox" id="customQrCheckbox">
+                              <span style="font-weight: 600; color: #4338CA;">📱 Show Scannable QR Code</span>
+                              <span class="custom-msg-sub">Add a QR code that opens your link when scanned.</span>
+                            </label>
+                            <div id="customQrArea" style="display: none; margin-top: 8px;">
+                              <input type="url" id="customQrUrl" class="form-control" placeholder="Enter link: https://instagram.com/yourbrand" style="width: 100%; padding: 8px 12px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 8px; color: #111827; font-size: 0.82rem;">
+                              <div id="customQrPreviewContainer" style="display: none; align-items: center; gap: 10px; margin-top: 8px;">
+                                <canvas id="customQrCanvas" style="width: 50px; height: 50px; border-radius: 4px; background: #fff; padding: 2px; border: 1px solid #E2E8F0;"></canvas>
+                                <span style="font-size: 0.76rem; color: #059669; font-weight: 600;">✓ QR generated! Printed next to your custom message.</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Right: SKU Order Panel -->
+                    <div class="label-order-panel">
+                      <div class="label-order-header">
+                        <div class="label-order-title">
+                          <span>⚙️ SKU Order</span>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="labelPreviewMap">📋 Preview Map</button>
+                      </div>
+                      <div class="sku-order-list" id="skuOrderList">
+                        <div class="sku-order-empty">Process labels to see SKU order</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </section>
+              </div> <!-- End of #publicMeeshoLabelSorterMount -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Advanced Features Built for Serious Sellers -->
+      <section class="sb-label-features-section" style="background: #FFFFFF;">
+        <div class="sb-label-features-container">
+          <div class="sb-label-section-header">
+            <div class="sb-interactive-pill" style="margin: 0 auto 16px;">
+              <span>⚡</span>
+              <span>Features</span>
+            </div>
+            <h2 class="sb-interactive-title">Advanced Meesho Label Crop &amp; Sort Features Built for Serious Sellers</h2>
+            <p class="sb-interactive-subtitle">
+              Crop invoices, clean white space, sort by SKU or courier partner, handle multiple accounts, and preview every batch before printing.
+            </p>
+          </div>
+
+          <div class="sb-label-features-grid">
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">✂️</div>
+              <h3>Meesho Label Crop: Invoice Removal &amp; White Space Cleaning</h3>
+              <p>Removes the invoice section and trims extra white space to create a tighter, cleaner label output. Works perfectly for thermal rolls and A4 paper.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">📦</div>
+              <h3>Meesho Label Sort by SKU</h3>
+              <p>Group all labels for the same SKU together so your packing team can pick one product, pack all related orders, and move rapidly without hunting.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">🚚</div>
+              <h3>Meesho Label Sort by Courier Partner</h3>
+              <p>Separate Delhivery, Xpressbees, Shadowfax, Valmo, and other courier labels into their own batches so pickup handover is instant.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">📁</div>
+              <h3>Multi-Account Meesho Label Handling</h3>
+              <p>Upload label PDFs from multiple Meesho seller accounts in one batch. Combine, sort, and export one consolidated print-ready PDF.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">🔢</div>
+              <h3>Multi-Quantity Order Visibility</h3>
+              <p>Highlights multi-piece orders clearly so your packing staff never misses extra units or sends incomplete shipments.</p>
+            </div>
+
+            <div class="sb-feature-card">
+              <div class="sb-feature-icon-wrap">👁️</div>
+              <h3>Preview Map Before Every Download</h3>
+              <p>Check how your Meesho labels are arranged before generating the final file to ensure perfect SKU sequence and zero misprints.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works (3 Steps) -->
+      <section class="sb-label-steps-section" style="background: #F0F0F0;">
+        <div class="sb-label-steps-container">
+          <div class="sb-label-section-header">
+            <div class="sb-interactive-pill" style="margin: 0 auto 16px;">
+              <span>🚀</span>
+              <span>How It Works</span>
+            </div>
+            <h2 class="sb-interactive-title">How to Crop &amp; Sort Meesho Labels in 3 Steps</h2>
+            <p class="sb-interactive-subtitle">
+              Upload your label PDF, choose your sorting order, and download a cleaner print-ready file for dispatch.
+            </p>
+          </div>
+
+          <div class="sb-steps-grid">
+            <div class="sb-step-card">
+              <div class="sb-step-header">
+                <div class="sb-step-icon">📤</div>
+                <div class="sb-step-num">1</div>
+              </div>
+              <h3>Upload Your Meesho Label PDF</h3>
+              <p>Click the upload area above or drag and drop your Meesho label PDF. You can upload multiple PDFs at once, even files from different seller accounts.</p>
+            </div>
+
+            <div class="sb-step-card">
+              <div class="sb-step-header">
+                <div class="sb-step-icon">⚙️</div>
+                <div class="sb-step-num">2</div>
+              </div>
+              <h3>Choose Your Sort &amp; Crop Settings</h3>
+              <p>Sort Meesho labels by SKU or courier partner, remove the invoice section, support 4×4 thermal printing, or add custom messages with scannable QR codes.</p>
+            </div>
+
+            <div class="sb-step-card">
+              <div class="sb-step-header">
+                <div class="sb-step-icon">🖨️</div>
+                <div class="sb-step-num">3</div>
+              </div>
+              <h3>Preview, Download &amp; Print</h3>
+              <p>Use the visual preview map to see exactly how your labels will be arranged. Download the PDF and print at 100% actual size for instant barcode scanning.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Benefits Section: Why sellers use FC Analytics for labels -->
+      <section class="sb-meesho-benefits-section">
+        <div class="sb-meesho-benefits-container">
+          <div class="sb-meesho-benefits-grid">
+            <div>
+              <div class="sb-meesho-pill-badge" style="margin-bottom: 16px;">
+                <span class="sb-meesho-pill-dot"></span>
+                <span>Seller Benefits</span>
+              </div>
+              <h2 style="font-family: 'Raleway', sans-serif; font-size: 2.6rem; font-weight: 800; color: #08070E; line-height: 1.15; margin: 0 0 16px;">
+                Why sellers use FC Analytics for labels
+              </h2>
+              <p style="color: #5F6B7D; font-size: 1.05rem; line-height: 1.65; margin: 0 0 28px;">
+                Built for e-commerce sellers who want daily shipping label preparation to feel 3x faster, cleaner, and free of human packing mistakes.
+              </p>
+              <div style="background: #FFFFFF; border: 1px solid #DDE5F1; border-radius: 20px; padding: 20px; display: flex; gap: 16px; align-items: center;">
+                <div style="width: 52px; height: 52px; border-radius: 14px; background: #8B1874; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; shrink: 0;">
+                  🚀
+                </div>
+                <div>
+                  <h4 style="margin: 0 0 4px; font-weight: 700; font-size: 1rem; color: #111827;">Made for busy dispatch days</h4>
+                  <p style="margin: 0; color: #607086; font-size: 0.86rem; line-height: 1.5;">Sort labels clearly before packing so your staff spends less time checking and more time shipping.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="sb-meesho-benefit-cards-grid">
+              <div class="sb-meesho-benefit-card">
+                <div class="sb-meesho-benefit-icon">📄</div>
+                <h4>Less Paper Waste</h4>
+                <p>Crop extra invoice white space and save thousands of thermal labels and sheets annually.</p>
+              </div>
+              <div class="sb-meesho-benefit-card">
+                <div class="sb-meesho-benefit-icon">⚡</div>
+                <h4>Faster Packing</h4>
+                <p>Keep labels arranged by SKU before packing starts so your team packs in rapid batches.</p>
+              </div>
+              <div class="sb-meesho-benefit-card">
+                <div class="sb-meesho-benefit-icon">📦</div>
+                <h4>Easy Multi-Qty Handling</h4>
+                <p>Make multi-quantity orders stand out clearly to eliminate missing units and customer returns.</p>
+              </div>
+              <div class="sb-meesho-benefit-card">
+                <div class="sb-meesho-benefit-icon">🎯</div>
+                <h4>Fewer Misprints</h4>
+                <p>Visual preview map lets you audit label groupings and counts before sending to thermal printer.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparison Table -->
+      <section class="sb-label-comparison-section" style="background: #F0F0F0;">
+        <div class="sb-comparison-card">
+          <div style="padding: 32px 32px 20px; text-align: center;">
+            <h2 class="sb-interactive-title" style="font-size: 2.2rem;">More Than a Basic Meesho Label Cropper</h2>
+            <p class="sb-interactive-subtitle">See how FC Analytics compares with simple online PDF splitters.</p>
+          </div>
+          <table class="sb-comparison-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th class="center">Basic Crop Tools</th>
+                <th class="brand-col" style="background: #9E2A9C;">FC Analytics</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Meesho label crop &amp; invoice removal</strong></td>
+                <td class="center">✅</td>
+                <td class="brand-col">✅ Dynamic &amp; 4×4 Thermal</td>
+              </tr>
+              <tr>
+                <td><strong>Sort &amp; group labels by SKU</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Auto-sorted</td>
+              </tr>
+              <tr>
+                <td><strong>Sort by Courier Partner (Xpressbees, Valmo, etc.)</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ 1-Click Separate</td>
+              </tr>
+              <tr>
+                <td><strong>Multi-account batch processing</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Merge Multiple PDFs</td>
+              </tr>
+              <tr>
+                <td><strong>Multi-quantity order highlight badges</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Clear Warning Badges</td>
+              </tr>
+              <tr>
+                <td><strong>Custom packing message &amp; live QR code generator</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Built-in</td>
+              </tr>
+              <tr>
+                <td><strong>Visual preview map before generating PDF</strong></td>
+                <td class="center">❌</td>
+                <td class="brand-col">✅ Instant Interactive Map</td>
+              </tr>
+              <tr>
+                <td><strong>100% Free with No Signup Required</strong></td>
+                <td class="center">✅</td>
+                <td class="brand-col">✅ Free &amp; Private</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Call To Action Banner -->
+      <section class="sb-label-cta-section">
+        <div class="sb-label-cta-container">
+          <h2 class="sb-label-cta-title">Start shipping smarter with complete clarity.</h2>
+          <p class="sb-label-cta-subtitle">
+            Track every order, automate reconciliation, crop &amp; sort labels, and scale your e-commerce business with confidence.
+          </p>
+          <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+            <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard">
+              Launch Free Dashboard →
+            </button>
+            <a href="https://api.whatsapp.com/send?phone=917069051397&text=Hi+I+need+help+with+shipping+label+sorting" target="_blank" class="sb-btn sb-btn-outline sb-btn-lg" style="text-decoration: none;">
+              Chat on WhatsApp 💬
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ═══ Modern Footer (Shared across all marketing and info pages) ═══ -->
+    <footer class="sb-footer">
+      <div class="sb-container">
+        <div class="sb-footer-grid">
+          <div class="sb-footer-col">
+            <div class="sb-logo" style="margin-bottom: 14px;">
+              <div class="sb-logo-box">📊</div>
+              <span>FC Analytics</span>
+            </div>
+            <p style="color: var(--sb-text-muted); font-size: 0.95rem; line-height: 1.6; max-width: 360px;">
+              The all-in-one operations & intelligence platform for Meesho, Amazon, and Flipkart sellers. Built for speed, clarity, and profit growth.
+            </p>
+          </div>
+
+          <div class="sb-footer-col">
+            <h4>Quick Navigation</h4>
+            <ul class="sb-footer-links">
+              <li><a href="#" data-sb-route="home">Home</a></li>
+              <li><a href="#" data-sb-route="login">Login / Sign In</a></li>
+              <li><a href="#" data-sb-route="label-sort">Shipping Label Sorter</a></li>
+              <li><a href="#calculator">Meesho Profit Calculator</a></li>
+              <li><a href="#" data-sb-route="dashboard">Full Business Dashboard</a></li>
+              <li><a href="#faq">Frequently Asked Questions</a></li>
+            </ul>
+          </div>
+
+          <div class="sb-footer-col">
+            <h4>Information</h4>
+            <ul class="sb-footer-links">
+              <li><a href="#" data-sb-route="about">About Us</a></li>
+              <li><a href="#" data-sb-route="privacy">Privacy Policy</a></li>
+              <li><a href="#" data-sb-route="terms">Terms & Conditions</a></li>
+              <li><a href="#" data-sb-route="cookies">Cookie Policy</a></li>
+              <li><a href="#" data-sb-route="disclaimer">Disclaimer</a></li>
+              <li><a href="#" data-sb-route="contact">Contact Us</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sb-footer-bottom">
+          <div>© 2026 FC Analytics. Built for e-commerce sellers with zero bloat & ultra-fast speed.</div>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <a href="#" data-sb-route="privacy" style="color: var(--sb-text-muted); text-decoration: none;">Privacy Policy</a>
+            <span>•</span>
+            <a href="#" data-sb-route="terms" style="color: var(--sb-text-muted); text-decoration: none;">Terms</a>
+            <span>•</span>
+            <a href="#" data-sb-route="contact" style="color: var(--sb-text-muted); text-decoration: none;">Contact Us</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div> <!-- End of #publicSite -->
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       INTERNAL WORKSPACE / DASHBOARD APPLICATION LAYOUT
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="app-layout" id="appLayout" style="display: none;">
     <!-- Backdrop for mobile sidebar drawer -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- ═══ Sidebar ═══ -->
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-logo">
+      <div class="sidebar-logo sidebar-logo-clickable" id="sidebarLogoHome" title="Back to Website" role="button" tabindex="0" aria-label="Go to FC Analytics Home">
         <div class="logo-icon">📊</div>
         <div class="logo-title-wrap">
           <div class="logo-text">FC Analytics</div>
@@ -27,6 +1553,8 @@
         </div>
         <button class="mobile-sidebar-close" id="mobileSidebarClose" aria-label="Close Navigation Menu">✕</button>
       </div>
+
+
 
       <nav class="sidebar-nav">
         <div class="nav-section-title">Main</div>
@@ -65,6 +1593,13 @@
           <span class="nav-icon">📥</span>
           <span class="nav-label">Export & Data</span>
         </div>
+
+        <div class="nav-section-title">Tools</div>
+
+        <div class="nav-item" data-section="labelSorter">
+          <span class="nav-icon">🏷️</span>
+          <span class="nav-label">Label Sort & Print</span>
+        </div>
       </nav>
 
       <div class="sidebar-footer">
@@ -85,7 +1620,10 @@
           <span class="mobile-brand-title">FC Analytics</span>
         </div>
       </div>
-      <div class="mobile-top-right">
+      <div class="mobile-top-right" style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="btn btn-secondary btn-sm" data-sb-route="home" style="padding: 5px 9px; font-size: 0.78rem;">
+          🏠 Home
+        </button>
         <button class="btn btn-primary btn-sm mobile-quick-upload upload-trigger" title="Upload Payment File">
           📂 <span class="mobile-hide-text">Upload</span>
         </button>
@@ -129,7 +1667,7 @@
             <!-- Quick Action Cards Grid -->
             <div class="welcome-actions-grid">
               <div class="welcome-action-card highlight" id="welcomeCardNewSession">
-                <div class="welcome-card-icon">➕</div>
+                <div class="welcome-card-icon icon-session">➕</div>
                 <div class="welcome-card-body">
                   <h3>Start New Session</h3>
                   <p>Create a clean, dedicated workspace for a new month (e.g. August 2026).</p>
@@ -138,21 +1676,21 @@
               </div>
 
               <div class="welcome-action-card" id="welcomeCardUpload">
-                <div class="welcome-card-icon">📂</div>
+                <div class="welcome-card-icon icon-upload">📂</div>
                 <div class="welcome-card-body">
                   <h3>Upload Payment File</h3>
-                  <p>Directly upload your marketplace Excel payment sheet to parse orders and settlement.</p>
+                  <p>Upload your marketplace Excel payment sheet to parse orders and settlement.</p>
                 </div>
                 <button class="btn btn-secondary btn-sm welcome-card-btn upload-trigger">📂 Upload File</button>
               </div>
 
-              <div class="welcome-action-card" id="welcomeCardSessions">
-                <div class="welcome-card-icon">📁</div>
+              <div class="welcome-action-card card-label-sort" id="welcomeCardLabelSort">
+                <div class="welcome-card-icon icon-label">🏷️</div>
                 <div class="welcome-card-body">
-                  <h3>Browse Monthly Sessions</h3>
-                  <p>Load previous months with all analytics, SKU groups, and profit calculations intact.</p>
+                  <h3>Sort & Print Labels</h3>
+                  <p>Upload Meesho label PDFs — sort by SKU or courier, crop invoices, and print.</p>
                 </div>
-                <button class="btn btn-secondary btn-sm welcome-card-btn" id="welcomeBrowseSessionsBtn">📁 View Sessions</button>
+                <button class="btn btn-secondary btn-sm welcome-card-btn" id="welcomeLabelSortBtn">🏷️ Sort Labels</button>
               </div>
             </div>
 
@@ -612,7 +2150,57 @@
         </div>
       </section>
 
+      <!-- ══ Label Sort & Print Section (Inner Dashboard Workspace) ══ -->
+      <section id="labelSorterSection" class="section">
+        <div class="page-header">
+          <div>
+            <h1>🏷️ Shipping Label Sort &amp; Crop Workspace</h1>
+            <p class="subtitle">Crop invoice space, sort labels strictly by SKU or courier, and prepare print-ready PDFs</p>
+          </div>
+        </div>
+
+        <div class="dashboard-label-sorter-container" id="dashboardLabelSorterMount">
+          <!-- #labelSorter dynamically mounts here when accessed inside the dashboard -->
+        </div>
+      </section>
+
     </main>
+  </div>
+
+  <!-- ═══ Label Preview Map Modal ═══ -->
+  <div class="modal-overlay" id="labelPreviewModal">
+    <div class="modal" style="max-width: 640px;">
+      <div class="modal-header">
+        <h2>📋 Preview Map</h2>
+        <button class="modal-close" id="labelPreviewClose">✕</button>
+      </div>
+      <div id="labelPreviewContent" style="max-height: 60vh; overflow-y: auto; padding: 16px;">
+        <!-- Preview map content rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Label PDF Ready Modal ═══ -->
+  <div class="modal-overlay" id="labelPdfModal">
+    <div class="modal" style="max-width: 560px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="color: var(--color-success); font-size: 1.5rem;">✅</span>
+          <div>
+            <h2 style="margin: 0;">Your PDF is Ready!</h2>
+            <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);" id="labelPdfPageCount">0 pages generated</p>
+          </div>
+        </div>
+        <button class="modal-close" id="labelModalClose">✕</button>
+      </div>
+      <div style="padding: 16px; display: flex; justify-content: center; background: rgba(255,255,255,0.03); border-radius: var(--radius-md); margin: 0 16px;">
+        <canvas id="labelPdfPreviewCanvas" style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: var(--shadow-md);"></canvas>
+      </div>
+      <div style="display: flex; gap: 10px; padding: 16px; flex-wrap: wrap;">
+        <button class="btn btn-secondary" id="labelOpenPdf" style="flex: 1;">👁️ View</button>
+        <button class="btn btn-primary" id="labelDownloadPdf" style="flex: 1.5;">📥 Download PDF</button>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ Upload Modal ═══ -->
