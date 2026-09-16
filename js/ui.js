@@ -802,6 +802,13 @@ export function switchSection(sectionId) {
     navItem.classList.add('active');
   }
 
+  // Update mobile bottom nav active state
+  document.querySelectorAll('.mobile-bottom-nav-item').forEach(b => b.classList.remove('active'));
+  const bottomNavItem = document.querySelector(`.mobile-bottom-nav-item[data-section="${navKey}"]`);
+  if (bottomNavItem) {
+    bottomNavItem.classList.add('active');
+  }
+
   // Close mobile sidebar drawer when navigating
   closeMobileSidebar();
 

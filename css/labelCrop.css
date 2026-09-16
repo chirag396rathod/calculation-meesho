@@ -1004,13 +1004,24 @@
 /* 2. Inner Dashboard Section Mount Container */
 .dashboard-label-sorter-container {
   width: 100%;
-  max-width: 1240px;
-  margin: 0 auto 36px;
+  max-width: var(--page-max-width, 1440px);
+  margin: 0 auto 32px;
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 20px;
-  padding: 28px 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .dashboard-label-sorter-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 0 24px 0 !important;
+  }
 }
 
 .dashboard-label-sorter-container #labelSorter {
@@ -1020,29 +1031,38 @@
 }
 
 .dashboard-label-sorter-container .label-upload-card {
-  padding: 24px 0 !important;
+  padding: 20px 0 !important;
 }
 
-/* 3. SellerBox-Exact Sorter Visual Layout (Works in both Public & Dashboard) */
+/* 3. Sorter Visual Layout */
 #labelCropMeeshoView .label-stats-bar,
 .dashboard-label-sorter-container .label-stats-bar {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   flex-wrap: wrap !important;
-  gap: 14px !important;
-  margin-bottom: 24px !important;
-  padding: 14px 20px !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+  padding: 16px 20px !important;
   background: #FFFFFF !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 16px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  #labelCropMeeshoView .label-stats-bar,
+  .dashboard-label-sorter-container .label-stats-bar {
+    padding: 14px !important;
+    border-radius: 12px !important;
+  }
 }
 
 #labelCropMeeshoView .label-stats-badges,
 .dashboard-label-sorter-container .label-stats-badges {
   display: flex !important;
-  gap: 10px !important;
+  gap: 8px !important;
   align-items: center !important;
   flex-wrap: wrap !important;
 }
@@ -1052,9 +1072,10 @@
   background: #EEF2FF !important;
   color: #4F46E5 !important;
   border: 1px solid #C7D2FE !important;
-  font-size: 0.82rem !important;
-  font-weight: 600 !important;
-  padding: 6px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 18px !important;
+  padding: 5px 12px !important;
   border-radius: 9999px !important;
 }
 
@@ -1063,9 +1084,10 @@
   background: #F5F3FF !important;
   color: #7C3AED !important;
   border: 1px solid #DDD6FE !important;
-  font-size: 0.82rem !important;
-  font-weight: 600 !important;
-  padding: 6px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 18px !important;
+  padding: 5px 12px !important;
   border-radius: 9999px !important;
 }
 
@@ -1074,9 +1096,10 @@
   background: #ECFDF5 !important;
   color: #059669 !important;
   border: 1px solid #A7F3D0 !important;
-  font-size: 0.82rem !important;
-  font-weight: 600 !important;
-  padding: 6px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 18px !important;
+  padding: 5px 12px !important;
   border-radius: 9999px !important;
 }
 
@@ -1087,16 +1110,33 @@
   align-items: center !important;
 }
 
+@media (max-width: 768px) {
+  #labelCropMeeshoView .label-stats-actions,
+  .dashboard-label-sorter-container .label-stats-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1.5fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+}
+
 #labelCropMeeshoView #labelStartOver,
 .dashboard-label-sorter-container #labelStartOver {
   background: #FFFFFF !important;
   border: 1px solid #D1D5DB !important;
   color: #374151 !important;
-  font-weight: 600 !important;
-  border-radius: 10px !important;
-  padding: 8px 18px !important;
-  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
   cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
   transition: all 0.15s ease !important;
 }
 
@@ -1111,19 +1151,25 @@
   background: #8B1874 !important;
   color: #FFFFFF !important;
   border: none !important;
-  border-radius: 10px !important;
-  padding: 9px 22px !important;
-  font-weight: 700 !important;
-  font-size: 0.88rem !important;
+  border-radius: 8px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 18px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
   cursor: pointer !important;
-  box-shadow: 0 4px 14px rgba(139, 24, 116, 0.28) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 2px 8px rgba(139, 24, 116, 0.28) !important;
   transition: all 0.15s ease !important;
 }
 
 #labelCropMeeshoView #labelGeneratePdf:hover,
 .dashboard-label-sorter-container #labelGeneratePdf:hover {
   background: #731360 !important;
-  box-shadow: 0 6px 18px rgba(139, 24, 116, 0.38) !important;
+  box-shadow: 0 4px 14px rgba(139, 24, 116, 0.38) !important;
   transform: translateY(-1px) !important;
 }
 
@@ -1131,7 +1177,7 @@
 .dashboard-label-sorter-container .label-sorter-layout {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
-  gap: 24px !important;
+  gap: 20px !important;
   align-items: start !important;
 }
 
@@ -1139,6 +1185,7 @@
   #labelCropMeeshoView .label-sorter-layout,
   .dashboard-label-sorter-container .label-sorter-layout {
     grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 }
 
@@ -1146,61 +1193,79 @@
 .dashboard-label-sorter-container .label-config-panel {
   background: #FFFFFF !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 16px !important;
-  padding: 22px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  #labelCropMeeshoView .label-config-panel,
+  .dashboard-label-sorter-container .label-config-panel {
+    padding: 16px 14px !important;
+  }
 }
 
 #labelCropMeeshoView .label-config-title,
 .dashboard-label-sorter-container .label-config-title {
-  font-size: 0.95rem !important;
-  font-weight: 700 !important;
-  color: #1E293B !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 26px !important;
+  color: #111827 !important;
   margin-bottom: 12px !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
 #labelCropMeeshoView .sort-type-tabs,
 .dashboard-label-sorter-container .sort-type-tabs {
-  display: flex !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
   background: #F1F5F9 !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 12px !important;
+  border-radius: 10px !important;
   padding: 4px !important;
   gap: 4px !important;
 }
 
 #labelCropMeeshoView .sort-type-tab,
 .dashboard-label-sorter-container .sort-type-tab {
-  flex: 1 !important;
-  padding: 10px 16px !important;
+  height: 40px !important;
   border: none !important;
   background: transparent !important;
   border-radius: 8px !important;
-  font-weight: 600 !important;
-  font-size: 0.84rem !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
   color: #64748B !important;
   cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
   transition: all 0.15s ease !important;
 }
 
 #labelCropMeeshoView .sort-type-tab.active,
 .dashboard-label-sorter-container .sort-type-tab.active {
   background: #FFFFFF !important;
-  color: #1E293B !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
-  font-weight: 700 !important;
+  color: #111827 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  font-weight: 600 !important;
 }
 
 #labelCropMeeshoView .sort-by-pill,
 .dashboard-label-sorter-container .sort-by-pill {
+  height: 36px !important;
   border: 1px solid #E2E8F0 !important;
   background: #FFFFFF !important;
   color: #475569 !important;
-  font-weight: 600 !important;
-  font-size: 0.82rem !important;
-  padding: 6px 14px !important;
-  border-radius: 9999px !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
   cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   transition: all 0.15s ease !important;
 }
 
@@ -1209,6 +1274,7 @@
   background: #EEF2FF !important;
   border-color: #C7D2FE !important;
   color: #4F46E5 !important;
+  font-weight: 600 !important;
 }
 
 #labelCropMeeshoView .sort-dir-btn,
@@ -1217,10 +1283,13 @@
   background: #FFFFFF !important;
   color: #475569 !important;
   border-radius: 8px !important;
-  width: 32px !important;
-  height: 32px !important;
-  font-size: 0.9rem !important;
-  font-weight: 700 !important;
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
 }
@@ -1235,15 +1304,16 @@
 #labelCropMeeshoView .trim-option,
 .dashboard-label-sorter-container .trim-option {
   border: 1.5px solid #E2E8F0 !important;
-  border-radius: 12px !important;
-  padding: 14px 16px !important;
-  margin-bottom: 10px !important;
+  border-radius: 10px !important;
+  padding: 12px 14px !important;
+  margin-bottom: 8px !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: flex-start !important;
-  gap: 12px !important;
+  gap: 10px !important;
   background: #FFFFFF !important;
   transition: all 0.15s ease !important;
+  box-sizing: border-box !important;
 }
 
 #labelCropMeeshoView .trim-option:hover,
@@ -1265,22 +1335,25 @@
 .dashboard-label-sorter-container .trim-option input[type="radio"] {
   width: 18px !important;
   height: 18px !important;
-  margin-top: 3px !important;
+  margin-top: 2px !important;
   accent-color: #8B1874 !important;
   cursor: pointer !important;
+  flex-shrink: 0 !important;
 }
 
 #labelCropMeeshoView .trim-option-title,
 .dashboard-label-sorter-container .trim-option-title {
-  font-size: 0.88rem !important;
-  font-weight: 700 !important;
-  color: #1E293B !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 20px !important;
+  color: #111827 !important;
   display: block !important;
 }
 
 #labelCropMeeshoView .trim-option-desc,
 .dashboard-label-sorter-container .trim-option-desc {
-  font-size: 0.78rem !important;
+  font-size: 13px !important;
+  line-height: 18px !important;
   color: #64748B !important;
   display: block !important;
   margin-top: 2px !important;
@@ -1288,25 +1361,31 @@
 
 #labelCropMeeshoView .combo-btn-group,
 .dashboard-label-sorter-container .combo-btn-group {
-  display: flex !important;
-  gap: 6px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 4px !important;
   background: #F1F5F9 !important;
   border: 1px solid #E2E8F0 !important;
   border-radius: 10px !important;
   padding: 4px !important;
+  box-sizing: border-box !important;
 }
 
 #labelCropMeeshoView .combo-btn,
 .dashboard-label-sorter-container .combo-btn {
-  flex: 1 !important;
+  height: 38px !important;
   border: none !important;
   background: transparent !important;
-  padding: 8px 12px !important;
+  padding: 0 8px !important;
   border-radius: 8px !important;
-  font-size: 0.8rem !important;
-  font-weight: 600 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
   color: #64748B !important;
   cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
   transition: all 0.15s ease !important;
 }
 
@@ -1314,16 +1393,59 @@
 .dashboard-label-sorter-container .combo-btn.active {
   background: #8B1874 !important;
   color: #FFFFFF !important;
-  box-shadow: 0 2px 6px rgba(139, 24, 116, 0.25) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(139, 24, 116, 0.25) !important;
 }
 
 #labelCropMeeshoView .label-order-panel,
 .dashboard-label-sorter-container .label-order-panel {
   background: #FFFFFF !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 16px !important;
-  padding: 22px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  #labelCropMeeshoView .label-order-panel,
+  .dashboard-label-sorter-container .label-order-panel {
+    padding: 14px 10px !important;
+    margin-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #labelCropMeeshoView .sku-order-item,
+  .dashboard-label-sorter-container .sku-order-item {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+  }
+
+  #labelCropMeeshoView .sku-drag-handle,
+  .dashboard-label-sorter-container .sku-drag-handle {
+    width: 14px !important;
+    font-size: 13px !important;
+  }
+
+  #labelCropMeeshoView .sku-order-num,
+  .dashboard-label-sorter-container .sku-order-num {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 11px !important;
+  }
+
+  #labelCropMeeshoView .sku-order-count,
+  .dashboard-label-sorter-container .sku-order-count {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+    background: #F1F5F9 !important;
+    border-radius: 4px !important;
+  }
+
+  #labelCropMeeshoView .sku-order-remove,
+  .dashboard-label-sorter-container .sku-order-remove {
+    padding: 2px 4px !important;
+    font-size: 13px !important;
+  }
 }
 
 #labelCropMeeshoView .label-order-header,
@@ -1331,30 +1453,36 @@
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  margin-bottom: 16px !important;
-  padding-bottom: 12px !important;
+  margin-bottom: 14px !important;
+  padding-bottom: 10px !important;
   border-bottom: 1px solid #F1F5F9 !important;
 }
 
 #labelCropMeeshoView .label-order-title,
 .dashboard-label-sorter-container .label-order-title {
-  font-size: 0.95rem !important;
-  font-weight: 700 !important;
-  color: #1E293B !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 26px !important;
+  color: #111827 !important;
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
 #labelCropMeeshoView #labelPreviewMap,
 .dashboard-label-sorter-container #labelPreviewMap {
-  background: #FFFFFF !important;
-  border: 1px solid #E2E8F0 !important;
-  color: #475569 !important;
-  font-weight: 600 !important;
+  height: 36px !important;
+  padding: 0 12px !important;
   border-radius: 8px !important;
-  padding: 6px 14px !important;
-  font-size: 0.82rem !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #334155 !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
 }
@@ -1362,44 +1490,49 @@
 #labelCropMeeshoView #labelPreviewMap:hover,
 .dashboard-label-sorter-container #labelPreviewMap:hover {
   background: #F8FAFC !important;
-  border-color: #CBD5E1 !important;
+  border-color: #94A3B8 !important;
 }
 
 #labelCropMeeshoView .sku-order-item,
 .dashboard-label-sorter-container .sku-order-item {
   background: #FFFFFF !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 12px !important;
-  padding: 12px 16px !important;
-  margin-bottom: 10px !important;
+  border-radius: 10px !important;
+  padding: 10px 12px !important;
+  margin-bottom: 8px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  gap: 8px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  box-sizing: border-box !important;
 }
 
 #labelCropMeeshoView .sku-order-item:hover,
 .dashboard-label-sorter-container .sku-order-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 }
 
 #labelCropMeeshoView .sku-drag-handle,
 .dashboard-label-sorter-container .sku-drag-handle {
   color: #94A3B8 !important;
-  font-size: 1.1rem !important;
+  font-size: 15px !important;
   cursor: grab !important;
+  width: 18px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+  user-select: none !important;
 }
 
 #labelCropMeeshoView .sku-order-num,
 .dashboard-label-sorter-container .sku-order-num {
-  width: 26px !important;
-  height: 26px !important;
+  width: 24px !important;
+  height: 24px !important;
   border-radius: 50% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 0.78rem !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   color: #FFFFFF !important;
   flex-shrink: 0 !important;
@@ -1407,10 +1540,18 @@
 
 #labelCropMeeshoView .sku-order-name,
 .dashboard-label-sorter-container .sku-order-name {
-  font-size: 0.9rem !important;
-  font-weight: 700 !important;
-  color: #1E293B !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  color: #111827 !important;
   flex: 1 !important;
+  min-width: 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  word-break: break-word !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 #labelCropMeeshoView .sku-order-count,
@@ -1418,6 +1559,7 @@
   font-size: 0.8rem !important;
   color: #64748B !important;
   font-weight: 500 !important;
+  white-space: nowrap !important;
 }
 
 #labelCropMeeshoView .sku-order-remove,

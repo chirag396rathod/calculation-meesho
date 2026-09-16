@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0e1a">
+  <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
@@ -1612,20 +1612,20 @@
     <!-- ═══ Mobile Top Bar ═══ -->
     <header class="mobile-top-bar" id="mobileTopBar">
       <div class="mobile-top-left">
-        <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Open Navigation Menu">
+        <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Open Navigation Menu" title="Open Navigation Menu">
           <span class="mobile-menu-icon">☰</span>
         </button>
-        <div class="mobile-brand">
-          <span class="mobile-brand-icon">📊</span>
+        <div class="mobile-brand" id="mobileBrandHome" role="button" tabindex="0" title="Back to FC Analytics Home">
+          <div class="mobile-brand-icon-wrap">📊</div>
           <span class="mobile-brand-title">FC Analytics</span>
         </div>
       </div>
-      <div class="mobile-top-right" style="display: flex; align-items: center; gap: 8px;">
-        <button type="button" class="btn btn-secondary btn-sm" data-sb-route="home" style="padding: 5px 9px; font-size: 0.78rem;">
-          🏠 Home
+      <div class="mobile-top-right">
+        <button type="button" class="mobile-top-home-btn" data-sb-route="home" title="Go to Website Home">
+          🏠 <span>Home</span>
         </button>
-        <button class="btn btn-primary btn-sm mobile-quick-upload upload-trigger" title="Upload Payment File">
-          📂 <span class="mobile-hide-text">Upload</span>
+        <button class="mobile-quick-upload upload-trigger" title="Upload Payment Files">
+          📂 <span>Upload</span>
         </button>
       </div>
     </header>
@@ -2165,11 +2165,36 @@
       </section>
 
     </main>
+
+    <!-- ═══ Mobile Bottom Navigation Bar ═══ -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+      <button class="mobile-bottom-nav-item active" data-section="dashboard" aria-label="Dashboard">
+        <span class="bottom-nav-icon">🏠</span>
+        <span class="bottom-nav-label">Overview</span>
+      </button>
+      <button class="mobile-bottom-nav-item" data-section="returns" aria-label="Returns & Reconciliation">
+        <span class="bottom-nav-icon">🔄</span>
+        <span class="bottom-nav-label">Returns</span>
+      </button>
+      <button class="mobile-bottom-nav-item" data-section="skuManager" aria-label="SKU Groups & Costs">
+        <span class="bottom-nav-icon">⚙️</span>
+        <span class="bottom-nav-label">SKU Costs</span>
+      </button>
+      <button class="mobile-bottom-nav-item" data-section="sessionsSection" aria-label="Monthly Sessions">
+        <span class="bottom-nav-icon">📁</span>
+        <span class="bottom-nav-label">Sessions</span>
+      </button>
+      <button class="mobile-bottom-nav-item" data-section="labelSorter" aria-label="Label Sort & Print">
+        <span class="bottom-nav-icon">🏷️</span>
+        <span class="bottom-nav-label">Labels</span>
+      </button>
+    </nav>
   </div>
 
   <!-- ═══ Label Preview Map Modal ═══ -->
   <div class="modal-overlay" id="labelPreviewModal">
     <div class="modal" style="max-width: 640px;">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h2>📋 Preview Map</h2>
         <button class="modal-close" id="labelPreviewClose">✕</button>
@@ -2183,6 +2208,7 @@
   <!-- ═══ Label PDF Ready Modal ═══ -->
   <div class="modal-overlay" id="labelPdfModal">
     <div class="modal" style="max-width: 560px;">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="color: var(--color-success); font-size: 1.5rem;">✅</span>
@@ -2206,6 +2232,7 @@
   <!-- ═══ Upload Modal ═══ -->
   <div class="modal-overlay" id="uploadModal">
     <div class="modal">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h2>📂 Upload Payment Files</h2>
         <button class="modal-close">✕</button>
@@ -2229,6 +2256,7 @@
   <!-- ═══ Create Group Modal ═══ -->
   <div class="modal-overlay" id="createGroupModal">
     <div class="modal">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h2>📁 Create SKU Group</h2>
         <button class="modal-close">✕</button>
@@ -2265,6 +2293,7 @@
   <!-- ═══ Rename Report Modal ═══ -->
   <div class="modal-overlay" id="renameReportModal">
     <div class="modal" style="max-width: 440px;">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h2>✏️ Rename Report</h2>
         <button class="modal-close">✕</button>
@@ -2285,6 +2314,7 @@
   <!-- ═══ Create Session Modal ═══ -->
   <div class="modal-overlay" id="createSessionModal">
     <div class="modal" style="max-width: 500px;">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h2>➕ Create New Session</h2>
         <button class="modal-close">✕</button>
@@ -2331,6 +2361,7 @@
   <!-- ═══ Save Session Modal ═══ -->
   <div class="modal-overlay" id="saveSessionModal">
     <div class="modal" style="max-width: 480px;">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h2>💾 Save Monthly Session</h2>
         <button class="modal-close">✕</button>
@@ -2363,6 +2394,7 @@
   <!-- ═══ Edit Session Modal ═══ -->
   <div class="modal-overlay" id="editSessionModal">
     <div class="modal" style="max-width: 480px;">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h2>✏️ Edit Session Details</h2>
         <button class="modal-close">✕</button>
@@ -2394,6 +2426,7 @@
   <!-- ═══ Clear Dashboard Confirmation Modal ═══ -->
   <div class="modal-overlay" id="clearDashboardModal">
     <div class="modal" style="max-width: 440px; text-align: center;">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
       <div style="font-size: 2.6rem; margin-bottom: 12px;">🧹</div>
       <h2 style="font-size: 1.35rem; margin-bottom: 8px;">Clear Dashboard Workspace?</h2>
       <p style="color: var(--text-secondary); font-size: var(--font-sm); line-height: 1.5; margin-bottom: 20px;">

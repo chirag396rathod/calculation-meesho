@@ -9,6 +9,7 @@ import { skuManager } from './skuManager.js';
 import { sessionManager } from './sessionManager.js';
 import { initLabelSorter, mountLabelSorter } from './labelSorter.js';
 import { initLandingPage, navigateTo } from './landing.js';
+import { initBottomSheetPan } from './bottomSheetPan.js';
 import {
   renderStatusChart,
   renderProfitBreakdownChart,
@@ -83,6 +84,7 @@ async function init() {
   setupSessionHandlers();
   initLabelSorter();
   initLandingPage();
+  initBottomSheetPan();
 
   // Initialize SKU Groups from backend REST API
   try {
@@ -130,35 +132,40 @@ async function init() {
 }
 
 /**
- * Setup navigation sidebar
+ * Setup navigation sidebar & mobile bottom navigation bar
  */
 function setupNavigation() {
-  document.querySelectorAll('.nav-item[data-section]').forEach(item => {
-    item.addEventListener('click', () => {
-      const sectionId = item.dataset.section;
-      if (sectionId === 'labelSorter') {
-        mountLabelSorter('dashboard');
-        state.currentSection = 'labelSorter';
-        switchSection('labelSorterSection');
-        return;
-      }
-      state.currentSection = sectionId;
-      switchSection(sectionId);
+  const handleNavClick = (sectionId) => {
+    if (sectionId === 'labelSorter') {
+      mountLabelSorter('dashboard');
+      state.currentSection = 'labelSorter';
+      switchSection('labelSorterSection');
+      return;
+    }
+    state.currentSection = sectionId;
+    switchSection(sectionId);
 
-      // Re-render charts when switching to their sections
-      if (sectionId === 'dashboard' && state.analytics) {
-        renderCharts();
-      }
-      if (sectionId === 'returns' && state.analytics) {
-        renderReturnCharts();
-      }
-      if (sectionId === 'skuManager') {
-        refreshSkuManager();
-      }
-      if (sectionId === 'sessionsSection') {
-        refreshSessionsView();
-      }
-    });
+    // Re-render charts when switching to their sections
+    if (sectionId === 'dashboard' && state.analytics) {
+      renderCharts();
+    }
+    if (sectionId === 'returns' && state.analytics) {
+      renderReturnCharts();
+    }
+    if (sectionId === 'skuManager') {
+      refreshSkuManager();
+    }
+    if (sectionId === 'sessionsSection') {
+      refreshSessionsView();
+    }
+  };
+
+  document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+    item.addEventListener('click', () => handleNavClick(item.dataset.section));
+  });
+
+  document.querySelectorAll('.mobile-bottom-nav-item[data-section]').forEach(item => {
+    item.addEventListener('click', () => handleNavClick(item.dataset.section));
   });
 
   // Mobile sidebar drawer triggers

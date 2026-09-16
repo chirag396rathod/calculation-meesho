@@ -508,6 +508,17 @@ function setupClientRouting() {
     });
   }
 
+  const mobileBrand = document.getElementById('mobileBrandHome');
+  if (mobileBrand) {
+    mobileBrand.addEventListener('click', () => navigateTo('home'));
+    mobileBrand.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navigateTo('home');
+      }
+    });
+  }
+
   // Handle browser back/forward and initial hash
   window.addEventListener('hashchange', handleHash);
   handleHash();
