@@ -19,22 +19,22 @@ const FEATURE_TABS = {
       "Zero server upload — 100% private & client-side"
     ],
     previewHtml: `
-      <div style="background: white; border-radius: 14px; padding: 18px; border: 1px solid #E3E3E3; box-shadow: 0 4px 14px rgba(0,0,0,0.03);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #ECECEC; padding-bottom: 8px;">
-          <span style="font-weight: 700; color: #8B1874; font-size: 0.88rem;">🏷️ Meesho Thermal Label Preview</span>
-          <span style="background: #FBF0F7; color: #8B1874; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Cropped Below Details</span>
+      <div style="background: white; border-radius: 12px; padding: 14px; border: 1px solid #E3E3E3; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #ECECEC; padding-bottom: 8px; gap: 8px;">
+          <span style="font-weight: 600; color: #8B1874; font-size: 13px; white-space: nowrap;">🏷️ Thermal Label Preview</span>
+          <span style="background: #FBF0F7; color: #8B1874; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">Cropped Details</span>
         </div>
-        <div style="background: #FAFAFA; border: 1px dashed #D1D5DB; border-radius: 10px; padding: 14px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <strong style="font-size: 0.85rem;">COURIER: Xpress Bees</strong>
-            <span style="font-size: 0.8rem; color: #6B6B6B;">SKU: KURTI-RED-XL</span>
+        <div style="background: #FAFAFA; border: 1px dashed #D1D5DB; border-radius: 8px; padding: 12px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px;">
+            <strong>COURIER: Xpress Bees</strong>
+            <span style="color: #6B6B6B;">SKU: KURTI-RED-XL</span>
           </div>
-          <div style="height: 36px; background: #1A1A1A; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 10px;">
+          <div style="height: 36px; background: #1A1A1A; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-size: 12px; letter-spacing: 2px; margin-bottom: 10px;">
             ||||| 892019482910 |||||
           </div>
-          <div style="display: flex; gap: 8px; align-items: center; background: white; padding: 8px; border-radius: 8px; border: 1px solid #E3E3E3;">
-            <div style="width: 32px; height: 32px; background: #FBF0F7; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;">📱</div>
-            <div style="font-size: 0.78rem; line-height: 1.3;">
+          <div style="display: flex; gap: 8px; align-items: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid #E3E3E3;">
+            <div style="width: 28px; height: 28px; background: #FBF0F7; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;">📱</div>
+            <div style="font-size: 12px; line-height: 1.35;">
               <strong>Custom Message + QR:</strong><br><span style="color: #6B6B6B;">Thank you for your order! Please leave a 5-star review.</span>
             </div>
           </div>
@@ -52,30 +52,30 @@ const FEATURE_TABS = {
       "High-margin vs losing SKU identification alerts"
     ],
     previewHtml: `
-      <div style="background: white; border-radius: 16px; padding: 18px; border: 1.5px solid #E2E8F0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <span style="font-weight: 700; font-size: 0.88rem;">📊 SKU Profitability Leaderboard</span>
-          <span style="color: #10B981; font-weight: 700; font-size: 0.85rem;">+24.8% Net Margin</span>
+      <div style="background: white; border-radius: 12px; padding: 14px; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px;">
+          <span style="font-weight: 600; font-size: 13px; color: #111827; white-space: nowrap;">📊 SKU Profitability</span>
+          <span style="color: #10B981; font-weight: 600; font-size: 12px; white-space: nowrap; flex-shrink: 0;">+24.8% Margin</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="background: #F8FAFC; padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <div style="font-weight: 700; font-size: 0.84rem;">SANGANERI-BEDSHEET-DBL</div>
-              <div style="font-size: 0.75rem; color: #64748B;">Orders: 420 | Payout: ₹1,42,800</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="background: #F8FAFC; padding: 8px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #111827;">SANGANERI-BEDSHEET-DBL</div>
+              <div style="font-size: 11px; color: #64748B;">420 Orders • ₹1,42,800</div>
             </div>
-            <div style="text-align: right;">
-              <div style="font-weight: 800; color: #10B981; font-size: 0.92rem;">+₹48,200</div>
-              <div style="font-size: 0.72rem; color: #10B981;">33.7% Profit</div>
+            <div style="text-align: right; flex-shrink: 0;">
+              <div style="font-weight: 700; color: #10B981; font-size: 13px;">+₹48,200</div>
+              <div style="font-size: 11px; color: #10B981;">33.7% Profit</div>
             </div>
           </div>
-          <div style="background: #FFF1F2; padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #FECDD3;">
-            <div>
-              <div style="font-weight: 700; font-size: 0.84rem;">COTTON-SHIRT-BLUE-M</div>
-              <div style="font-size: 0.75rem; color: #E11D48;">High RTO (28%) | Heavy Shipping Deductions</div>
+          <div style="background: #FFF1F2; padding: 8px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #FECDD3; gap: 6px;">
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #9F1239;">COTTON-SHIRT-BLUE-M</div>
+              <div style="font-size: 11px; color: #E11D48;">High RTO (28%)</div>
             </div>
-            <div style="text-align: right;">
-              <div style="font-weight: 800; color: #E11D48; font-size: 0.92rem;">-₹6,400</div>
-              <div style="font-size: 0.72rem; color: #E11D48;">Losing Product</div>
+            <div style="text-align: right; flex-shrink: 0;">
+              <div style="font-weight: 700; color: #E11D48; font-size: 13px;">-₹6,400</div>
+              <div style="font-size: 11px; color: #E11D48;">Loss Maker</div>
             </div>
           </div>
         </div>
@@ -92,23 +92,23 @@ const FEATURE_TABS = {
       "Historical month-on-month trend comparisons"
     ],
     previewHtml: `
-      <div style="background: white; border-radius: 16px; padding: 18px; border: 1.5px solid #E2E8F0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <span style="font-weight: 700; font-size: 0.88rem;">📦 Order Status Distribution</span>
-          <span style="font-size: 0.78rem; font-weight: 600; color: #64748B;">Last 30 Days</span>
+      <div style="background: white; border-radius: 12px; padding: 14px; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px;">
+          <span style="font-weight: 600; font-size: 13px; color: #111827; white-space: nowrap;">📦 Order Status Distribution</span>
+          <span style="font-size: 11px; font-weight: 500; color: #64748B; white-space: nowrap; flex-shrink: 0;">Last 30 Days</span>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; margin-bottom: 14px;">
-          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; padding: 10px; border-radius: 10px;">
-            <div style="font-size: 0.72rem; color: #166534; font-weight: 600;">DELIVERED</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #15803D;">78.4%</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center;">
+          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; padding: 8px 4px; border-radius: 8px;">
+            <div style="font-size: 10px; color: #166534; font-weight: 600; letter-spacing: 0.02em;">DELIVERED</div>
+            <div style="font-size: 17px; font-weight: 700; color: #15803D; margin-top: 2px;">78.4%</div>
           </div>
-          <div style="background: #FEF3C7; border: 1px solid #FDE68A; padding: 10px; border-radius: 10px;">
-            <div style="font-size: 0.72rem; color: #92400E; font-weight: 600;">COURIER RTO</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #B45309;">14.2%</div>
+          <div style="background: #FEF3C7; border: 1px solid #FDE68A; padding: 8px 4px; border-radius: 8px;">
+            <div style="font-size: 10px; color: #92400E; font-weight: 600; letter-spacing: 0.02em;">COURIER RTO</div>
+            <div style="font-size: 17px; font-weight: 700; color: #B45309; margin-top: 2px;">14.2%</div>
           </div>
-          <div style="background: #FEE2E2; border: 1px solid #FECACA; padding: 10px; border-radius: 10px;">
-            <div style="font-size: 0.72rem; color: #991B1B; font-weight: 600;">CUST RETURN</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #B91C1C;">7.4%</div>
+          <div style="background: #FEE2E2; border: 1px solid #FECACA; padding: 8px 4px; border-radius: 8px;">
+            <div style="font-size: 10px; color: #991B1B; font-weight: 600; letter-spacing: 0.02em;">CUST RETURN</div>
+            <div style="font-size: 17px; font-weight: 700; color: #B91C1C; margin-top: 2px;">7.4%</div>
           </div>
         </div>
       </div>
@@ -124,23 +124,23 @@ const FEATURE_TABS = {
       "Export audit-ready Excel and CSV reports"
     ],
     previewHtml: `
-      <div style="background: white; border-radius: 16px; padding: 18px; border: 1.5px solid #E2E8F0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <span style="font-weight: 700; font-size: 0.88rem;">⚖️ Settlement Reconciliation Status</span>
-          <span style="background: #F0FDF4; color: #166534; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 8px;">Reconciled</span>
+      <div style="background: white; border-radius: 12px; padding: 14px; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px;">
+          <span style="font-weight: 600; font-size: 13px; color: #111827; white-space: nowrap;">⚖️ Settlement Reconciliation</span>
+          <span style="background: #F0FDF4; color: #166534; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">Reconciled</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.84rem;">
-          <div style="display: flex; justify-content: space-between; padding: 8px; background: #F8FAFC; border-radius: 8px;">
-            <span style="color: #64748B;">Total Expected Settlement:</span>
-            <strong>₹2,48,910</strong>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #F8FAFC; border-radius: 6px;">
+            <span style="color: #64748B; font-size: 12px;">Total Expected:</span>
+            <strong style="font-size: 13px;">₹2,48,910</strong>
           </div>
-          <div style="display: flex; justify-content: space-between; padding: 8px; background: #F8FAFC; border-radius: 8px;">
-            <span style="color: #64748B;">Bank Deposited Amount:</span>
-            <strong style="color: #10B981;">₹2,48,910</strong>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #F8FAFC; border-radius: 6px;">
+            <span style="color: #64748B; font-size: 12px;">Bank Deposited:</span>
+            <strong style="color: #10B981; font-size: 13px;">₹2,48,910</strong>
           </div>
-          <div style="display: flex; justify-content: space-between; padding: 8px; background: #F0FDF4; border-radius: 8px; border: 1px solid #BBF7D0;">
-            <span style="color: #166534; font-weight: 600;">Discrepancies / Missing:</span>
-            <strong style="color: #166534;">₹0.00 (100% Matched)</strong>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #F0FDF4; border-radius: 6px; border: 1px solid #BBF7D0;">
+            <span style="color: #166534; font-weight: 600; font-size: 12px;">Discrepancies:</span>
+            <strong style="color: #166534; font-size: 13px;">₹0.00 (100% Match)</strong>
           </div>
         </div>
       </div>

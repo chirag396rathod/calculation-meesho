@@ -151,6 +151,57 @@
   min-height: 70px;
 }
 
+@media (max-width: 768px) {
+  .sb-header-inner {
+    min-height: 56px;
+    height: 56px;
+  }
+
+  .sb-logo {
+    font-size: 1.15rem;
+    gap: 8px;
+  }
+
+  .sb-logo-box {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .sb-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  #sbHeaderLoginBtn {
+    display: inline-flex !important;
+    height: 36px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--sb-border) !important;
+    background: #FFFFFF !important;
+    color: var(--sb-text-dark) !important;
+    white-space: nowrap !important;
+  }
+
+  .sb-header-actions .sb-btn-primary {
+    height: 36px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  .sb-header-dash-short {
+    display: none;
+  }
+}
+
 .sb-logo {
   display: flex;
   align-items: center;
@@ -213,15 +264,18 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 9px 18px;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   border: 1px solid transparent;
   outline: none;
+  white-space: nowrap !important;
+  box-sizing: border-box;
 }
 
 .sb-btn:focus-visible {
@@ -266,36 +320,32 @@
 }
 
 .sb-btn-lg {
-  padding: 13px 26px;
-  font-size: 1rem;
-  border-radius: 12px;
+  height: 44px;
+  padding: 0 22px;
+  font-size: 15px;
+  border-radius: 8px;
+  white-space: nowrap !important;
+}
+
+/* ── Button Groups ── */
+.sb-showcase-btn-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.sb-banner-btn-group {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .sb-hamburger {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-}
-
-@media (min-width: 900px) {
-  .sb-hamburger {
-    display: none;
-  }
-}
-
-.sb-hamburger span {
-  display: block;
-  height: 2.5px;
-  width: 100%;
-  background: var(--sb-text-dark);
-  border-radius: 4px;
+  display: none !important;
 }
 
 /* ── Badges & Status Tags ── */
@@ -862,18 +912,22 @@
 }
 
 .sb-tab-btn {
-  padding: 10px 18px;
+  height: 40px;
+  padding: 0 16px;
   background: #FFFFFF;
   border: 1px solid var(--sb-border);
-  border-radius: 10px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--sb-text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  box-sizing: border-box;
 }
 
 .sb-tab-btn:hover {
@@ -885,7 +939,80 @@
   background: var(--sb-primary);
   color: #FFFFFF;
   border-color: var(--sb-primary);
-  box-shadow: 0 4px 12px var(--sb-primary-glow);
+  font-weight: 600;
+  box-shadow: 0 2px 8px var(--sb-primary-glow);
+}
+
+@media (max-width: 768px) {
+  .sb-feature-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 2px 16px 8px 16px !important;
+    margin: 0 -16px 20px -16px !important;
+  }
+
+  .sb-feature-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sb-tab-btn {
+    flex-shrink: 0 !important;
+    width: auto !important;
+    height: 40px !important;
+    padding: 0 16px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  .sb-tab-btn.active {
+    font-weight: 600 !important;
+  }
+
+  .sb-showcase-box {
+    padding: 16px 14px !important;
+    border-radius: 12px !important;
+  }
+
+  .sb-showcase-grid {
+    gap: 16px !important;
+  }
+
+  .sb-showcase-preview-frame {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    min-height: unset !important;
+  }
+
+  .sb-showcase-info h3 {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    line-height: 26px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .sb-showcase-info p {
+    font-size: 14px !important;
+    line-height: 21px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .sb-feature-checklist {
+    margin-bottom: 16px !important;
+    gap: 8px !important;
+  }
+
+  .sb-feature-checklist li {
+    font-size: 13px !important;
+    line-height: 18px !important;
+  }
 }
 
 .sb-showcase-box {
@@ -1039,20 +1166,34 @@
 .sb-calc-results {
   background: #FAFAFA;
   border: 1px solid var(--sb-border);
-  border-radius: 14px;
-  padding: 22px;
+  border-radius: 12px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .sb-calc-res-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--sb-border-subtle);
-  font-size: 0.9rem;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.sb-calc-res-row span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sb-text-muted);
+}
+
+.sb-calc-res-row strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sb-text-dark);
 }
 
 .sb-calc-res-row:last-child {
@@ -1060,21 +1201,48 @@
 }
 
 .sb-calc-profit-highlight {
+  position: relative;
   background: #FFFFFF;
   border: 1px solid var(--sb-border);
-  border-left: 4px solid var(--sb-primary);
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 10px;
+  padding: 14px 16px 14px 18px;
   margin-top: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.sb-calc-profit-highlight::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--sb-primary);
+  border-radius: 10px 0 0 10px;
 }
 
 .sb-profit-big {
-  font-size: 1.85rem;
+  font-size: clamp(28px, 3.5vw, 32px);
   font-weight: 700;
+  line-height: clamp(36px, 4.5vw, 40px);
   color: var(--sb-success);
+}
+
+.sb-calc-results .sb-btn {
+  height: 40px !important;
+  font-size: 14px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* ── Benefits Grid (6 Cards) ── */
@@ -1330,6 +1498,32 @@
     width: 100%;
   }
 
+  .sb-showcase-btn-group {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin-top: 16px !important;
+  }
+
+  .sb-showcase-btn-group .sb-btn {
+    width: 100% !important;
+    height: 40px !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+
+  .sb-banner-btn-group {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .sb-banner-btn-group .sb-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+
   .sb-marketplace-proof {
     flex-direction: column;
     align-items: flex-start;
@@ -1395,13 +1589,29 @@
     font-size: 1.15rem;
   }
 
-  .sb-header-actions .sb-btn-outline {
-    display: none;
+  .sb-header-actions {
+    gap: 6px !important;
+  }
+
+  #sbHeaderLoginBtn {
+    display: inline-flex !important;
+    height: 34px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
   }
 
   .sb-header-actions .sb-btn-primary {
-    padding: 7px 12px;
-    font-size: 0.82rem;
+    height: 34px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+  }
+
+  .sb-header-dash-full {
+    display: none !important;
+  }
+
+  .sb-header-dash-short {
+    display: inline !important;
   }
 
   .sb-profit-big {
