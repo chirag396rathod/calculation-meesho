@@ -10,7 +10,7 @@
 
 // ── Token Storage ──
 const TOKEN_KEY = 'fc_auth_token';
-const USER_KEY  = 'fc_auth_user';
+const USER_KEY = 'fc_auth_user';
 
 export const authState = {
   token: null,
@@ -39,9 +39,9 @@ export function getToken() {
 
 export function setToken(token, user) {
   if (token) localStorage.setItem(TOKEN_KEY, token);
-  if (user)  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
   authState.token = token;
-  authState.user  = user || authState.user;
+  authState.user = user || authState.user;
   updateAuthUI();  // always refresh header on token change
   notifyAuthChange();
 }
@@ -50,7 +50,7 @@ export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
   authState.token = null;
-  authState.user  = null;
+  authState.user = null;
   updateAuthUI();
   notifyAuthChange();
 }
@@ -85,18 +85,18 @@ export function getUserInitials(user) {
 }
 
 export function updateAuthUI() {
-  const user  = authState.user;
+  const user = authState.user;
   const token = authState.token || getToken();
 
   const getStartedBtn = document.getElementById('sbHeaderLoginBtn');
-  const dashBtn       = document.getElementById('sbHeaderDashBtn');
+  const dashBtn = document.getElementById('sbHeaderDashBtn');
 
-  const sidebarUserName   = document.getElementById('sidebarUserName');
-  const sidebarUserMeta   = document.getElementById('sidebarUserMeta');
+  const sidebarUserName = document.getElementById('sidebarUserName');
+  const sidebarUserMeta = document.getElementById('sidebarUserMeta');
   const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
-  const sidebarUserBadge  = document.getElementById('sidebarUserBadge');
-  const sidebarStatusDot  = document.getElementById('sidebarStatusDot');
-  const sidebarLogoutBtn  = document.getElementById('sidebarLogoutBtn');
+  const sidebarUserBadge = document.getElementById('sidebarUserBadge');
+  const sidebarStatusDot = document.getElementById('sidebarStatusDot');
+  const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
 
   if (token && user) {
     // ── LOGGED IN ──
@@ -139,7 +139,7 @@ export function updateAuthUI() {
       getStartedBtn.style.removeProperty('display');
       getStartedBtn.classList.remove('sb-header-btn-hidden');
       getStartedBtn.removeAttribute('hidden');
-      getStartedBtn.textContent   = 'Get Started';
+      getStartedBtn.textContent = 'Get Started';
       getStartedBtn.dataset.sbRoute = 'login';
       getStartedBtn.classList.remove('sb-btn-logged-in');
     }
@@ -149,12 +149,12 @@ export function updateAuthUI() {
       dashBtn.setAttribute('hidden', '');
     }
 
-    if (sidebarUserName)   sidebarUserName.textContent = 'Guest User';
-    if (sidebarUserMeta)   sidebarUserMeta.textContent = 'Sign in to sync data';
+    if (sidebarUserName) sidebarUserName.textContent = 'Guest User';
+    if (sidebarUserMeta) sidebarUserMeta.textContent = 'Sign in to sync data';
     if (sidebarUserAvatar) sidebarUserAvatar.textContent = '👤';
-    if (sidebarStatusDot)  sidebarStatusDot.style.display = 'none';
-    if (sidebarUserBadge)  sidebarUserBadge.title = 'Click to sign in';
-    if (sidebarLogoutBtn)  sidebarLogoutBtn.style.display = 'none';
+    if (sidebarStatusDot) sidebarStatusDot.style.display = 'none';
+    if (sidebarUserBadge) sidebarUserBadge.title = 'Click to sign in';
+    if (sidebarLogoutBtn) sidebarLogoutBtn.style.display = 'none';
   }
 }
 
@@ -171,9 +171,9 @@ export async function fetchMe() {
   if (token && cached) {
     try {
       authState.token = token;
-      authState.user  = JSON.parse(cached);
+      authState.user = JSON.parse(cached);
       updateAuthUI();
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (!token) {
@@ -190,7 +190,7 @@ export async function fetchMe() {
     if (res.ok) {
       const data = await res.json();
       authState.token = token;
-      authState.user  = data.user;
+      authState.user = data.user;
       authState.isLoaded = true;
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
       updateAuthUI();
@@ -214,7 +214,7 @@ export async function fetchMe() {
 }
 
 export function logout() {
-  fetch('/api/auth/logout', { method: 'POST', headers: authHeaders() }).catch(() => {});
+  fetch('/api/auth/logout', { method: 'POST', headers: authHeaders() }).catch(() => { });
   clearToken();
   import('./landing.js').then(({ navigateTo }) => navigateTo('home'));
 }
@@ -269,7 +269,6 @@ function renderStepInput(container) {
         class="otp-contact-input"
         placeholder="Mobile number or email"
         autocomplete="tel email"
-        inputmode="numeric"
         autofocus
       >
     </div>
@@ -287,10 +286,10 @@ function renderStepInput(container) {
     </p>
   `;
 
-  const input    = container.querySelector('#otpContactInput');
-  const prefix   = container.querySelector('#otpInputPrefix');
-  const btn      = container.querySelector('#sendOtpBtn');
-  const err      = container.querySelector('#otpErrorMsg');
+  const input = container.querySelector('#otpContactInput');
+  const prefix = container.querySelector('#otpInputPrefix');
+  const btn = container.querySelector('#sendOtpBtn');
+  const err = container.querySelector('#otpErrorMsg');
 
   const PHONE_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`;
   const EMAIL_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`;
@@ -350,7 +349,7 @@ function renderStepInput(container) {
 // ────────────────────────────────────────────────
 
 function renderStepOtp(container, { input, channel, expiresIn, message }) {
-  const isEmail   = channel === 'email';
+  const isEmail = channel === 'email';
   const channelIcon = isEmail ? '✉️' : '💬';
   const channelLabel = isEmail
     ? 'Check your email inbox (and spam folder)'
@@ -374,9 +373,9 @@ function renderStepOtp(container, { input, channel, expiresIn, message }) {
     <p class="otp-channel-label">${channelLabel}</p>
 
     <div class="otp-boxes" id="otpBoxes">
-      ${[0,1,2,3,4,5].map(i =>
-        `<input type="text" class="otp-box" id="otpBox${i}" maxlength="1" inputmode="numeric" autocomplete="one-time-code" placeholder="·">`
-      ).join('')}
+      ${[0, 1, 2, 3, 4, 5].map(i =>
+    `<input type="text" class="otp-box" id="otpBox${i}" maxlength="1" inputmode="numeric" autocomplete="one-time-code" placeholder="·">`
+  ).join('')}
     </div>
 
     <div class="otp-timer-row">
@@ -396,13 +395,13 @@ function renderStepOtp(container, { input, channel, expiresIn, message }) {
 }
 
 function setupOtpBoxes(container, inputVal, expiresIn) {
-  const boxes     = Array.from(container.querySelectorAll('.otp-box'));
+  const boxes = Array.from(container.querySelectorAll('.otp-box'));
   const verifyBtn = container.querySelector('#verifyOtpBtn');
-  const err       = container.querySelector('#otpErrorMsg');
-  const timerEl   = container.querySelector('#timerCount');
-  const timerRow  = container.querySelector('#otpTimerRow');
+  const err = container.querySelector('#otpErrorMsg');
+  const timerEl = container.querySelector('#timerCount');
+  const timerRow = container.querySelector('#otpTimerRow');
   const resendBtn = container.querySelector('#resendOtpBtn');
-  const backBtn   = container.querySelector('#otpBackBtn');
+  const backBtn = container.querySelector('#otpBackBtn');
 
   boxes[0]?.focus();
 
@@ -516,7 +515,7 @@ function setupOtpBoxes(container, inputVal, expiresIn) {
 // ────────────────────────────────────────────────
 
 function renderStepProfile(container, { token, user }) {
-  const prefillName  = user?.name  || '';
+  const prefillName = user?.name || '';
   const prefillEmail = user?.email || '';
 
   container.innerHTML = `
@@ -564,7 +563,7 @@ function renderStepProfile(container, { token, user }) {
 
   const saveBtn = container.querySelector('#saveProfileBtn');
   const skipBtn = container.querySelector('#skipProfileBtn');
-  const err     = container.querySelector('#otpErrorMsg');
+  const err = container.querySelector('#otpErrorMsg');
 
   const goToDashboard = () =>
     import('./landing.js').then(({ navigateTo }) => navigateTo('dashboard'));
@@ -572,7 +571,7 @@ function renderStepProfile(container, { token, user }) {
   skipBtn?.addEventListener('click', goToDashboard);
 
   saveBtn?.addEventListener('click', async () => {
-    const name  = (container.querySelector('#profileName')?.value  || '').trim();
+    const name = (container.querySelector('#profileName')?.value || '').trim();
     const email = (container.querySelector('#profileEmail')?.value || prefillEmail || '').trim();
 
     setLoading(saveBtn, true, 'Saving...');
@@ -614,7 +613,7 @@ function hideError(el) {
 
 function setLoading(btn, loading, text) {
   if (!btn) return;
-  btn.disabled  = loading;
+  btn.disabled = loading;
   btn.textContent = text;
   btn.style.opacity = loading ? '0.72' : '1';
 }
@@ -630,22 +629,22 @@ export function openProfileModal() {
   const user = authState.user;
   if (!user) return;
 
-  const avatarEl   = document.getElementById('modalProfileAvatar');
-  const headingEl  = document.getElementById('modalProfileHeading');
-  const tagEl      = document.getElementById('modalProfileTag');
-  const nameInput  = document.getElementById('modalProfileNameInput');
+  const avatarEl = document.getElementById('modalProfileAvatar');
+  const headingEl = document.getElementById('modalProfileHeading');
+  const tagEl = document.getElementById('modalProfileTag');
+  const nameInput = document.getElementById('modalProfileNameInput');
   const emailInput = document.getElementById('modalProfileEmailInput');
-  const mobileInput= document.getElementById('modalProfileMobileInput');
-  const userIdEl   = document.getElementById('modalProfileUserId');
-  const statusMsg  = document.getElementById('modalProfileStatusMsg');
+  const mobileInput = document.getElementById('modalProfileMobileInput');
+  const userIdEl = document.getElementById('modalProfileUserId');
+  const statusMsg = document.getElementById('modalProfileStatusMsg');
 
-  if (avatarEl)   avatarEl.textContent = getUserInitials(user);
-  if (headingEl)  headingEl.textContent = user.name || 'My Account';
-  if (tagEl)      tagEl.textContent = (user.email || user.mobile) ? 'Active Account' : 'Personal Workspace';
-  if (nameInput)  nameInput.value = user.name || '';
+  if (avatarEl) avatarEl.textContent = getUserInitials(user);
+  if (headingEl) headingEl.textContent = user.name || 'My Account';
+  if (tagEl) tagEl.textContent = (user.email || user.mobile) ? 'Active Account' : 'Personal Workspace';
+  if (nameInput) nameInput.value = user.name || '';
   if (emailInput) emailInput.value = user.email || '';
-  if (mobileInput)mobileInput.value = user.mobile || '(No mobile number)';
-  if (userIdEl)   userIdEl.textContent = user.id || '-';
+  if (mobileInput) mobileInput.value = user.mobile || '(No mobile number)';
+  if (userIdEl) userIdEl.textContent = user.id || '-';
 
   if (statusMsg) {
     statusMsg.style.display = 'none';
@@ -677,12 +676,12 @@ export function setupProfileModal() {
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const saveBtn   = document.getElementById('modalProfileSaveBtn');
+      const saveBtn = document.getElementById('modalProfileSaveBtn');
       const statusMsg = document.getElementById('modalProfileStatusMsg');
       const nameInput = document.getElementById('modalProfileNameInput');
-      const emailInput= document.getElementById('modalProfileEmailInput');
+      const emailInput = document.getElementById('modalProfileEmailInput');
 
-      const name  = (nameInput?.value || '').trim();
+      const name = (nameInput?.value || '').trim();
       const email = (emailInput?.value || '').trim();
 
       if (saveBtn) setLoading(saveBtn, true, 'Saving...');
@@ -705,9 +704,9 @@ export function setupProfileModal() {
           }
           updateAuthUI();
 
-          const avatarEl  = document.getElementById('modalProfileAvatar');
+          const avatarEl = document.getElementById('modalProfileAvatar');
           const headingEl = document.getElementById('modalProfileHeading');
-          if (avatarEl && data.user)  avatarEl.textContent  = getUserInitials(data.user);
+          if (avatarEl && data.user) avatarEl.textContent = getUserInitials(data.user);
           if (headingEl && data.user) headingEl.textContent = data.user.name || 'My Account';
 
           if (statusMsg) {
