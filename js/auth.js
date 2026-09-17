@@ -298,7 +298,7 @@ function renderStepInput(container) {
   input?.addEventListener('input', () => {
     const val = input.value.trim();
     const isEmail = val.includes('@');
-    input.inputMode = isEmail ? 'email' : 'numeric';
+    input.inputMode = 'email';
     prefix.innerHTML = isEmail ? EMAIL_SVG : PHONE_SVG;
   });
 
