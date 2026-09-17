@@ -193,13 +193,14 @@ export async function initDatabase() {
     // ── SKU Groups (with user_id for multi-tenancy) ──
     await client.execute(`
       CREATE TABLE IF NOT EXISTS sku_groups (
-        id       TEXT PRIMARY KEY,
-        user_id  TEXT NOT NULL DEFAULT 'legacy',
-        name     TEXT NOT NULL,
-        raw_cost REAL DEFAULT 0,
-        skus     TEXT NOT NULL,
+        id         TEXT PRIMARY KEY,
+        user_id    TEXT NOT NULL DEFAULT 'legacy',
+        name       TEXT NOT NULL,
+        raw_cost   REAL DEFAULT 0,
+        skus       TEXT NOT NULL,
         created_at TEXT,
-        updated_at TEXT
+        updated_at TEXT,
+        UNIQUE(user_id, name)
       );
     `);
 

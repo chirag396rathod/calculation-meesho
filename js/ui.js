@@ -856,11 +856,12 @@ export function renderSessionsList(sessions, activeSessionId, { onSwitch, onEdit
           <div class="session-card-header">
             <div class="session-title-group">
               <div class="session-name">
-                📁 ${sess.name}
+                <span class="session-folder-icon">📁</span>
+                <span class="session-name-text">${sess.name}</span>
               </div>
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <div class="session-meta-row">
                 ${sess.month ? `<span class="session-month-badge">📅 ${sess.month}</span>` : ''}
-                <span style="font-size: 0.75rem; color: var(--text-muted);">${createdFmt}</span>
+                <span class="session-date-text">${createdFmt}</span>
               </div>
             </div>
             ${isActive ? `
@@ -891,15 +892,14 @@ export function renderSessionsList(sessions, activeSessionId, { onSwitch, onEdit
         <div class="session-card-footer">
           <div class="session-footer-actions">
             ${isActive ? `
-              <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.8; cursor: default;">✓ Currently Loaded</button>
-              <button class="btn btn-secondary btn-sm session-update-btn" data-id="${sess.id}" title="Overwrite this session with current loaded data">🔄 Update Data</button>
+              <button class="btn btn-primary btn-sm session-update-btn" data-id="${sess.id}" title="Overwrite this session with currently loaded active dashboard data">🔄 Update Data</button>
             ` : `
-              <button class="btn btn-primary btn-sm session-switch-btn" data-id="${sess.id}">👁️ View / Switch</button>
+              <button class="btn btn-outline btn-sm session-switch-btn" data-id="${sess.id}">👁️ View / Switch</button>
             `}
           </div>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn btn-secondary btn-sm session-edit-btn" data-id="${sess.id}" title="Edit Name & Notes">✏️ Edit</button>
-            <button class="btn btn-danger btn-sm session-delete-btn" data-id="${sess.id}" title="Delete Session">🗑 Delete</button>
+          <div class="session-footer-secondary">
+            <button class="btn btn-ghost btn-sm session-edit-btn" data-id="${sess.id}" title="Edit Name & Notes">✏️ Edit</button>
+            <button class="btn btn-danger-ghost btn-sm session-delete-btn" data-id="${sess.id}" title="Delete Session">🗑️ Delete</button>
           </div>
         </div>
       </div>
