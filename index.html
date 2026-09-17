@@ -41,9 +41,9 @@
 
           <div class="sb-header-actions">
             <button class="sb-btn sb-btn-outline" data-sb-route="login" id="sbHeaderLoginBtn">
-              Login
+              Get Started
             </button>
-            <button class="sb-btn sb-btn-primary" data-sb-route="dashboard">
+            <button class="sb-btn sb-btn-primary" data-sb-route="dashboard" id="sbHeaderDashBtn" style="display:none;">
               <span class="sb-header-dash-short">Dashboard →</span>
             </button>
           </div>
@@ -85,13 +85,16 @@
               <span class="sb-proof-label">Marketplaces</span>
               <div class="sb-market-tags">
                 <span class="sb-market-tag sb-tag-meesho">
-                  🛍️ Meesho <span class="sb-badge-live">✓ Live</span>
+                  <img src="/logos/meesho-samll.png" alt="Meesho" class="sb-market-logo-img">
+                  Meesho <span class="sb-badge-live">✓ Live</span>
                 </span>
-                <span class="sb-market-tag sb-tag-disabled">
-                  📦 Amazon <span class="sb-badge-coming-soon">Coming Soon</span>
+                <span class="sb-market-tag sb-tag-flipkart">
+                  <img src="/logos/flipkart-small.png" alt="Flipkart" class="sb-market-logo-img">
+                  Flipkart <span class="sb-badge-live">✓ Live</span>
                 </span>
-                <span class="sb-market-tag sb-tag-disabled">
-                  ⚡ Flipkart <span class="sb-badge-coming-soon">Coming Soon</span>
+                <span class="sb-market-tag sb-tag-amazon sb-tag-disabled">
+                  <img src="/logos/amazon-small.png" alt="Amazon" class="sb-market-logo-img">
+                  Amazon <span class="sb-badge-coming-soon">Coming Soon</span>
                 </span>
               </div>
             </div>
@@ -235,8 +238,9 @@
           <div class="sb-market-card active">
             <div>
               <div class="sb-market-card-top">
-                <div class="sb-market-icon-name" style="color: var(--sb-primary);">
-                  <span style="font-size: 1.5rem;">🛍️</span> Meesho Labels
+                <div class="sb-market-icon-name" style="color: var(--sb-primary); display: flex; align-items: center; gap: 10px;">
+                  <img src="/logos/meesho-samll.png" alt="Meesho" class="sb-card-logo-img">
+                  <span>Meesho Labels</span>
                 </div>
                 <span class="sb-badge-live">✓ Live Now</span>
               </div>
@@ -244,8 +248,27 @@
                 Crop below product details, 4×4 standard thermal trim, auto-group by courier (Xpress Bees, Valmo, Shadowfax), with custom seller message & QR code generator.
               </p>
             </div>
-            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort" style="width: 100%;">
+            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort-crop/meesho" style="width: 100%;">
               Open Meesho Cropper →
+            </button>
+          </div>
+
+          <!-- Flipkart (ACTIVE - Next to Meesho) -->
+          <div class="sb-market-card active flipkart" style="border-color: #2874F0;">
+            <div>
+              <div class="sb-market-card-top">
+                <div class="sb-market-icon-name" style="color: #2874F0; display: flex; align-items: center; gap: 10px;">
+                  <img src="/logos/flipkart-small.png" alt="Flipkart" class="sb-card-logo-img">
+                  <span>Flipkart Labels</span>
+                </div>
+                <span class="sb-badge-live" style="background: #EFF6FF; color: #2874F0; border-color: rgba(40, 116, 240, 0.25);">✓ Live Now</span>
+              </div>
+              <p class="sb-market-card-desc">
+                Crop tax invoice section away, 3×5 thermal print format, auto-group by courier (Ekart Logistics, Delhivery, Shadowfax), and alphabetical SKU sorting.
+              </p>
+            </div>
+            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort-crop/flipkart" style="width: 100%; background: #2874F0; border-color: #2874F0;">
+              Open Flipkart Cropper →
             </button>
           </div>
 
@@ -253,31 +276,14 @@
           <div class="sb-market-card disabled">
             <div>
               <div class="sb-market-card-top">
-                <div class="sb-market-icon-name" style="color: #6B7280;">
-                  <span style="font-size: 1.5rem;">📦</span> Amazon Labels
+                <div class="sb-market-icon-name" style="color: #232F3E; display: flex; align-items: center; gap: 10px;">
+                  <img src="/logos/amazon-small.png" alt="Amazon" class="sb-card-logo-img">
+                  <span>Amazon Labels</span>
                 </div>
-                <span class="sb-badge-coming-soon">Coming Soon</span>
+                <span class="sb-badge-coming-soon" style="background: #FFF8EE; color: #C2410C; border-color: rgba(255, 153, 0, 0.25);">Coming Soon</span>
               </div>
               <p class="sb-market-card-desc">
                 Batch sort Amazon EasyShip labels by SKU, automatically drop duplicate invoice pages, and stamp SKU pick lists directly onto shipping labels.
-              </p>
-            </div>
-            <button class="sb-btn sb-btn-outline" disabled style="width: 100%; opacity: 0.6; cursor: not-allowed;">
-              Coming Soon
-            </button>
-          </div>
-
-          <!-- Flipkart (COMING SOON) -->
-          <div class="sb-market-card disabled">
-            <div>
-              <div class="sb-market-card-top">
-                <div class="sb-market-icon-name" style="color: #6B7280;">
-                  <span style="font-size: 1.5rem;">⚡</span> Flipkart Labels
-                </div>
-                <span class="sb-badge-coming-soon">Coming Soon</span>
-              </div>
-              <p class="sb-market-card-desc">
-                Flipkart thermal label cutter, auto-grouping by logistics partner (Ekart, Delhivery, Shadowfax), and multi-order consignment sorting.
               </p>
             </div>
             <button class="sb-btn sb-btn-outline" disabled style="width: 100%; opacity: 0.6; cursor: not-allowed;">
@@ -636,55 +642,33 @@
     <!-- ══════════════════════════════════════════════════════════════════════
          AUTHENTICATION / LOGIN VIEW (SellerBox Style)
          ══════════════════════════════════════════════════════════════════════ -->
-    <div class="sb-login-page" id="loginView" style="display: none;">
+    <div class="sb-login-page" id="loginView" style="display: none; flex-direction: column;">
       <div class="sb-login-bg-grid"></div>
       <div class="sb-login-bg-glow"></div>
       <div class="sb-login-container">
-        <!-- Header Text Area -->
+        <!-- Header -->
         <div class="sb-login-header">
           <div class="sb-login-pill">
-            <span>Seller dashboard and label sorting</span>
+            <span>🔒 Secure Account Login</span>
           </div>
-          <h1 class="sb-login-title">Welcome to FC Analytics</h1>
+          <h1 class="sb-login-title">FC Analytics</h1>
           <p class="sb-login-subtitle">
-            Login to check your Meesho orders, profit, payments, and labels in one simple place.
+            Your private Meesho seller dashboard — orders, profits, labels &amp; more.
           </p>
         </div>
 
-        <!-- Floating Login Card -->
+        <!-- OTP Auth Card — steps rendered dynamically by js/auth.js -->
         <div class="sb-login-card">
-          <div class="sb-login-card-icon">
-            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 256" height="28" width="28" xmlns="http://www.w3.org/2000/svg">
-              <path d="M225.6,62.65l-88-48.18a19.91,19.91,0,0,0-19.2,0l-88,48.17A20,20,0,0,0,20,80.19v95.62a20,20,0,0,0,10.4,17.55l88,48.17a19.89,19.89,0,0,0,19.2,0l88-48.18A20,20,0,0,0,236,175.81V80.19A20,20,0,0,0,225.6,62.65ZM164,152v47.72l-24,13.14V135.11l72-39.42v22.92l-41.76,22.86A12,12,0,0,0,164,152ZM85.76,141.47,44,118.61V95.69l72,39.42v77.75L92,199.72V152A12,12,0,0,0,85.76,141.47ZM83.13,61.13l39.1,21.4a11.95,11.95,0,0,0,11.52,0l39.1-21.4L199,75.45l-71,38.87L57,75.45ZM128,36.57l19.87,10.88L128,58.33,108.13,47.45ZM44,146l24,13.14v27.47L44,173.44Zm144,40.61V159.11L212,146v27.47Z"></path>
-            </svg>
-          </div>
-          <h2 class="sb-login-card-title">Login to FC Analytics</h2>
-          <p class="sb-login-card-desc">Use your Google account to continue.</p>
-
-          <!-- Google Sign-in Button -->
-          <button type="button" class="sb-google-btn" id="sbGoogleLoginBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <span id="sbGoogleBtnText">Continue with Google</span>
-          </button>
-
-          <!-- Secure Login Divider -->
-          <div class="sb-login-divider">
-            <span>secure login</span>
-          </div>
-
-          <!-- Legal Footer in Card -->
-          <div class="sb-login-legal">
-            By continuing, you agree to our <a href="#terms" data-sb-route="terms">Terms</a> and <a href="#privacy" data-sb-route="privacy">Privacy Policy</a>.
+          <div class="sb-login-otp-container">
+            <!-- Step 1/2/3 injected by initOtpFlow() in auth.js -->
+            <div class="otp-loading">
+              <div class="otp-loading-spinner"></div>
+            </div>
           </div>
         </div>
 
         <!-- Back to home -->
-        <a href="#home" class="sb-login-back-link" data-sb-route="home">
+        <a href="/" class="sb-login-back-link" data-sb-route="home">
           ← Back to home
         </a>
       </div>
@@ -739,7 +723,7 @@
 
             <div class="sb-platform-info">
               <div class="sb-platform-pill meesho">
-                <span>🏷️</span>
+                <img src="/logos/meesho-samll.png" alt="Meesho" class="sb-platform-logo-img">
                 <span>Meesho shipping labels</span>
               </div>
               <h2 class="sb-platform-title">Meesho Shipping Label Sort & Crop Tool</h2>
@@ -753,46 +737,10 @@
             </div>
           </div>
 
-          <!-- Amazon Card (Coming Soon) -->
+          <!-- Flipkart Card (Active - Next to Meesho) -->
           <div class="sb-platform-card reverse">
             <div class="sb-platform-graphic">
-              <div class="sb-platform-graphic-tag-top" style="background: #FFF7ED; color: #C2410C;">Upload PDFs</div>
-              <div class="sb-mock-paper-stack">
-                <div class="sb-mock-paper-1"></div>
-                <div class="sb-mock-paper-2"></div>
-                <div class="sb-mock-paper-front">
-                  <div class="sb-mock-paper-header" style="background: #FFF7ED;"></div>
-                  <div class="sb-mock-paper-line" style="width: 85%;"></div>
-                  <div class="sb-mock-paper-line" style="width: 65%;"></div>
-                  <div class="sb-mock-paper-line" style="width: 45%;"></div>
-                </div>
-              </div>
-              <div class="sb-platform-graphic-tag-bottom" style="background: #EA580C;">Sorted PDF</div>
-              <div class="sb-platform-graphic-icon-action" style="background: #EA580C;">
-                ✂️
-              </div>
-            </div>
-
-            <div class="sb-platform-info">
-              <div class="sb-platform-pill amazon">
-                <span>📦</span>
-                <span>Amazon shipping labels</span>
-              </div>
-              <h2 class="sb-platform-title">Amazon Shipping Label Sort Tool</h2>
-              <p class="sb-platform-desc">
-                Sort Amazon labels by SKU, remove invoice pages when needed, and stamp SKU details for faster product picking.
-              </p>
-              <div class="sb-platform-tag">SKU stamp + invoice drop</div>
-              <button class="sb-platform-btn disabled" disabled>
-                Coming Soon
-              </button>
-            </div>
-          </div>
-
-          <!-- Flipkart Card (Coming Soon) -->
-          <div class="sb-platform-card">
-            <div class="sb-platform-graphic">
-              <div class="sb-platform-graphic-tag-top" style="background: #EFF6FF; color: #1D4ED8;">Upload PDFs</div>
+              <div class="sb-platform-graphic-tag-top" style="background: #EFF6FF; color: #2874F0;">Upload PDFs</div>
               <div class="sb-mock-paper-stack">
                 <div class="sb-mock-paper-1"></div>
                 <div class="sb-mock-paper-2"></div>
@@ -803,22 +751,58 @@
                   <div class="sb-mock-paper-line" style="width: 55%;"></div>
                 </div>
               </div>
-              <div class="sb-platform-graphic-tag-bottom" style="background: #2563EB;">Sorted PDF</div>
-              <div class="sb-platform-graphic-icon-action" style="background: #2563EB;">
+              <div class="sb-platform-graphic-tag-bottom" style="background: #2874F0;">Sorted PDF</div>
+              <div class="sb-platform-graphic-icon-action" style="background: #2874F0;">
                 ✂️
               </div>
             </div>
 
             <div class="sb-platform-info">
               <div class="sb-platform-pill flipkart">
-                <span>🛍️</span>
+                <img src="/logos/flipkart-small.png" alt="Flipkart" class="sb-platform-logo-img">
                 <span>Flipkart shipping labels</span>
               </div>
               <h2 class="sb-platform-title">Flipkart Label Crop & Cutter Tool</h2>
               <p class="sb-platform-desc">
                 Crop pdf flipkart shipping labels to remove the invoice section, sort by SKU, and download a clean print-ready PDF for packing.
               </p>
-              <div class="sb-platform-tag">Label crop + SKU sorting</div>
+              <div class="sb-platform-tag" style="background: #EFF6FF; border-color: #BFDBFE; color: #2874F0;">Label crop + SKU sorting</div>
+              <button type="button" class="sb-platform-btn" data-sb-route="label-sort-crop/flipkart" id="sbNavigateToFlipkartBtn" style="background: #2874F0;">
+                Sort & crop Flipkart shipping labels →
+              </button>
+            </div>
+          </div>
+
+          <!-- Amazon Card (Coming Soon) -->
+          <div class="sb-platform-card">
+            <div class="sb-platform-graphic">
+              <div class="sb-platform-graphic-tag-top" style="background: #FFF8EE; color: #232F3E;">Upload PDFs</div>
+              <div class="sb-mock-paper-stack">
+                <div class="sb-mock-paper-1"></div>
+                <div class="sb-mock-paper-2"></div>
+                <div class="sb-mock-paper-front">
+                  <div class="sb-mock-paper-header" style="background: #FFF8EE;"></div>
+                  <div class="sb-mock-paper-line" style="width: 85%;"></div>
+                  <div class="sb-mock-paper-line" style="width: 65%;"></div>
+                  <div class="sb-mock-paper-line" style="width: 45%;"></div>
+                </div>
+              </div>
+              <div class="sb-platform-graphic-tag-bottom" style="background: #232F3E;">Sorted PDF</div>
+              <div class="sb-platform-graphic-icon-action" style="background: #FF9900; color: #232F3E;">
+                ✂️
+              </div>
+            </div>
+
+            <div class="sb-platform-info">
+              <div class="sb-platform-pill amazon">
+                <img src="/logos/amazon-small.png" alt="Amazon" class="sb-platform-logo-img">
+                <span>Amazon shipping labels</span>
+              </div>
+              <h2 class="sb-platform-title">Amazon Shipping Label Sort Tool</h2>
+              <p class="sb-platform-desc">
+                Sort Amazon labels by SKU, remove invoice pages when needed, and stamp SKU details for faster product picking.
+              </p>
+              <div class="sb-platform-tag">SKU stamp + invoice drop</div>
               <button class="sb-platform-btn disabled" disabled>
                 Coming Soon
               </button>
@@ -1019,16 +1003,22 @@
       <div class="sb-meesho-switcher-bar">
         <div class="sb-meesho-switcher-pill">
           <button type="button" class="sb-meesho-switch-item active" data-sb-route="label-sort-crop/meesho">
-            <span class="sb-meesho-switch-logo" style="color: #9E2A9C;">🏷️</span>
+            <span class="sb-meesho-switch-logo">
+              <img src="/logos/meesho-samll.png" alt="Meesho" class="sb-switch-logo-img">
+            </span>
             <span>Meesho</span>
           </button>
-          <button type="button" class="sb-meesho-switch-item" data-sb-route="label-sort-crop" title="Amazon (Coming Soon)">
-            <span class="sb-meesho-switch-logo" style="color: #EA580C;">📦</span>
-            <span>Amazon</span>
-          </button>
-          <button type="button" class="sb-meesho-switch-item" data-sb-route="label-sort-crop" title="Flipkart (Coming Soon)">
-            <span class="sb-meesho-switch-logo" style="color: #2563EB;">🛍️</span>
+          <button type="button" class="sb-meesho-switch-item" data-sb-route="label-sort-crop/flipkart" id="sbSwitchToFlipkartBtn" title="Flipkart Shipping Labels">
+            <span class="sb-meesho-switch-logo">
+              <img src="/logos/flipkart-small.png" alt="Flipkart" class="sb-switch-logo-img">
+            </span>
             <span>Flipkart</span>
+          </button>
+          <button type="button" class="sb-meesho-switch-item" data-sb-route="label-sort-crop" title="Amazon (Coming Soon)">
+            <span class="sb-meesho-switch-logo">
+              <img src="/logos/amazon-small.png" alt="Amazon" class="sb-switch-logo-img">
+            </span>
+            <span>Amazon</span>
           </button>
         </div>
       </div>
@@ -1043,12 +1033,12 @@
               <span>Label Sorting Tool</span>
             </div>
 
-            <h1 class="sb-meesho-hero-title">
+            <h1 class="sb-meesho-hero-title" id="sbMarketplaceHeroTitle">
               Free Meesho Label Crop <br>
               <span class="highlight">&amp; Sort Tool</span>
             </h1>
 
-            <div class="sb-meesho-hero-desc">
+            <div class="sb-meesho-hero-desc" id="sbMarketplaceHeroDesc">
               <p>
                 Every Meesho seller faces the same daily problem: shipping label PDFs include both the shipping label and tax invoice on the same page.
               </p>
@@ -1074,16 +1064,37 @@
                 <!-- Upload Panel -->
                 <div id="labelUploadPanel">
                   <div class="label-upload-card" style="box-shadow: none; border: none; padding: 0; background: transparent;">
+                    
+                    <!-- Marketplace Selector Tabs (Meesho / Flipkart) -->
+                    <div class="label-platform-selector-wrap" id="labelPlatformSelectorWrap">
+                      <div class="label-platform-pills" role="radiogroup" aria-label="Select Marketplace Platform">
+                        <button type="button" class="label-platform-pill active" id="platformBtnMeesho" data-platform="meesho">
+                          <span class="platform-icon" style="display: inline-flex; align-items: center;">
+                            <img src="/logos/meesho-samll.png" alt="Meesho" class="sb-pill-logo-img">
+                          </span>
+                          <span class="platform-name">Meesho</span>
+                          <span class="platform-status-badge live">Live</span>
+                        </button>
+                        <button type="button" class="label-platform-pill" id="platformBtnFlipkart" data-platform="flipkart">
+                          <span class="platform-icon" style="display: inline-flex; align-items: center;">
+                            <img src="/logos/flipkart-small.png" alt="Flipkart" class="sb-pill-logo-img">
+                          </span>
+                          <span class="platform-name">Flipkart</span>
+                          <span class="platform-status-badge live">Live</span>
+                        </button>
+                      </div>
+                    </div>
+
                     <div class="label-upload-header" style="margin-bottom: 20px; text-align: center;">
-                      <h2 style="font-size: 18px; font-weight: 600; line-height: 26px; color: #111827; margin: 0 0 6px;">Upload Shipping Labels</h2>
-                      <p style="color: #64748B; font-size: 14px; line-height: 21px; margin: 0;">Upload your Meesho shipping label PDF to crop invoice space, sort labels, and prepare a cleaner print-ready file.</p>
+                      <h2 id="labelUploadHeaderTitle" style="font-size: 18px; font-weight: 600; line-height: 26px; color: #111827; margin: 0 0 6px;">Upload Meesho Shipping Labels</h2>
+                      <p id="labelUploadHeaderSubtitle" style="color: #64748B; font-size: 14px; line-height: 21px; margin: 0;">Upload your Meesho shipping label PDF to crop invoice space, sort labels, and prepare a cleaner print-ready file.</p>
                     </div>
 
                     <div class="label-upload-zone" id="labelUploadZone">
                       <div id="labelUploadEmpty">
                         <div class="label-upload-icon">📤</div>
-                        <div class="label-upload-text">Click here to upload or Drag &amp; Drop Meesho Label PDFs Here</div>
-                        <div class="label-upload-hint">Supported format: PDF</div>
+                        <div class="label-upload-text" id="labelUploadText">Click here to upload or Drag &amp; Drop Meesho Label PDFs Here</div>
+                        <div class="label-upload-hint" id="labelUploadHint">Supported format: PDF</div>
                       </div>
                       <div id="labelFileList"></div>
                       <a href="#" class="label-add-more" id="labelAddMoreFiles" style="display: none;">+ Add More Files</a>
@@ -1154,7 +1165,7 @@
                       </div>
 
                       <!-- Combo / Multi-qty Orders -->
-                      <div class="label-config-section">
+                      <div class="label-config-section" id="comboSection">
                         <div class="label-config-title">Combo / Multi-qty Orders</div>
                         <div class="combo-btn-group">
                           <button class="combo-btn active" data-combo="none">No preference</button>
@@ -1506,14 +1517,7 @@
         </div>
 
         <div class="sb-footer-bottom">
-          <div>© 2026 FC Analytics. Built for e-commerce sellers with zero bloat & ultra-fast speed.</div>
-          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-            <a href="#" data-sb-route="privacy" style="color: var(--sb-text-muted); text-decoration: none;">Privacy Policy</a>
-            <span>•</span>
-            <a href="#" data-sb-route="terms" style="color: var(--sb-text-muted); text-decoration: none;">Terms</a>
-            <span>•</span>
-            <a href="#" data-sb-route="contact" style="color: var(--sb-text-muted); text-decoration: none;">Contact Us</a>
-          </div>
+          © 2026 FC Analytics. Built for e-commerce sellers with zero bloat & ultra-fast speed.
         </div>
       </div>
     </footer>
@@ -1586,8 +1590,31 @@
       </nav>
 
       <div class="sidebar-footer">
-        <button class="upload-btn upload-trigger" id="sidebarUploadBtn">
-          📂 Upload Payment File
+        <!-- User Profile Badge -->
+        <div class="sidebar-user-badge" id="sidebarUserBadge" role="button" tabindex="0" title="Account Settings">
+          <div class="sidebar-user-avatar-wrap">
+            <div class="sidebar-user-avatar" id="sidebarUserAvatar">👤</div>
+            <span class="sidebar-status-dot" id="sidebarStatusDot" title="Active"></span>
+          </div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebarUserName">My Account</div>
+            <div class="sidebar-user-meta" id="sidebarUserMeta"></div>
+          </div>
+          <div class="sidebar-user-arrow" title="View Account">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logout Button -->
+        <button class="sidebar-logout-btn" id="sidebarLogoutBtn" type="button" style="display:none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
         </button>
       </div>
     </aside>
@@ -1620,7 +1647,6 @@
               <span class="session-pill-dot"></span>
               <span class="session-pill-label" id="headerActiveSessionLabel">Session: Default</span>
             </div>
-            <button class="btn btn-secondary btn-sm" id="headerCreateSessionBtn" title="Create a new monthly session">➕ Create Session</button>
             <button class="btn btn-secondary btn-sm" id="headerSaveSessionBtn" title="Save current data as a monthly session">💾 Save Session</button>
             <button class="btn btn-secondary btn-sm" id="headerClearDashboardBtn" title="Clear dashboard and return to fresh welcome screen" style="display: none;">🧹 Clear</button>
             <button class="btn btn-primary upload-trigger">📂 Upload Files</button>
@@ -1636,36 +1662,57 @@
             </div>
             <h2 class="welcome-hero-title">Welcome to Business Analytics</h2>
             <p class="welcome-hero-subtitle">
-              Start a fresh monthly session, upload your marketplace payment files, or quickly switch to an existing saved month.
+              Upload your marketplace Excel payment files to analyze orders, profits, and returns, or sort shipping labels.
             </p>
 
             <!-- Quick Action Cards Grid -->
             <div class="welcome-actions-grid">
-              <div class="welcome-action-card highlight" id="welcomeCardNewSession">
-                <div class="welcome-card-icon icon-session">➕</div>
-                <div class="welcome-card-body">
-                  <h3>Start New Session</h3>
-                  <p>Create a clean, dedicated workspace for a new month (e.g. August 2026).</p>
+              <div class="welcome-action-card highlight" id="welcomeCardUpload">
+                <div class="welcome-action-card-top">
+                  <div class="welcome-card-icon icon-upload">📂</div>
+                  <span class="welcome-card-chip highlight">Primary Step</span>
                 </div>
-                <button class="btn btn-primary btn-sm welcome-card-btn" id="welcomeCreateSessionBtn">➕ Create Session</button>
-              </div>
-
-              <div class="welcome-action-card" id="welcomeCardUpload">
-                <div class="welcome-card-icon icon-upload">📂</div>
                 <div class="welcome-card-body">
                   <h3>Upload Payment File</h3>
-                  <p>Upload your marketplace Excel payment sheet to parse orders and settlement.</p>
+                  <p>Upload your marketplace Excel payment sheet (.xlsx / .xls) to parse orders, settlement deductions, and SKU profit.</p>
+                  <div class="welcome-card-tags">
+                    <span>Meesho & Flipkart</span>
+                    <span>Profit & Loss</span>
+                    <span>SKU Costing</span>
+                  </div>
                 </div>
-                <button class="btn btn-secondary btn-sm welcome-card-btn upload-trigger">📂 Upload File</button>
+                <button class="btn btn-primary welcome-action-btn upload-trigger" type="button">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  Browse & Upload File
+                </button>
               </div>
 
               <div class="welcome-action-card card-label-sort" id="welcomeCardLabelSort">
-                <div class="welcome-card-icon icon-label">🏷️</div>
+                <div class="welcome-action-card-top">
+                  <div class="welcome-card-icon icon-label">🏷️</div>
+                  <span class="welcome-card-chip">Warehouse Tool</span>
+                </div>
                 <div class="welcome-card-body">
                   <h3>Sort & Print Labels</h3>
-                  <p>Upload Meesho label PDFs — sort by SKU or courier, crop invoices, and print.</p>
+                  <p>Upload Meesho or Flipkart shipping label PDFs to organize orders by SKU or courier, crop invoices, and prepare print batches.</p>
+                  <div class="welcome-card-tags">
+                    <span>Meesho & Flipkart</span>
+                    <span>PDF Label Crop</span>
+                    <span>SKU Grouping</span>
+                    <span>Courier Sort</span>
+                  </div>
                 </div>
-                <button class="btn btn-secondary btn-sm welcome-card-btn" id="welcomeLabelSortBtn">🏷️ Sort Labels</button>
+                <button class="btn btn-secondary welcome-action-btn" id="welcomeLabelSortBtn" type="button">
+                  Open Label Sorter
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -1719,7 +1766,6 @@
             </div>
             <div style="display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap;">
               <button class="btn btn-primary upload-trigger">📂 Upload Payment File</button>
-              <button class="btn btn-secondary" id="emptyCreateSessionBtn">➕ Create New Session</button>
             </div>
           </div>
         </div>
@@ -2063,8 +2109,6 @@
           </div>
           <div class="header-actions">
             <button class="btn btn-secondary" id="sessionsBackToDashboardBtn">← Back to Dashboard</button>
-            <button class="btn btn-primary" id="sessionsSectionCreateBtn">➕ Create New Session</button>
-            <button class="btn btn-secondary" id="sessionsSectionSaveBtn">💾 Save Current Data</button>
           </div>
         </div>
 
@@ -2413,6 +2457,53 @@
         <button type="button" class="btn btn-secondary" id="cancelClearDashboardBtn" style="flex: 1;">Cancel</button>
         <button type="button" class="btn btn-danger" id="confirmClearDashboardBtn" style="flex: 1;">✓ Clear Workspace</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══ User Profile Modal ═══ -->
+  <div class="modal-overlay" id="userProfileModal">
+    <div class="modal" style="max-width: 460px;">
+      <div class="bottom-sheet-handle" aria-hidden="true"></div>
+      <div class="modal-header">
+        <h2>👤 Account & Profile</h2>
+        <button class="modal-close" id="userProfileModalClose" type="button">✕</button>
+      </div>
+
+      <div class="profile-modal-hero">
+        <div class="profile-modal-avatar" id="modalProfileAvatar">👤</div>
+        <div class="profile-modal-hero-info">
+          <div class="profile-modal-title" id="modalProfileHeading">My Account</div>
+          <div class="profile-modal-tag" id="modalProfileTag">Personal Workspace</div>
+        </div>
+      </div>
+
+      <form id="userProfileForm">
+        <div class="form-group">
+          <label class="form-label">Business / Account Name</label>
+          <input type="text" class="form-input" id="modalProfileNameInput" placeholder="e.g. R P R ENTERPRISE">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="modalProfileEmailInput" placeholder="e.g. owner@example.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Registered Mobile Number</label>
+          <input type="text" class="form-input" id="modalProfileMobileInput" readonly style="background: #F8FAFC; color: #64748B; cursor: not-allowed;">
+        </div>
+
+        <div class="profile-tenant-box">
+          <span class="profile-tenant-label">Tenant ID:</span>
+          <code id="modalProfileUserId" class="profile-tenant-code">-</code>
+        </div>
+
+        <div id="modalProfileStatusMsg" class="profile-modal-status" style="display:none;"></div>
+
+        <button type="submit" class="btn btn-primary" id="modalProfileSaveBtn" style="width: 100%; margin-top: 14px;">
+          💾 Save Changes
+        </button>
+      </form>
     </div>
   </div>
 

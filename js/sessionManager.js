@@ -6,6 +6,8 @@
  * Vercel Serverless Function 4.5 MB payload limits.
  */
 
+import { authHeaders } from './auth.js';
+
 const API_BASE = '/api/sessions';
 const ACTIVE_SESSION_KEY = 'fc_active_session_id';
 const ACTIVE_SESSION_NAME_KEY = 'fc_active_session_name';
@@ -103,7 +105,9 @@ class SessionManager {
    */
   async fetchSessions() {
     try {
-      const res = await fetch(API_BASE);
+      const res = await fetch(API_BASE, {
+        headers: { ...authHeaders() }
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
@@ -121,7 +125,9 @@ class SessionManager {
    * Fetch full session content (auto-decompresses if gzipped)
    */
   async fetchSession(id) {
-    const res = await fetch(`${API_BASE}/${id}`);
+    const res = await fetch(`${API_BASE}/${id}`, {
+      headers: { ...authHeaders() }
+    });
     if (!res.ok) throw new Error(`Session not found (HTTP ${res.status})`);
     const json = await res.json();
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to load session');
@@ -195,7 +201,7 @@ class SessionManager {
 
     const res = await fetch(API_BASE, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(payload)
     });
     const json = await res.json();
@@ -255,7 +261,7 @@ class SessionManager {
 
     const res = await fetch(`${API_BASE}/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(payload)
     });
     const json = await res.json();
@@ -274,7 +280,8 @@ class SessionManager {
    */
   async deleteSession(id) {
     const res = await fetch(`${API_BASE}/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: { ...authHeaders() }
     });
     const json = await res.json();
     if (!res.ok || !json.success) {

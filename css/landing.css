@@ -176,7 +176,7 @@
   }
 
   #sbHeaderLoginBtn {
-    display: inline-flex !important;
+    display: inline-flex;
     height: 36px !important;
     padding: 0 12px !important;
     font-size: 13px !important;
@@ -195,10 +195,6 @@
     font-weight: 600 !important;
     border-radius: 8px !important;
     white-space: nowrap !important;
-  }
-
-  .sb-header-dash-short {
-    display: none;
   }
 }
 
@@ -534,9 +530,62 @@
   background: var(--sb-primary-light);
 }
 
+.sb-tag-flipkart {
+  border-color: rgba(40, 116, 240, 0.28);
+  color: #2874F0;
+  background: #EFF6FF;
+}
+
+.sb-tag-amazon {
+  border-color: rgba(255, 153, 0, 0.35);
+  color: #232F3E;
+  background: #FFF8EE;
+}
+
+.sb-market-logo-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.sb-card-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+
+.sb-platform-logo-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.sb-switch-logo-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+.sb-pill-logo-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 .sb-tag-disabled {
-  opacity: 0.75;
-  color: #6B7280;
+  opacity: 0.85;
 }
 
 /* ── Hero Mockup Card ── */
@@ -868,6 +917,11 @@
 .sb-market-card.active {
   border-color: var(--sb-primary);
   box-shadow: 0 4px 18px rgba(139, 24, 116, 0.1);
+}
+
+.sb-market-card.active.flipkart {
+  border-color: #2874F0;
+  box-shadow: 0 4px 18px rgba(40, 116, 240, 0.15);
 }
 
 .sb-market-card.disabled {
@@ -1594,7 +1648,7 @@
   }
 
   #sbHeaderLoginBtn {
-    display: inline-flex !important;
+    display: inline-flex;
     height: 34px !important;
     padding: 0 10px !important;
     font-size: 12px !important;
@@ -1618,3 +1672,21 @@
     font-size: 1.5rem;
   }
 }
+
+/* ── Always respect hidden states on header buttons ── */
+#sbHeaderLoginBtn.sb-header-btn-hidden,
+#sbHeaderDashBtn.sb-header-btn-hidden,
+#sbHeaderLoginBtn[hidden],
+#sbHeaderDashBtn[hidden],
+#sbHeaderLoginBtn[style*="display: none"],
+#sbHeaderDashBtn[style*="display: none"] {
+  display: none !important;
+}
+
+/* ── Ensure public site views always enable vertical scrolling ── */
+#publicSite {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+}
+

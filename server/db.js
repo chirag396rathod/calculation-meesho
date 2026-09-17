@@ -24,54 +24,75 @@ const useLocalDbOnly = process.env.USE_LOCAL_DB === 'true';
 let client = null;
 let isInitialized = false;
 
-// ── Local File Fallback Helpers (safe for read-only serverless filesystems) ──
-function ensureLocalDirs() {
-  try {
-    const dataDir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-    if (!fs.existsSync(SESSIONS_DIR)) fs.mkdirSync(SESSIONS_DIR, { recursive: true });
-    if (!fs.existsSync(DATA_FILE)) {
-      fs.writeFileSync(DATA_FILE, JSON.stringify({ groups: [], skuCosts: {}, updatedAt: new Date().toISOString() }, null, 2), 'utf8');
-    }
-  } catch (err) {
-    // Read-only filesystem on Vercel
-  }
+// ── Per-User Local File Storage ──────────────────────────────────────────────
+// Each user gets their own directory: data/users/{userId}/
+//   data/users/{userId}/sku_groups.json
+//   data/users/{userId}/sessions/{sessionId}.json
+// ─────────────────────────────────────────────────────────────────────────────
+
+const USERS_DATA_DIR = path.resolve(__dirname, '../data/users');
+
+function userDataDir(userId) {
+  return path.join(USERS_DATA_DIR, userId || 'legacy');
 }
 
-function readLocalSkuData() {
-  ensureLocalDirs();
+function userSkuFile(userId) {
+  return path.join(userDataDir(userId), 'sku_groups.json');
+}
+
+function userSessionsDir(userId) {
+  return path.join(userDataDir(userId), 'sessions');
+}
+
+function ensureUserDirs(userId) {
   try {
-    if (fs.existsSync(DATA_FILE)) {
-      const raw = fs.readFileSync(DATA_FILE, 'utf8');
-      return JSON.parse(raw);
+    const dir     = userDataDir(userId);
+    const sessDir = userSessionsDir(userId);
+    if (!fs.existsSync(dir))     fs.mkdirSync(dir,     { recursive: true });
+    if (!fs.existsSync(sessDir)) fs.mkdirSync(sessDir, { recursive: true });
+    const skuFile = userSkuFile(userId);
+    if (!fs.existsSync(skuFile)) {
+      fs.writeFileSync(skuFile, JSON.stringify({ groups: [], skuCosts: {}, updatedAt: new Date().toISOString() }, null, 2), 'utf8');
     }
-  } catch (err) {
-    console.error('[DB-Local] Error reading SKU JSON:', err);
-  }
+  } catch (err) { /* read-only on Vercel */ }
+}
+
+// Legacy shared dirs (kept for migration only)
+const LEGACY_DATA_FILE  = path.resolve(__dirname, '../data/sku_groups.json');
+const LEGACY_SESS_DIR   = path.resolve(__dirname, '../data/sessions');
+
+function ensureLocalDirs() {
+  // Keep legacy dirs intact — only ensure they exist if already present
+}
+
+function readLocalSkuData(userId = 'legacy') {
+  ensureUserDirs(userId);
+  try {
+    const file = userSkuFile(userId);
+    if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (err) { console.error('[DB-Local] Error reading SKU JSON:', err); }
   return { groups: [], skuCosts: {} };
 }
 
-function writeLocalSkuData(data) {
+function writeLocalSkuData(userId = 'legacy', data) {
   try {
-    ensureLocalDirs();
+    ensureUserDirs(userId);
     data.updatedAt = new Date().toISOString();
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
-  } catch (err) {
-    // Read-only filesystem on Vercel
-  }
+    fs.writeFileSync(userSkuFile(userId), JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) { /* read-only */ }
   return data;
 }
 
-function listLocalSessions() {
-  ensureLocalDirs();
+function listLocalSessions(userId = 'legacy') {
+  ensureUserDirs(userId);
   try {
-    if (!fs.existsSync(SESSIONS_DIR)) return [];
-    const files = fs.readdirSync(SESSIONS_DIR).filter(f => f.endsWith('.json'));
+    const dir = userSessionsDir(userId);
+    if (!fs.existsSync(dir)) return [];
+    const files = fs.readdirSync(dir).filter(f => f.endsWith('.json'));
     const sessions = [];
     for (const file of files) {
       try {
-        const full = path.join(SESSIONS_DIR, file);
-        const data = JSON.parse(fs.readFileSync(full, 'utf8'));
+        const data = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
         sessions.push({
           id: data.id,
           name: data.name || 'Untitled Session',
@@ -85,55 +106,43 @@ function listLocalSessions() {
           createdAt: data.createdAt,
           updatedAt: data.updatedAt
         });
-      } catch (e) {
-        console.error('[DB-Local] Error reading session:', file, e);
-      }
+      } catch (e) { console.error('[DB-Local] Error reading session:', file, e); }
     }
     return sessions.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-  } catch (err) {
-    return [];
-  }
+  } catch (err) { return []; }
 }
 
-function getLocalSession(id) {
-  ensureLocalDirs();
+function getLocalSession(userId = 'legacy', id) {
+  ensureUserDirs(userId);
   try {
-    const safeId = path.basename(id);
-    const filePath = path.join(SESSIONS_DIR, `${safeId}.json`);
+    const safeId   = path.basename(id);
+    const filePath = path.join(userSessionsDir(userId), `${safeId}.json`);
     if (!fs.existsSync(filePath)) return null;
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (err) {
-    return null;
-  }
+  } catch (err) { return null; }
 }
 
-function saveLocalSession(sessionData) {
+function saveLocalSession(userId = 'legacy', sessionData) {
   try {
-    ensureLocalDirs();
+    ensureUserDirs(userId);
     const id = sessionData.id || `sess_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
     sessionData.id = id;
+    sessionData.userId = userId;
     sessionData.updatedAt = new Date().toISOString();
     if (!sessionData.createdAt) sessionData.createdAt = sessionData.updatedAt;
     const safeId = path.basename(id);
-    fs.writeFileSync(path.join(SESSIONS_DIR, `${safeId}.json`), JSON.stringify(sessionData, null, 2), 'utf8');
-  } catch (err) {
-    // Read-only filesystem on Vercel
-  }
+    fs.writeFileSync(path.join(userSessionsDir(userId), `${safeId}.json`), JSON.stringify(sessionData, null, 2), 'utf8');
+  } catch (err) { /* read-only */ }
   return sessionData;
 }
 
-function deleteLocalSession(id) {
+function deleteLocalSession(userId = 'legacy', id) {
   try {
-    ensureLocalDirs();
-    const safeId = path.basename(id);
-    const filePath = path.join(SESSIONS_DIR, `${safeId}.json`);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      return true;
-    }
-  } catch (err) {
-    // Read-only filesystem on Vercel
-  }
+    ensureUserDirs(userId);
+    const safeId   = path.basename(id);
+    const filePath = path.join(userSessionsDir(userId), `${safeId}.json`);
+    if (fs.existsSync(filePath)) { fs.unlinkSync(filePath); return true; }
+  } catch (err) { /* read-only */ }
   return false;
 }
 
@@ -156,42 +165,83 @@ export async function initDatabase() {
       authToken: authToken
     });
 
-    // Create tables
+    // ── Users table (multi-tenant) ──
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS users (
+        id         TEXT PRIMARY KEY,
+        mobile     TEXT NOT NULL UNIQUE,
+        name       TEXT DEFAULT '',
+        email      TEXT DEFAULT '',
+        created_at TEXT,
+        last_login TEXT
+      );
+    `);
+
+    // ── OTP requests table (short-lived tokens) ──
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS otp_requests (
+        id         TEXT PRIMARY KEY,
+        mobile     TEXT NOT NULL,
+        otp_hash   TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        attempts   INTEGER DEFAULT 0,
+        verified   INTEGER DEFAULT 0
+      );
+    `);
+
+    // ── SKU Groups (with user_id for multi-tenancy) ──
     await client.execute(`
       CREATE TABLE IF NOT EXISTS sku_groups (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL UNIQUE,
+        id       TEXT PRIMARY KEY,
+        user_id  TEXT NOT NULL DEFAULT 'legacy',
+        name     TEXT NOT NULL,
         raw_cost REAL DEFAULT 0,
-        skus TEXT NOT NULL,
+        skus     TEXT NOT NULL,
         created_at TEXT,
         updated_at TEXT
       );
     `);
 
+    // ── SKU Costs (with user_id) ──
     await client.execute(`
       CREATE TABLE IF NOT EXISTS sku_costs (
-        sku TEXT PRIMARY KEY,
-        cost REAL NOT NULL,
-        updated_at TEXT
+        sku        TEXT NOT NULL,
+        user_id    TEXT NOT NULL DEFAULT 'legacy',
+        cost       REAL NOT NULL,
+        updated_at TEXT,
+        PRIMARY KEY (sku, user_id)
       );
     `);
 
+    // ── Sessions (with user_id) ──
     await client.execute(`
       CREATE TABLE IF NOT EXISTS sessions (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        month TEXT,
-        notes TEXT,
-        order_count INTEGER DEFAULT 0,
-        file_count INTEGER DEFAULT 0,
+        id           TEXT PRIMARY KEY,
+        user_id      TEXT NOT NULL DEFAULT 'legacy',
+        name         TEXT NOT NULL,
+        month        TEXT,
+        notes        TEXT,
+        order_count  INTEGER DEFAULT 0,
+        file_count   INTEGER DEFAULT 0,
         net_settlement REAL DEFAULT 0,
-        net_profit REAL DEFAULT 0,
-        return_rate REAL DEFAULT 0,
-        data_json TEXT,
-        created_at TEXT,
-        updated_at TEXT
+        net_profit   REAL DEFAULT 0,
+        return_rate  REAL DEFAULT 0,
+        data_json    TEXT,
+        created_at   TEXT,
+        updated_at   TEXT
       );
     `);
+
+    // ── Safe column migration for existing deployments ──
+    // Adds user_id column to tables created before multi-tenant support
+    const migrations = [
+      `ALTER TABLE sku_groups ADD COLUMN user_id TEXT NOT NULL DEFAULT 'legacy'`,
+      `ALTER TABLE sku_costs  ADD COLUMN user_id TEXT NOT NULL DEFAULT 'legacy'`,
+      `ALTER TABLE sessions   ADD COLUMN user_id TEXT NOT NULL DEFAULT 'legacy'`,
+    ];
+    for (const sql of migrations) {
+      try { await client.execute(sql); } catch (e) { /* column already exists */ }
+    }
 
     console.log('[Database] Turso tables verified/created successfully.');
 
@@ -304,16 +354,22 @@ async function autoMigrateIfEmpty() {
 //  SKU GROUPS & COSTING DB OPERATIONS
 // ═════════════════════════════════════════════════════
 
-export async function dbGetSkuData() {
+export async function dbGetSkuData(userId = 'legacy') {
   await initDatabase();
 
   if (!client) {
-    return readLocalSkuData();
+    return readLocalSkuData(userId);
   }
 
   try {
-    const groupsRes = await client.execute('SELECT * FROM sku_groups ORDER BY created_at ASC');
-    const costsRes = await client.execute('SELECT * FROM sku_costs');
+    const groupsRes = await client.execute({
+      sql: 'SELECT * FROM sku_groups WHERE user_id = ? ORDER BY created_at ASC',
+      args: [userId]
+    });
+    const costsRes = await client.execute({
+      sql: 'SELECT * FROM sku_costs WHERE user_id = ?',
+      args: [userId]
+    });
 
     const groups = groupsRes.rows.map(row => ({
       id: row.id,
@@ -325,21 +381,17 @@ export async function dbGetSkuData() {
     }));
 
     const skuCosts = {};
-    costsRes.rows.forEach(row => {
-      skuCosts[row.sku] = Number(row.cost);
-    });
+    costsRes.rows.forEach(row => { skuCosts[row.sku] = Number(row.cost); });
 
-    // Mirror to local disk as instant cache
-    writeLocalSkuData({ groups, skuCosts });
-
+    writeLocalSkuData(userId, { groups, skuCosts });
     return { groups, skuCosts };
   } catch (err) {
     console.error('[Database] Error reading SKU data from Turso:', err);
-    return readLocalSkuData();
+    return readLocalSkuData(userId);
   }
 }
 
-export async function dbCreateSkuGroup({ name, rawCost = 0, skus = [] }) {
+export async function dbCreateSkuGroup({ name, rawCost = 0, skus = [], userId = 'legacy' }) {
   await initDatabase();
   const id = `grp_${Date.now()}`;
   const now = new Date().toISOString();
@@ -347,7 +399,7 @@ export async function dbCreateSkuGroup({ name, rawCost = 0, skus = [] }) {
   const uniqueSkus = [...new Set(skus)];
 
   if (!client) {
-    const current = readLocalSkuData();
+    const current = readLocalSkuData(userId);
     if (current.groups.some(g => g.name.toLowerCase() === name.toLowerCase())) {
       throw new Error('A group with this name already exists');
     }
@@ -355,42 +407,34 @@ export async function dbCreateSkuGroup({ name, rawCost = 0, skus = [] }) {
     current.groups.push(newGroup);
     current.skuCosts = current.skuCosts || {};
     uniqueSkus.forEach(s => { current.skuCosts[s] = numCost; });
-    writeLocalSkuData(current);
+    writeLocalSkuData(userId, current);
     return newGroup;
   }
 
   try {
-    // Check name collision
     const existing = await client.execute({
-      sql: 'SELECT id FROM sku_groups WHERE LOWER(name) = LOWER(?)',
-      args: [name]
+      sql: 'SELECT id FROM sku_groups WHERE user_id = ? AND LOWER(name) = LOWER(?)',
+      args: [userId, name]
     });
-    if (existing.rows.length > 0) {
-      throw new Error('A group with this name already exists');
-    }
+    if (existing.rows.length > 0) throw new Error('A group with this name already exists');
 
     await client.execute({
-      sql: `INSERT INTO sku_groups (id, name, raw_cost, skus, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [id, name, numCost, JSON.stringify(uniqueSkus), now, now]
+      sql: `INSERT INTO sku_groups (id, user_id, name, raw_cost, skus, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      args: [id, userId, name, numCost, JSON.stringify(uniqueSkus), now, now]
     });
-
-    // Update sku costs in batch
     for (const sku of uniqueSkus) {
       await client.execute({
-        sql: `INSERT OR REPLACE INTO sku_costs (sku, cost, updated_at) VALUES (?, ?, ?)`,
-        args: [sku, numCost, now]
+        sql: `INSERT OR REPLACE INTO sku_costs (sku, user_id, cost, updated_at) VALUES (?, ?, ?, ?)`,
+        args: [sku, userId, numCost, now]
       });
     }
 
     const newGroup = { id, name, rawCost: numCost, skus: uniqueSkus, createdAt: now, updatedAt: now };
-    
-    // Sync local disk backup
-    const local = readLocalSkuData();
+    const local = readLocalSkuData(userId);
     local.groups.push(newGroup);
     local.skuCosts = local.skuCosts || {};
     uniqueSkus.forEach(s => { local.skuCosts[s] = numCost; });
-    writeLocalSkuData(local);
-
+    writeLocalSkuData(userId, local);
     return newGroup;
   } catch (err) {
     console.error('[Database] Error creating group in Turso:', err);
@@ -398,19 +442,18 @@ export async function dbCreateSkuGroup({ name, rawCost = 0, skus = [] }) {
   }
 }
 
-export async function dbUpdateSkuGroup(id, updates) {
+export async function dbUpdateSkuGroup(id, updates, userId = 'legacy') {
   await initDatabase();
   const now = new Date().toISOString();
 
   if (!client) {
-    const current = readLocalSkuData();
+    const current = readLocalSkuData(userId);
     const group = current.groups.find(g => g.id === id);
     if (!group) throw new Error('Group not found');
     if (updates.name && updates.name.trim() !== group.name) {
       const newName = updates.name.trim();
-      if (current.groups.some(g => g.id !== id && g.name.toLowerCase() === newName.toLowerCase())) {
+      if (current.groups.some(g => g.id !== id && g.name.toLowerCase() === newName.toLowerCase()))
         throw new Error('A group with this name already exists');
-      }
       group.name = newName;
     }
     if (updates.rawCost !== undefined) {
@@ -424,65 +467,53 @@ export async function dbUpdateSkuGroup(id, updates) {
       group.skus = newSkus;
       newSkus.forEach(sku => { current.skuCosts[sku] = group.rawCost; });
     }
-    writeLocalSkuData(current);
+    writeLocalSkuData(userId, current);
     return group;
   }
 
   try {
     const groupRes = await client.execute({
-      sql: 'SELECT * FROM sku_groups WHERE id = ?',
-      args: [id]
+      sql: 'SELECT * FROM sku_groups WHERE id = ? AND user_id = ?',
+      args: [id, userId]
     });
     if (groupRes.rows.length === 0) throw new Error('Group not found');
-
     const currentGroup = {
       ...groupRes.rows[0],
       rawCost: Number(groupRes.rows[0].raw_cost),
       skus: JSON.parse(groupRes.rows[0].skus || '[]')
     };
-
     let newName = currentGroup.name;
     if (updates.name && updates.name.trim() !== currentGroup.name) {
       newName = updates.name.trim();
       const dup = await client.execute({
-        sql: 'SELECT id FROM sku_groups WHERE id != ? AND LOWER(name) = LOWER(?)',
-        args: [id, newName]
+        sql: 'SELECT id FROM sku_groups WHERE user_id = ? AND id != ? AND LOWER(name) = LOWER(?)',
+        args: [userId, id, newName]
       });
       if (dup.rows.length > 0) throw new Error('A group with this name already exists');
     }
-
     const newCost = updates.rawCost !== undefined ? (parseFloat(updates.rawCost) || 0) : currentGroup.rawCost;
     const newSkus = Array.isArray(updates.skus) ? [...new Set(updates.skus)] : currentGroup.skus;
-
     await client.execute({
-      sql: 'UPDATE sku_groups SET name = ?, raw_cost = ?, skus = ?, updated_at = ? WHERE id = ?',
-      args: [newName, newCost, JSON.stringify(newSkus), now, id]
+      sql: 'UPDATE sku_groups SET name = ?, raw_cost = ?, skus = ?, updated_at = ? WHERE id = ? AND user_id = ?',
+      args: [newName, newCost, JSON.stringify(newSkus), now, id, userId]
     });
-
-    // Remove deleted SKUs costs
     const removedSkus = currentGroup.skus.filter(s => !newSkus.includes(s));
     for (const s of removedSkus) {
-      await client.execute({ sql: 'DELETE FROM sku_costs WHERE sku = ?', args: [s] });
+      await client.execute({ sql: 'DELETE FROM sku_costs WHERE sku = ? AND user_id = ?', args: [s, userId] });
     }
-
-    // Set updated SKUs costs
     for (const s of newSkus) {
       await client.execute({
-        sql: 'INSERT OR REPLACE INTO sku_costs (sku, cost, updated_at) VALUES (?, ?, ?)',
-        args: [s, newCost, now]
+        sql: 'INSERT OR REPLACE INTO sku_costs (sku, user_id, cost, updated_at) VALUES (?, ?, ?, ?)',
+        args: [s, userId, newCost, now]
       });
     }
-
     const updated = { id, name: newName, rawCost: newCost, skus: newSkus, updatedAt: now };
-
-    // Update local cache
-    const local = readLocalSkuData();
+    const local = readLocalSkuData(userId);
     const gIdx = local.groups.findIndex(g => g.id === id);
     if (gIdx !== -1) local.groups[gIdx] = updated;
     removedSkus.forEach(s => delete local.skuCosts[s]);
     newSkus.forEach(s => { local.skuCosts[s] = newCost; });
-    writeLocalSkuData(local);
-
+    writeLocalSkuData(userId, local);
     return updated;
   } catch (err) {
     console.error('[Database] Error updating group in Turso:', err);
@@ -490,39 +521,31 @@ export async function dbUpdateSkuGroup(id, updates) {
   }
 }
 
-export async function dbDeleteSkuGroup(id) {
+export async function dbDeleteSkuGroup(id, userId = 'legacy') {
   await initDatabase();
 
   if (!client) {
-    const current = readLocalSkuData();
+    const current = readLocalSkuData(userId);
     const idx = current.groups.findIndex(g => g.id === id);
     if (idx === -1) throw new Error('Group not found');
     const [deleted] = current.groups.splice(idx, 1);
     (deleted.skus || []).forEach(sku => delete current.skuCosts[sku]);
-    writeLocalSkuData(current);
+    writeLocalSkuData(userId, current);
     return deleted;
   }
 
   try {
-    const groupRes = await client.execute({ sql: 'SELECT * FROM sku_groups WHERE id = ?', args: [id] });
+    const groupRes = await client.execute({ sql: 'SELECT * FROM sku_groups WHERE id = ? AND user_id = ?', args: [id, userId] });
     if (groupRes.rows.length === 0) throw new Error('Group not found');
-
-    const group = {
-      ...groupRes.rows[0],
-      skus: JSON.parse(groupRes.rows[0].skus || '[]')
-    };
-
-    await client.execute({ sql: 'DELETE FROM sku_groups WHERE id = ?', args: [id] });
+    const group = { ...groupRes.rows[0], skus: JSON.parse(groupRes.rows[0].skus || '[]') };
+    await client.execute({ sql: 'DELETE FROM sku_groups WHERE id = ? AND user_id = ?', args: [id, userId] });
     for (const sku of group.skus) {
-      await client.execute({ sql: 'DELETE FROM sku_costs WHERE sku = ?', args: [sku] });
+      await client.execute({ sql: 'DELETE FROM sku_costs WHERE sku = ? AND user_id = ?', args: [sku, userId] });
     }
-
-    // Mirror to local disk
-    const local = readLocalSkuData();
+    const local = readLocalSkuData(userId);
     local.groups = local.groups.filter(g => g.id !== id);
     group.skus.forEach(sku => delete local.skuCosts[sku]);
-    writeLocalSkuData(local);
-
+    writeLocalSkuData(userId, local);
     return group;
   } catch (err) {
     console.error('[Database] Error deleting group in Turso:', err);
@@ -530,15 +553,15 @@ export async function dbDeleteSkuGroup(id) {
   }
 }
 
-export async function dbBulkSyncSku({ groups, skuCosts }) {
+export async function dbBulkSyncSku({ groups, skuCosts, userId = 'legacy' }) {
   await initDatabase();
   const now = new Date().toISOString();
 
   if (!client) {
-    const current = readLocalSkuData();
+    const current = readLocalSkuData(userId);
     if (Array.isArray(groups)) current.groups = groups;
     if (skuCosts) current.skuCosts = { ...(current.skuCosts || {}), ...skuCosts };
-    writeLocalSkuData(current);
+    writeLocalSkuData(userId, current);
     return current;
   }
 
@@ -546,43 +569,33 @@ export async function dbBulkSyncSku({ groups, skuCosts }) {
     if (Array.isArray(groups)) {
       for (const g of groups) {
         await client.execute({
-          sql: `INSERT OR REPLACE INTO sku_groups (id, name, raw_cost, skus, created_at, updated_at) 
-                VALUES (?, ?, ?, ?, ?, ?)`,
-          args: [
-            g.id || `grp_${Date.now()}`,
-            g.name,
-            parseFloat(g.rawCost) || 0,
-            JSON.stringify(g.skus || []),
-            g.createdAt || now,
-            now
-          ]
+          sql: `INSERT OR REPLACE INTO sku_groups (id, user_id, name, raw_cost, skus, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          args: [g.id || `grp_${Date.now()}`, userId, g.name, parseFloat(g.rawCost) || 0, JSON.stringify(g.skus || []), g.createdAt || now, now]
         });
       }
     }
-
     if (skuCosts && typeof skuCosts === 'object') {
       for (const [sku, cost] of Object.entries(skuCosts)) {
         await client.execute({
-          sql: `INSERT OR REPLACE INTO sku_costs (sku, cost, updated_at) VALUES (?, ?, ?)`,
-          args: [sku, parseFloat(cost) || 0, now]
+          sql: `INSERT OR REPLACE INTO sku_costs (sku, user_id, cost, updated_at) VALUES (?, ?, ?, ?)`,
+          args: [sku, userId, parseFloat(cost) || 0, now]
         });
       }
     }
-
-    return await dbGetSkuData();
+    return await dbGetSkuData(userId);
   } catch (err) {
     console.error('[Database] Error in bulk sync:', err);
     throw err;
   }
 }
 
-export async function dbUpdateSkuCost(sku, cost) {
+export async function dbUpdateSkuCost(sku, cost, userId = 'legacy') {
   await initDatabase();
   const numCost = parseFloat(cost) || 0;
   const now = new Date().toISOString();
 
   if (!client) {
-    const current = readLocalSkuData();
+    const current = readLocalSkuData(userId);
     current.skuCosts = current.skuCosts || {};
     current.skuCosts[sku] = numCost;
     const group = current.groups.find(g => (g.skus || []).includes(sku));
@@ -590,34 +603,34 @@ export async function dbUpdateSkuCost(sku, cost) {
       group.rawCost = numCost;
       group.skus.forEach(s => { current.skuCosts[s] = numCost; });
     }
-    writeLocalSkuData(current);
+    writeLocalSkuData(userId, current);
     return { sku, cost: numCost };
   }
 
   try {
     await client.execute({
-      sql: 'INSERT OR REPLACE INTO sku_costs (sku, cost, updated_at) VALUES (?, ?, ?)',
-      args: [sku, numCost, now]
+      sql: 'INSERT OR REPLACE INTO sku_costs (sku, user_id, cost, updated_at) VALUES (?, ?, ?, ?)',
+      args: [sku, userId, numCost, now]
     });
-
-    // Update parent group if exists
-    const groupsRes = await client.execute('SELECT * FROM sku_groups');
+    const groupsRes = await client.execute({
+      sql: 'SELECT * FROM sku_groups WHERE user_id = ?',
+      args: [userId]
+    });
     for (const row of groupsRes.rows) {
       const skus = JSON.parse(row.skus || '[]');
       if (skus.includes(sku)) {
         await client.execute({
-          sql: 'UPDATE sku_groups SET raw_cost = ?, updated_at = ? WHERE id = ?',
-          args: [numCost, now, row.id]
+          sql: 'UPDATE sku_groups SET raw_cost = ?, updated_at = ? WHERE id = ? AND user_id = ?',
+          args: [numCost, now, row.id, userId]
         });
         for (const s of skus) {
           await client.execute({
-            sql: 'INSERT OR REPLACE INTO sku_costs (sku, cost, updated_at) VALUES (?, ?, ?)',
-            args: [s, numCost, now]
+            sql: 'INSERT OR REPLACE INTO sku_costs (sku, user_id, cost, updated_at) VALUES (?, ?, ?, ?)',
+            args: [s, userId, numCost, now]
           });
         }
       }
     }
-
     return { sku, cost: numCost };
   } catch (err) {
     console.error('[Database] Error updating SKU cost in Turso:', err);
@@ -629,83 +642,64 @@ export async function dbUpdateSkuCost(sku, cost) {
 //  MONTHLY SESSIONS DB OPERATIONS
 // ═════════════════════════════════════════════════════
 
-export async function dbListSessions() {
+export async function dbListSessions(userId = 'legacy') {
   await initDatabase();
 
   if (!client) {
-    return listLocalSessions();
-  }
-
-  try {
-    const res = await client.execute(`
-      SELECT id, name, month, notes, order_count, file_count, net_settlement, net_profit, return_rate, created_at, updated_at 
-      FROM sessions 
-      ORDER BY created_at DESC
-    `);
-
-    return res.rows.map(row => ({
-      id: row.id,
-      name: row.name,
-      month: row.month || '',
-      notes: row.notes || '',
-      orderCount: Number(row.order_count || 0),
-      fileCount: Number(row.file_count || 0),
-      netSettlement: Number(row.net_settlement || 0),
-      netProfit: Number(row.net_profit || 0),
-      returnRate: Number(row.return_rate || 0),
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
-    }));
-  } catch (err) {
-    console.error('[Database] Error listing sessions from Turso:', err);
-    return listLocalSessions();
-  }
-}
-
-export async function dbGetSession(id) {
-  await initDatabase();
-
-  if (!client) {
-    return getLocalSession(id);
+    return listLocalSessions(userId);
   }
 
   try {
     const res = await client.execute({
-      sql: 'SELECT * FROM sessions WHERE id = ?',
-      args: [id]
+      sql: `SELECT id, name, month, notes, order_count, file_count, net_settlement, net_profit, return_rate, created_at, updated_at 
+            FROM sessions WHERE user_id = ? ORDER BY created_at DESC`,
+      args: [userId]
     });
+    return res.rows.map(row => ({
+      id: row.id, name: row.name, month: row.month || '', notes: row.notes || '',
+      orderCount: Number(row.order_count || 0), fileCount: Number(row.file_count || 0),
+      netSettlement: Number(row.net_settlement || 0), netProfit: Number(row.net_profit || 0),
+      returnRate: Number(row.return_rate || 0), createdAt: row.created_at, updatedAt: row.updated_at
+    }));
+  } catch (err) {
+    console.error('[Database] Error listing sessions from Turso:', err);
+    return listLocalSessions(userId);
+  }
+}
 
+export async function dbGetSession(id, userId = 'legacy') {
+  await initDatabase();
+
+  if (!client) {
+    return getLocalSession(userId, id);
+  }
+
+  try {
+    const res = await client.execute({
+      sql: 'SELECT * FROM sessions WHERE id = ? AND user_id = ?',
+      args: [id, userId]
+    });
     if (res.rows.length === 0) return null;
     const row = res.rows[0];
     const data = row.data_json ? JSON.parse(row.data_json) : {};
-
     return {
-      id: row.id,
-      name: row.name,
-      month: row.month || '',
-      notes: row.notes || '',
-      orderCount: Number(row.order_count || 0),
-      fileCount: Number(row.file_count || 0),
-      netSettlement: Number(row.net_settlement || 0),
-      netProfit: Number(row.net_profit || 0),
+      id: row.id, name: row.name, month: row.month || '', notes: row.notes || '',
+      orderCount: Number(row.order_count || 0), fileCount: Number(row.file_count || 0),
+      netSettlement: Number(row.net_settlement || 0), netProfit: Number(row.net_profit || 0),
       returnRate: Number(row.return_rate || 0),
-      isCompressed: !!data.isCompressed,
-      compressedData: data.compressedData || null,
-      orders: data.orders || [],
-      ads: data.ads || [],
-      parsedFiles: data.parsedFiles || [],
-      dateFilter: data.dateFilter || null,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
+      isCompressed: !!data.isCompressed, compressedData: data.compressedData || null,
+      orders: data.orders || [], ads: data.ads || [], parsedFiles: data.parsedFiles || [],
+      dateFilter: data.dateFilter || null, createdAt: row.created_at, updatedAt: row.updated_at
     };
   } catch (err) {
     console.error('[Database] Error getting session from Turso:', err);
-    return getLocalSession(id);
+    return getLocalSession(userId, id);
   }
 }
 
 export async function dbSaveSession(sessionData) {
   await initDatabase();
+  const userId = sessionData.userId || 'legacy';
   const id = sessionData.id || `sess_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
   const now = new Date().toISOString();
   const createdAt = sessionData.createdAt || now;
@@ -723,34 +717,26 @@ export async function dbSaveSession(sessionData) {
     dateFilter: sessionData.isCompressed ? null : (sessionData.dateFilter || null)
   });
 
-  // Always mirror to local backup
-  saveLocalSession(sessionData);
+  // Always mirror to local per-user backup
+  saveLocalSession(userId, sessionData);
 
-  if (!client) {
-    return sessionData;
-  }
+  if (!client) return sessionData;
 
   try {
     await client.execute({
       sql: `INSERT OR REPLACE INTO sessions 
-            (id, name, month, notes, order_count, file_count, net_settlement, net_profit, return_rate, data_json, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            (id, user_id, name, month, notes, order_count, file_count, net_settlement, net_profit, return_rate, data_json, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
-        id,
+        id, userId,
         sessionData.name || 'Untitled Session',
-        sessionData.month || '',
-        sessionData.notes || '',
+        sessionData.month || '', sessionData.notes || '',
         sessionData.orderCount ?? (sessionData.orders ? sessionData.orders.length : 0),
         sessionData.fileCount ?? (sessionData.parsedFiles ? sessionData.parsedFiles.length : 0),
-        sessionData.netSettlement || 0,
-        sessionData.netProfit || 0,
-        sessionData.returnRate || 0,
-        dataJson,
-        createdAt,
-        now
+        sessionData.netSettlement || 0, sessionData.netProfit || 0, sessionData.returnRate || 0,
+        dataJson, createdAt, now
       ]
     });
-
     return sessionData;
   } catch (err) {
     console.error('[Database] Error saving session to Turso:', err);
@@ -775,23 +761,296 @@ export async function dbUpdateSession(id, updates) {
   return await dbSaveSession(merged);
 }
 
-export async function dbDeleteSession(id) {
+export async function dbDeleteSession(id, userId = 'legacy') {
   await initDatabase();
 
-  deleteLocalSession(id);
+  deleteLocalSession(userId, id);
 
-  if (!client) {
-    return true;
-  }
+  if (!client) return true;
 
   try {
     await client.execute({
-      sql: 'DELETE FROM sessions WHERE id = ?',
-      args: [id]
+      sql: 'DELETE FROM sessions WHERE id = ? AND user_id = ?',
+      args: [id, userId]
     });
     return true;
   } catch (err) {
     console.error('[Database] Error deleting session from Turso:', err);
     return true;
   }
+}
+
+// ═════════════════════════════════════════════════════
+//  USER MANAGEMENT (MULTI-TENANT AUTH)
+// ═════════════════════════════════════════════════════
+
+/**
+ * Find user by mobile number
+ */
+export async function dbGetUserByMobile(mobile) {
+  await initDatabase();
+  if (!client) return _localGetUserBy('mobile', mobile);
+  try {
+    const res = await client.execute({ sql: 'SELECT * FROM users WHERE mobile = ?', args: [mobile] });
+    return res.rows.length ? _rowToUser(res.rows[0]) : null;
+  } catch (err) {
+    console.error('[Database] Error fetching user by mobile:', err);
+    return null;
+  }
+}
+
+/**
+ * Find user by email address
+ */
+export async function dbGetUserByEmail(email) {
+  await initDatabase();
+  if (!client) return _localGetUserBy('email', email);
+  try {
+    const res = await client.execute({ sql: 'SELECT * FROM users WHERE email = ?', args: [email] });
+    return res.rows.length ? _rowToUser(res.rows[0]) : null;
+  } catch (err) {
+    console.error('[Database] Error fetching user by email:', err);
+    return null;
+  }
+}
+
+/**
+ * Find user by ID
+ */
+export async function dbGetUserById(id) {
+  await initDatabase();
+  if (!client) return _localGetUserBy('id', id);
+  try {
+    const res = await client.execute({ sql: 'SELECT * FROM users WHERE id = ?', args: [id] });
+    return res.rows.length ? _rowToUser(res.rows[0]) : null;
+  } catch (err) {
+    console.error('[Database] Error fetching user by id:', err);
+    return null;
+  }
+}
+
+/**
+ * Create a new user (first login via mobile or email)
+ * @param {{ mobile?: string, email?: string, name?: string }}
+ */
+export async function dbCreateUser({ mobile = '', email = '', name = '' }) {
+  await initDatabase();
+  const id = `usr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  const now = new Date().toISOString();
+
+  if (!client) {
+    const user = { id, mobile, name, email, created_at: now, last_login: now };
+    _localSaveUser(user);
+    return _rowToUser(user);
+  }
+  try {
+    await client.execute({
+      sql: `INSERT INTO users (id, mobile, name, email, created_at, last_login) VALUES (?, ?, ?, ?, ?, ?)`,
+      args: [id, mobile || '', email || '', name || '', now, now]
+    });
+    return { id, mobile, email, name, createdAt: now, lastLogin: now };
+  } catch (err) {
+    console.error('[Database] Error creating user:', err);
+    throw err;
+  }
+}
+
+/**
+ * Update user's name, email, mobile, and/or last_login
+ */
+export async function dbUpdateUser(id, { name, email, mobile, lastLogin }) {
+  await initDatabase();
+  const now = new Date().toISOString();
+
+  if (!client) {
+    // Only pass fields that are actually defined — never overwrite with undefined
+    const safeUpdates = {};
+    if (name   !== undefined) safeUpdates.name   = name;
+    if (email  !== undefined) safeUpdates.email  = email;
+    if (mobile !== undefined) safeUpdates.mobile = mobile;
+    safeUpdates.last_login = lastLogin || now;
+    return _localUpdateUser(id, safeUpdates);
+  }
+  try {
+    const sets = [];
+    const args = [];
+    if (name   !== undefined) { sets.push('name = ?');   args.push(name); }
+    if (email  !== undefined) { sets.push('email = ?');  args.push(email); }
+    if (mobile !== undefined) { sets.push('mobile = ?'); args.push(mobile); }
+    sets.push('last_login = ?');
+    args.push(lastLogin || now);
+    args.push(id);
+    await client.execute({ sql: `UPDATE users SET ${sets.join(', ')} WHERE id = ?`, args });
+    return dbGetUserById(id);
+  } catch (err) {
+    console.error('[Database] Error updating user:', err);
+    throw err;
+  }
+}
+
+// ═════════════════════════════════════════════════════
+//  OTP MANAGEMENT
+// ═════════════════════════════════════════════════════
+
+/**
+ * Save a new OTP request (invalidates previous ones for this mobile)
+ */
+export async function dbSaveOtp({ mobile, otpHash, expiresAt }) {
+  await initDatabase();
+  const id = `otp_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+
+  if (!client) {
+    // In-memory fallback for local dev
+    if (!global._localOtps) global._localOtps = new Map();
+    global._localOtps.set(mobile, { id, mobile, otpHash, expiresAt, attempts: 0, verified: false });
+    return id;
+  }
+
+  try {
+    // Invalidate old OTPs for this mobile
+    await client.execute({
+      sql: `UPDATE otp_requests SET verified = 1 WHERE mobile = ? AND verified = 0`,
+      args: [mobile]
+    });
+    // Insert new OTP
+    await client.execute({
+      sql: `INSERT INTO otp_requests (id, mobile, otp_hash, expires_at, attempts, verified) VALUES (?, ?, ?, ?, 0, 0)`,
+      args: [id, mobile, otpHash, expiresAt]
+    });
+    return id;
+  } catch (err) {
+    console.error('[Database] Error saving OTP:', err);
+    throw err;
+  }
+}
+
+/**
+ * Get the latest pending OTP for a mobile number
+ */
+export async function dbGetPendingOtp(mobile) {
+  await initDatabase();
+
+  if (!client) {
+    if (!global._localOtps) return null;
+    const rec = global._localOtps.get(mobile);
+    if (!rec || rec.verified) return null;
+    return { id: rec.id, otpHash: rec.otpHash, expiresAt: rec.expiresAt, attempts: rec.attempts };
+  }
+
+  try {
+    const res = await client.execute({
+      sql: `SELECT * FROM otp_requests WHERE mobile = ? AND verified = 0 ORDER BY expires_at DESC LIMIT 1`,
+      args: [mobile]
+    });
+    if (!res.rows.length) return null;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      otpHash: row.otp_hash,
+      expiresAt: row.expires_at,
+      attempts: Number(row.attempts)
+    };
+  } catch (err) {
+    console.error('[Database] Error fetching OTP:', err);
+    return null;
+  }
+}
+
+/**
+ * Increment OTP attempt count
+ */
+export async function dbIncrementOtpAttempts(otpId) {
+  await initDatabase();
+  if (!client) {
+    if (global._localOtps) {
+      for (const [, rec] of global._localOtps) {
+        if (rec.id === otpId) { rec.attempts += 1; break; }
+      }
+    }
+    return;
+  }
+  try {
+    await client.execute({
+      sql: `UPDATE otp_requests SET attempts = attempts + 1 WHERE id = ?`,
+      args: [otpId]
+    });
+  } catch (err) {
+    console.error('[Database] Error incrementing OTP attempts:', err);
+  }
+}
+
+/**
+ * Mark an OTP as used/verified
+ */
+export async function dbMarkOtpVerified(otpId) {
+  await initDatabase();
+  if (!client) {
+    if (global._localOtps) {
+      for (const [, rec] of global._localOtps) {
+        if (rec.id === otpId) { rec.verified = true; break; }
+      }
+    }
+    return;
+  }
+  try {
+    await client.execute({
+      sql: `UPDATE otp_requests SET verified = 1 WHERE id = ?`,
+      args: [otpId]
+    });
+  } catch (err) {
+    console.error('[Database] Error marking OTP verified:', err);
+  }
+}
+
+// ── Local file fallback helpers for users (dev only) ──
+const LOCAL_USERS_FILE = path.resolve(__dirname, '../data/users.json');
+
+function _readLocalUsers() {
+  try {
+    if (fs.existsSync(LOCAL_USERS_FILE)) return JSON.parse(fs.readFileSync(LOCAL_USERS_FILE, 'utf8'));
+  } catch (e) {}
+  return {};
+}
+
+function _writeLocalUsers(users) {
+  try {
+    ensureLocalDirs();
+    fs.writeFileSync(LOCAL_USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+  } catch (e) {}
+}
+
+function _localGetUserBy(field, value) {
+  const users = _readLocalUsers();
+  const user = Object.values(users).find(u => u[field] === value);
+  return user ? _rowToUser(user) : null;
+}
+
+function _localSaveUser(user) {
+  const users = _readLocalUsers();
+  users[user.id] = user;
+  _writeLocalUsers(users);
+}
+
+function _localUpdateUser(id, updates) {
+  const users = _readLocalUsers();
+  if (users[id]) {
+    // Only merge fields that are explicitly set (skip undefined to prevent data loss)
+    for (const [key, val] of Object.entries(updates)) {
+      if (val !== undefined) users[id][key] = val;
+    }
+    _writeLocalUsers(users);
+    return _rowToUser(users[id]);
+  }
+  return null;
+}
+
+function _rowToUser(row) {
+  return {
+    id: row.id,
+    mobile: row.mobile || '',
+    name: row.name || '',
+    email: row.email || '',
+    createdAt: row.created_at,
+    lastLogin: row.last_login
+  };
 }

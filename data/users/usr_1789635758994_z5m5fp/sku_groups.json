@@ -1,0 +1,129 @@
+{
+  "groups": [
+    {
+      "id": "grp_1789636217922",
+      "name": "Anarkali",
+      "rawCost": 480,
+      "skus": [
+        "ANARK-LI002",
+        "ANARKALI",
+        "ANR-UPATAE-MAROON",
+        "Anarkali",
+        "GK-A N A R K L I - #1",
+        "MAROON ANARKALI"
+      ],
+      "createdAt": "2026-09-17T09:10:17.923Z"
+    },
+    {
+      "id": "grp_1789636256859",
+      "name": "Peach",
+      "rawCost": 430,
+      "skus": [
+        "2031287600",
+        "Art Silk Peach",
+        "Silk Blend Blue Gown V1",
+        "Silk Blend Blue Gown V2",
+        "Silk Blend Blue Gown V3",
+        "Silk Blend Pink Gown V1",
+        "Silk Blend Pink Gown V2",
+        "Silk Blend Pink Gown V3"
+      ],
+      "createdAt": "2026-09-17T09:10:56.859Z"
+    },
+    {
+      "id": "grp_1789636304273",
+      "name": "March",
+      "rawCost": 520,
+      "skus": [
+        "MAR-UPDATE-MAROON-2",
+        "MARCH GOWN GURUKRUPA #1",
+        "MRUN-MARCH 0001",
+        "SWadesh-GOWN #1",
+        "Swadesh Gown",
+        "Swadesh3Gown 3nd",
+        "march gown",
+        "march gown 2nd"
+      ],
+      "createdAt": "2026-09-17T09:11:44.273Z"
+    },
+    {
+      "id": "grp_1789636329266",
+      "name": "Monica",
+      "rawCost": 290,
+      "skus": [
+        "M O N I K A 0 2",
+        "M O N I K A 01",
+        "M O-N-I-K-A 04",
+        "MMOONNIIKA",
+        "MO-NI-KA-04",
+        "MONICA 15/6 #1",
+        "MONICA 15/6 #2",
+        "MONICA 15/6 #3",
+        "MONIKA",
+        "MOUNIK-A-05",
+        "Monika",
+        "PIN-K-MONI-KA-08",
+        "PINKMonikaNEW001"
+      ],
+      "createdAt": "2026-09-17T09:12:09.266Z"
+    },
+    {
+      "id": "grp_1789636366116",
+      "name": "Three Peace",
+      "rawCost": 290,
+      "skus": [
+        "BOTTAL-GREEN-RANGILA",
+        "BROWN-RANGILA",
+        "FENCY GOWN NEW PURPEL",
+        "MORPICH-RANGILA",
+        "RANGILA-V2-BOTTAL-GREEN",
+        "RANGILA-V2-BROWN"
+      ],
+      "createdAt": "2026-09-17T09:12:46.117Z"
+    }
+  ],
+  "skuCosts": {
+    "2031287600": 430,
+    "ANARK-LI002": 480,
+    "ANARKALI": 480,
+    "ANR-UPATAE-MAROON": 480,
+    "Anarkali": 480,
+    "GK-A N A R K L I - #1": 480,
+    "Art Silk Peach": 430,
+    "Silk Blend Blue Gown V1": 430,
+    "Silk Blend Blue Gown V2": 430,
+    "Silk Blend Blue Gown V3": 430,
+    "Silk Blend Pink Gown V1": 430,
+    "Silk Blend Pink Gown V2": 430,
+    "Silk Blend Pink Gown V3": 430,
+    "MAR-UPDATE-MAROON-2": 520,
+    "MRUN-MARCH 0001": 520,
+    "SWadesh-GOWN #1": 520,
+    "Swadesh Gown": 520,
+    "Swadesh3Gown 3nd": 520,
+    "march gown": 520,
+    "march gown 2nd": 520,
+    "M O N I K A 0 2": 290,
+    "M O N I K A 01": 290,
+    "M O-N-I-K-A 04": 290,
+    "MMOONNIIKA": 290,
+    "MO-NI-KA-04": 290,
+    "MONICA 15/6 #1": 290,
+    "MONICA 15/6 #2": 290,
+    "MONICA 15/6 #3": 290,
+    "MONIKA": 290,
+    "MOUNIK-A-05": 290,
+    "Monika": 290,
+    "PIN-K-MONI-KA-08": 290,
+    "PINKMonikaNEW001": 290,
+    "BOTTAL-GREEN-RANGILA": 290,
+    "BROWN-RANGILA": 290,
+    "MORPICH-RANGILA": 290,
+    "RANGILA-V2-BOTTAL-GREEN": 290,
+    "RANGILA-V2-BROWN": 290,
+    "MAROON ANARKALI": 480,
+    "MARCH GOWN GURUKRUPA #1": 520,
+    "FENCY GOWN NEW PURPEL": 290
+  },
+  "updatedAt": "2026-09-17T09:14:53.419Z"
+}

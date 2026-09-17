@@ -4,7 +4,7 @@
  * ══════════════════════════════════════════════════════════════════════
  */
 import { renderInfoPage, INFO_PAGES } from './infoPages.js';
-import { mountLabelSorter } from './labelSorter.js';
+import { mountLabelSorter, setMarketplace } from './labelSorter.js';
 
 // Feature Showcase Tab Definitions
 const FEATURE_TABS = {
@@ -178,37 +178,12 @@ function initLabelCropPage() {
 }
 
 /**
- * Login Screen Google Authentication Simulation
+ * Login Screen — OTP Auth (wired from js/auth.js after init)
+ * This function is intentionally minimal; full OTP flow is handled in js/auth.js
  */
 function initLoginScreen() {
-  const googleBtn = document.getElementById('sbGoogleLoginBtn');
-  const btnText = document.getElementById('sbGoogleBtnText');
-  if (!googleBtn) return;
-
-  googleBtn.addEventListener('click', () => {
-    if (googleBtn.classList.contains('loading')) return;
-    googleBtn.classList.add('loading');
-    if (btnText) btnText.textContent = 'Connecting Google Account...';
-
-    setTimeout(() => {
-      // Save authenticated seller state
-      const mockUser = {
-        name: 'Seller Account',
-        email: 'seller@fcanalytics.in',
-        loggedInAt: new Date().toISOString()
-      };
-      try {
-        localStorage.setItem('fc_user', JSON.stringify(mockUser));
-      } catch (e) {}
-
-      // Reset button
-      googleBtn.classList.remove('loading');
-      if (btnText) btnText.textContent = 'Continue with Google';
-
-      // Redirect into Dashboard workspace
-      navigateTo('dashboard');
-    }, 600);
-  });
+  // OTP auth flow is initialized in js/auth.js via window.fcAuthInit()
+  // This stub exists to prevent legacy code from breaking
 }
 
 /**
@@ -358,7 +333,33 @@ function initMobileMenu() {
 /**
  * Universal Client Routing between Landing Page, Info Pages, Login Screen, & App Dashboard
  */
-export function navigateTo(route) {
+/**
+ * Universal Client Routing — uses HTML5 History API (clean URLs, no hashes)
+ * URL map:
+ *   /              → Home (landing)
+ *   /dashboard     → Dashboard app (auth-guarded)
+ *   /login         → Login / OTP screen
+ *   /labels/meesho → Public label crop tool
+ *   /labels        → Label marketplace selector
+ *   /privacy       → Privacy policy
+ *   /terms         → Terms of service
+ *   /about         → About
+ *   /cookies       → Cookie policy
+ *   /disclaimer    → Disclaimer
+ *   /contact       → Contact
+ */
+export function closeMobileDrawer() {
+  document.body.classList.remove('sidebar-open');
+  document.body.style.removeProperty('overflow');
+  document.documentElement.style.removeProperty('overflow');
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.classList.remove('open');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (backdrop) backdrop.classList.remove('active');
+  document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+}
+
+export function navigateTo(route, { pushState: doPush = true } = {}) {
   const publicSite = document.getElementById('publicSite');
   const landingView = document.getElementById('landingView');
   const appLayout = document.getElementById('appLayout');
@@ -369,6 +370,11 @@ export function navigateTo(route) {
   const footer = document.querySelector('.sb-footer');
 
   if (!landingView || !appLayout) return;
+
+  // Clean up any mobile drawers or scroll locks when leaving app layout
+  if (route !== 'dashboard' && route !== 'app') {
+    closeMobileDrawer();
+  }
 
   // Normalize info page routes
   const infoMap = {
@@ -386,7 +392,20 @@ export function navigateTo(route) {
     'contact-us': 'contact'
   };
 
+  // Helper: push to browser history without hash
+  const pushCleanUrl = (path) => {
+    if (doPush && window.location.pathname !== path) {
+      history.pushState({ route }, '', path);
+    }
+  };
+
   if (route === 'dashboard' || route === 'app') {
+    // Auth guard: redirect to /login if not authenticated
+    const token = localStorage.getItem('fc_auth_token');
+    if (!token) {
+      navigateTo('login');
+      return;
+    }
     if (publicSite) publicSite.style.display = 'none';
     landingView.style.display = 'none';
     if (infoPageView) infoPageView.style.display = 'none';
@@ -394,11 +413,12 @@ export function navigateTo(route) {
     if (labelCropView) labelCropView.style.display = 'none';
     if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'none';
     appLayout.style.display = 'flex';
-    window.location.hash = 'dashboard';
+    pushCleanUrl('/dashboard');
     window.scrollTo({ top: 0, behavior: 'instant' });
-  } else if (route === 'label-sort-crop/meesho' || route === 'label-sort-crop-meesho' || route === 'labels/meesho' || route === 'label-sort' || route === 'labels') {
-    // Dedicated Meesho Label Crop & Sort Page (sellerbox.in/label-sort-crop/meesho — No Login Required)
+  } else if (route === 'label-sort-crop/flipkart' || route === 'label-sort-crop-flipkart' || route === 'labels/flipkart') {
+    // Public Flipkart Label Crop & Sort Page (no login required)
     mountLabelSorter('public');
+    setMarketplace('flipkart');
     if (publicSite) publicSite.style.display = 'block';
     landingView.style.display = 'none';
     if (infoPageView) infoPageView.style.display = 'none';
@@ -407,10 +427,24 @@ export function navigateTo(route) {
     if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'block';
     if (footer) footer.style.display = 'block';
     appLayout.style.display = 'none';
-    window.location.hash = 'label-sort-crop/meesho';
+    pushCleanUrl('/labels/flipkart');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  } else if (route === 'label-sort-crop/meesho' || route === 'label-sort-crop-meesho' || route === 'labels/meesho' || route === 'label-sort' || route === 'labels') {
+    // Public Meesho Label Crop & Sort Page (no login required)
+    mountLabelSorter('public');
+    setMarketplace('meesho');
+    if (publicSite) publicSite.style.display = 'block';
+    landingView.style.display = 'none';
+    if (infoPageView) infoPageView.style.display = 'none';
+    if (loginView) loginView.style.display = 'none';
+    if (labelCropView) labelCropView.style.display = 'none';
+    if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'block';
+    if (footer) footer.style.display = 'block';
+    appLayout.style.display = 'none';
+    pushCleanUrl('/labels/meesho');
     window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (route === 'label-sort-crop') {
-    // Marketplace Selection Directory (sellerbox.in/label-sort-crop)
+    // Marketplace Label Selector Directory
     if (publicSite) publicSite.style.display = 'block';
     landingView.style.display = 'none';
     if (infoPageView) infoPageView.style.display = 'none';
@@ -419,10 +453,10 @@ export function navigateTo(route) {
     if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'none';
     if (footer) footer.style.display = 'block';
     appLayout.style.display = 'none';
-    window.location.hash = 'label-sort-crop';
+    pushCleanUrl('/labels');
     window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (route === 'login' || route === 'signin') {
-    // Dedicated Login / Authentication Screen (SellerBox Style)
+    // Dedicated Login / OTP Authentication Screen
     if (publicSite) publicSite.style.display = 'block';
     landingView.style.display = 'none';
     if (infoPageView) infoPageView.style.display = 'none';
@@ -431,10 +465,12 @@ export function navigateTo(route) {
     if (loginView) loginView.style.display = 'flex';
     if (footer) footer.style.display = 'none';
     appLayout.style.display = 'none';
-    window.location.hash = 'login';
+    pushCleanUrl('/login');
     window.scrollTo({ top: 0, behavior: 'instant' });
+    // Re-initialize OTP flow in case user navigated back
+    if (typeof window.fcAuthInit === 'function') window.fcAuthInit();
   } else if (infoMap[route]) {
-    // Dedicated Information Pages View
+    // Information Pages
     const pageKey = infoMap[route];
     if (publicSite) publicSite.style.display = 'block';
     landingView.style.display = 'none';
@@ -447,10 +483,10 @@ export function navigateTo(route) {
       infoPageView.style.display = 'block';
       renderInfoPage(pageKey);
     }
-    window.location.hash = route;
+    pushCleanUrl('/' + route);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    // Landing page view
+    // Landing page / home
     if (publicSite) publicSite.style.display = 'block';
     if (infoPageView) infoPageView.style.display = 'none';
     if (loginView) loginView.style.display = 'none';
@@ -459,15 +495,7 @@ export function navigateTo(route) {
     if (footer) footer.style.display = 'block';
     landingView.style.display = 'block';
     appLayout.style.display = 'none';
-
-    // Reset hash cleanly
-    if (window.location.hash && window.location.hash !== '#' && window.location.hash !== '#home') {
-      try {
-        history.pushState(null, '', window.location.pathname + window.location.search);
-      } catch (err) {
-        window.location.hash = '';
-      }
-    }
+    pushCleanUrl('/');
 
     if (route && route !== 'home') {
       const targetEl = document.getElementById(route);
@@ -495,14 +523,14 @@ function setupClientRouting() {
   const sidebarLogo = document.getElementById('sidebarLogoHome');
   if (sidebarLogo) {
     sidebarLogo.addEventListener('click', (e) => {
-      // Don't trigger if the mobile-close button inside was clicked
       if (e.target.closest('.mobile-sidebar-close')) return;
+      closeMobileDrawer();
       navigateTo('home');
     });
-    // Keyboard accessibility (Enter / Space)
     sidebarLogo.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
+        closeMobileDrawer();
         navigateTo('home');
       }
     });
@@ -510,44 +538,83 @@ function setupClientRouting() {
 
   const mobileBrand = document.getElementById('mobileBrandHome');
   if (mobileBrand) {
-    mobileBrand.addEventListener('click', () => navigateTo('home'));
+    mobileBrand.addEventListener('click', () => {
+      closeMobileDrawer();
+      navigateTo('home');
+    });
     mobileBrand.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
+        closeMobileDrawer();
         navigateTo('home');
       }
     });
   }
 
-  // Handle browser back/forward and initial hash
-  window.addEventListener('hashchange', handleHash);
-  handleHash();
+  // Handle browser back/forward navigation (History API popstate)
+  window.addEventListener('popstate', handlePathname);
+
+  // Handle initial load from pathname (supports direct URL loads like /dashboard)
+  handlePathname();
 }
 
-function handleHash() {
+/**
+ * Route based on current pathname (History API)
+ * Also supports legacy hash URLs as a fallback redirect
+ */
+function handlePathname() {
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
   const hash = window.location.hash.replace('#', '').trim();
-  if (hash === 'dashboard') {
-    navigateTo('dashboard');
-  } else if (hash === 'label-sort-crop/meesho' || hash === 'label-sort-crop-meesho' || hash === 'labels/meesho') {
-    navigateTo('label-sort-crop/meesho');
-  } else if (hash === 'label-sort-crop') {
-    navigateTo('label-sort-crop');
-  } else if (hash === 'label-sort' || hash === 'labels') {
-    navigateTo('label-sort-crop/meesho');
-  } else if (hash === 'login' || hash === 'signin') {
-    navigateTo('login');
-  } else if (hash === 'faq' || hash === 'calculator' || hash === 'features' || hash === 'steps') {
-    navigateTo(hash);
-  } else if (
-    hash === 'about' || hash === 'about-us' ||
-    hash === 'privacy' || hash === 'privacy-policy' ||
-    hash === 'terms' || hash === 'terms-and-conditions' ||
-    hash === 'cookies' || hash === 'cookie-policy' ||
-    hash === 'disclaimer' ||
-    hash === 'contact' || hash === 'contact-us'
-  ) {
-    navigateTo(hash);
-  } else if (hash === 'home' || !hash) {
-    navigateTo('home');
+
+  // Legacy hash redirect: if someone navigates to /#dashboard, convert to /dashboard
+  if (hash && !path.startsWith('/api')) {
+    const hashToPath = {
+      'dashboard': '/dashboard',
+      'login': '/login',
+      'signin': '/login',
+      'labels/meesho': '/labels/meesho',
+      'label-sort': '/labels/meesho',
+      'label-sort-crop/meesho': '/labels/meesho',
+      'label-sort-crop': '/labels',
+      'privacy': '/privacy',
+      'privacy-policy': '/privacy',
+      'terms': '/terms',
+      'terms-and-conditions': '/terms',
+      'about': '/about',
+      'contact': '/contact',
+      'cookies': '/cookies',
+      'disclaimer': '/disclaimer'
+    };
+    if (hashToPath[hash]) {
+      history.replaceState(null, '', hashToPath[hash]);
+      handlePathname();
+      return;
+    }
+  }
+
+  // Route by clean pathname
+  if (path === '/dashboard') {
+    navigateTo('dashboard', { pushState: false });
+  } else if (path === '/labels/meesho') {
+    navigateTo('labels/meesho', { pushState: false });
+  } else if (path === '/labels') {
+    navigateTo('label-sort-crop', { pushState: false });
+  } else if (path === '/login' || path === '/signin') {
+    navigateTo('login', { pushState: false });
+  } else if (path === '/privacy' || path === '/privacy-policy') {
+    navigateTo('privacy', { pushState: false });
+  } else if (path === '/terms' || path === '/terms-and-conditions') {
+    navigateTo('terms', { pushState: false });
+  } else if (path === '/about' || path === '/about-us') {
+    navigateTo('about', { pushState: false });
+  } else if (path === '/cookies' || path === '/cookie-policy') {
+    navigateTo('cookies', { pushState: false });
+  } else if (path === '/disclaimer') {
+    navigateTo('disclaimer', { pushState: false });
+  } else if (path === '/contact' || path === '/contact-us') {
+    navigateTo('contact', { pushState: false });
+  } else {
+    // Home or any unrecognized path → landing page
+    navigateTo('home', { pushState: false });
   }
 }

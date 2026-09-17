@@ -1,7 +1,8 @@
 /**
  * apiRouter.js — Backend REST API router
- * Handles /api/sku-groups, /api/sku-costs, and /api/sessions
- * Powered by Turso LibSQL Cloud Database with local fallback
+ * Handles /api/auth/*, /api/sku-groups, /api/sku-costs, and /api/sessions
+ * All data endpoints are scoped per authenticated user (multi-tenant).
+ * Powered by Turso LibSQL Cloud Database with local fallback.
  */
 
 import {
@@ -15,8 +16,33 @@ import {
   dbGetSession,
   dbSaveSession,
   dbUpdateSession,
-  dbDeleteSession
+  dbDeleteSession,
+  dbGetUserByMobile,
+  dbGetUserByEmail,
+  dbGetUserById,
+  dbCreateUser,
+  dbUpdateUser,
+  dbSaveOtp,
+  dbGetPendingOtp,
+  dbIncrementOtpAttempts,
+  dbMarkOtpVerified
 } from './db.js';
+
+import {
+  generateOtp,
+  hashOtp,
+  compareOtp,
+  sendOtp,
+  generateJwt,
+  verifyJwt,
+  normalizeMobile,
+  normalizeEmail,
+  parseLoginInput,
+  checkOtpRateLimit,
+  authMiddleware,
+  OTP_TTL_MINUTES,
+  OTP_MAX_ATTEMPTS
+} from './auth.js';
 
 /**
  * Handle incoming API requests
@@ -72,7 +98,7 @@ export async function handleApiRequest(req, res, next) {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.end(JSON.stringify(payload));
   };
 
@@ -93,12 +119,177 @@ export async function handleApiRequest(req, res, next) {
 
   try {
     // ═══════════════════════════════════════════
+    //  AUTH ENDPOINTS (no JWT required)
+    // ═══════════════════════════════════════════
+
+    // POST /api/auth/send-otp  { input: "9876543210" | "user@email.com" }
+    if (req.method === 'POST' && pathOnly === '/api/auth/send-otp') {
+      const body = await getBody();
+      // Accept 'input' (new unified field) or legacy 'mobile'/'email' fields
+      const raw = body.input || body.mobile || body.email || '';
+      const contact = parseLoginInput(raw);
+
+      if (!contact) {
+        return sendJson(400, { success: false, error: 'Enter a valid 10-digit mobile number or email address.' });
+      }
+
+      const rateLimitKey = contact.mobile || contact.email;
+      const rateCheck = checkOtpRateLimit(rateLimitKey);
+      if (!rateCheck.allowed) {
+        return sendJson(429, { success: false, error: `Too many OTP requests. Try again in ${rateCheck.minutesLeft} minutes.` });
+      }
+
+      const otp = generateOtp();
+      const otpHash = await hashOtp(otp);
+      const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000).toISOString();
+      const otpKey = contact.mobile || contact.email;
+
+      await dbSaveOtp({ mobile: otpKey, otpHash, expiresAt });
+      await sendOtp(contact, otp);
+
+      const maskedDest = contact.mobile
+        ? contact.mobile.replace(/(\+91)(\d{2})\d{4}(\d{4})/, '$1$2****$3')
+        : contact.email.replace(/(.)(.*)(@.*)/, (_, a, b, c) => a + '*'.repeat(Math.min(b.length, 5)) + c);
+
+      return sendJson(200, {
+        success: true,
+        message: `OTP sent to ${maskedDest}`,
+        channel: contact.type,   // 'mobile' or 'email'
+        expiresIn: OTP_TTL_MINUTES * 60
+      });
+    }
+
+    // POST /api/auth/verify-otp  { input: "9876543210" | "email@x.com", otp: "482910" }
+    if (req.method === 'POST' && pathOnly === '/api/auth/verify-otp') {
+      const body = await getBody();
+      const raw = body.input || body.mobile || body.email || '';
+      const contact = parseLoginInput(raw);
+      const otp = String(body.otp || '').trim();
+
+      if (!contact || !otp) {
+        return sendJson(400, { success: false, error: 'Login input and OTP are required.' });
+      }
+
+      const otpKey = contact.mobile || contact.email;
+      const otpRecord = await dbGetPendingOtp(otpKey);
+      if (!otpRecord) {
+        return sendJson(400, { success: false, error: 'No OTP found. Please request a new one.' });
+      }
+
+      if (new Date(otpRecord.expiresAt) < new Date()) {
+        return sendJson(400, { success: false, error: 'OTP has expired. Please request a new one.' });
+      }
+
+      if (otpRecord.attempts >= OTP_MAX_ATTEMPTS) {
+        return sendJson(429, { success: false, error: 'Too many wrong attempts. Request a new OTP.' });
+      }
+
+      const isValid = await compareOtp(otp, otpRecord.otpHash);
+      if (!isValid) {
+        await dbIncrementOtpAttempts(otpRecord.id);
+        const remaining = OTP_MAX_ATTEMPTS - otpRecord.attempts - 1;
+        return sendJson(400, { success: false, error: `Incorrect OTP. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.` });
+      }
+
+      await dbMarkOtpVerified(otpRecord.id);
+
+      // Find or create user — check mobile OR email
+      let user = contact.mobile
+        ? await dbGetUserByMobile(contact.mobile)
+        : await dbGetUserByEmail(contact.email);
+
+      const isNewUser = !user;
+      if (!user) {
+        // New user — create with whatever contact info we have
+        user = await dbCreateUser({
+          mobile: contact.mobile || '',
+          email:  contact.email  || ''
+        });
+      } else {
+        // Returning user — always refresh lastLogin and fill in any missing contact info
+        const updates = { lastLogin: new Date().toISOString() };
+        if (contact.mobile) updates.mobile = contact.mobile; // always write mobile if used to login
+        if (contact.email)  updates.email  = contact.email;  // always write email if used to login
+        await dbUpdateUser(user.id, updates);
+        user = await dbGetUserById(user.id);
+      }
+
+      const token = generateJwt(user.id, otpKey);
+
+      return sendJson(200, {
+        success: true,
+        token,
+        user: { id: user.id, mobile: user.mobile, email: user.email, name: user.name },
+        isNewUser
+      });
+    }
+
+    // POST /api/auth/profile  { name: "...", email: "..." }  (JWT required)
+    if (req.method === 'POST' && pathOnly === '/api/auth/profile') {
+      const authHeader = req.headers['authorization'] || '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+      const payload = token ? verifyJwt(token) : null;
+      if (!payload) return sendJson(401, { success: false, error: 'Authentication required.' });
+
+      const body = await getBody();
+      const name  = (body.name  || '').trim();
+      const email = (body.email || '').trim();
+
+      await dbUpdateUser(payload.userId, { name, email });
+      const updatedUser = await dbGetUserById(payload.userId);
+
+      return sendJson(200, {
+        success: true,
+        message: 'Profile updated',
+        user: updatedUser
+          ? { id: updatedUser.id, mobile: updatedUser.mobile, email: updatedUser.email, name: updatedUser.name }
+          : { id: payload.userId, name, email }
+      });
+    }
+
+    // GET /api/auth/me  — validate token, return fresh user from DB
+    if (req.method === 'GET' && pathOnly === '/api/auth/me') {
+      const authHeader = req.headers['authorization'] || '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+      const payload = token ? verifyJwt(token) : null;
+      if (!payload) return sendJson(401, { success: false, error: 'Session expired.' });
+
+      const user = await dbGetUserById(payload.userId);
+      if (!user) return sendJson(404, { success: false, error: 'User not found.' });
+
+      return sendJson(200, {
+        success: true,
+        user: { id: user.id, mobile: user.mobile, email: user.email, name: user.name }
+      });
+    }
+
+    // POST /api/auth/logout  (client just drops the token, but we acknowledge)
+    if (req.method === 'POST' && pathOnly === '/api/auth/logout') {
+      return sendJson(200, { success: true, message: 'Logged out successfully.' });
+    }
+
+    // ═══════════════════════════════════════════
+    //  PROTECTED ENDPOINTS — require valid JWT
+    //  (authMiddleware sets req.userId)
+    // ═══════════════════════════════════════════
+    const authed = await new Promise((resolve) => {
+      authMiddleware(req, res, () => resolve(true));
+      // If authMiddleware calls res.end(), the promise stays pending;
+      // we resolve(false) via a small trick:
+    }).catch(() => false);
+
+    // If authMiddleware already sent a 401 response, just return
+    if (res.writableEnded) return;
+
+    const userId = req.userId;
+
+    // ═══════════════════════════════════════════
     //  MONTHLY SESSIONS ENDPOINTS
     // ═══════════════════════════════════════════
 
     // 1. GET /api/sessions (list session summaries)
     if (req.method === 'GET' && pathOnly === '/api/sessions') {
-      const list = await dbListSessions();
+      const list = await dbListSessions(userId);
       return sendJson(200, {
         success: true,
         data: list
@@ -113,6 +304,7 @@ export async function handleApiRequest(req, res, next) {
 
       const newSession = await dbSaveSession({
         id: body.id,
+        userId,
         name,
         month,
         notes: body.notes || '',
@@ -140,41 +332,29 @@ export async function handleApiRequest(req, res, next) {
     const sessionGetMatch = pathOnly.match(/^\/api\/sessions\/([^/]+)$/);
     if (req.method === 'GET' && sessionGetMatch) {
       const sessionId = sessionGetMatch[1];
-      const session = await dbGetSession(sessionId);
+      const session = await dbGetSession(sessionId, userId);
       if (!session) {
         return sendJson(404, { success: false, error: 'Session not found' });
       }
-      return sendJson(200, {
-        success: true,
-        data: session
-      });
+      return sendJson(200, { success: true, data: session });
     }
 
-    // 4. PUT /api/sessions/:id (edit session details / contents)
+    // 4. PUT /api/sessions/:id
     const sessionPutMatch = pathOnly.match(/^\/api\/sessions\/([^/]+)$/);
     if (req.method === 'PUT' && sessionPutMatch) {
       const sessionId = sessionPutMatch[1];
       const body = await getBody();
-      const saved = await dbUpdateSession(sessionId, body);
-      return sendJson(200, {
-        success: true,
-        message: `Session "${saved.name}" updated`,
-        data: saved
-      });
+      const saved = await dbUpdateSession(sessionId, { ...body, userId });
+      return sendJson(200, { success: true, message: `Session "${saved.name}" updated`, data: saved });
     }
 
-    // 5. DELETE /api/sessions/:id (delete session)
+    // 5. DELETE /api/sessions/:id
     const sessionDeleteMatch = pathOnly.match(/^\/api\/sessions\/([^/]+)$/);
     if (req.method === 'DELETE' && sessionDeleteMatch) {
       const sessionId = sessionDeleteMatch[1];
-      const deleted = await dbDeleteSession(sessionId);
-      if (!deleted) {
-        return sendJson(404, { success: false, error: 'Session not found' });
-      }
-      return sendJson(200, {
-        success: true,
-        message: 'Session deleted successfully'
-      });
+      const deleted = await dbDeleteSession(sessionId, userId);
+      if (!deleted) return sendJson(404, { success: false, error: 'Session not found' });
+      return sendJson(200, { success: true, message: 'Session deleted successfully' });
     }
 
     // ═══════════════════════════════════════════
@@ -183,29 +363,15 @@ export async function handleApiRequest(req, res, next) {
 
     // GET /api/sku-groups
     if (req.method === 'GET' && pathOnly === '/api/sku-groups') {
-      const data = await dbGetSkuData();
-      return sendJson(200, {
-        success: true,
-        data: {
-          groups: data.groups || [],
-          skuCosts: data.skuCosts || {}
-        }
-      });
+      const data = await dbGetSkuData(userId);
+      return sendJson(200, { success: true, data: { groups: data.groups || [], skuCosts: data.skuCosts || {} } });
     }
 
     // POST /api/sku-groups/bulk-sync
     if (req.method === 'POST' && pathOnly === '/api/sku-groups/bulk-sync') {
       const body = await getBody();
-      const data = await dbBulkSyncSku(body);
-
-      return sendJson(200, {
-        success: true,
-        message: `Synced ${data.groups.length} groups`,
-        data: {
-          groups: data.groups,
-          skuCosts: data.skuCosts
-        }
-      });
+      const data = await dbBulkSyncSku({ ...body, userId });
+      return sendJson(200, { success: true, message: `Synced ${data.groups.length} groups`, data: { groups: data.groups, skuCosts: data.skuCosts } });
     }
 
     // POST /api/sku-groups
@@ -215,21 +381,13 @@ export async function handleApiRequest(req, res, next) {
       const rawCost = parseFloat(body.rawCost) || 0;
       const skus = Array.isArray(body.skus) ? body.skus : [];
 
-      if (!name) {
-        return sendJson(400, { success: false, error: 'Group name is required' });
-      }
+      if (!name) return sendJson(400, { success: false, error: 'Group name is required' });
 
       try {
-        const newGroup = await dbCreateSkuGroup({ name, rawCost, skus });
-        return sendJson(201, {
-          success: true,
-          message: `Group "${name}" created`,
-          data: newGroup
-        });
+        const newGroup = await dbCreateSkuGroup({ name, rawCost, skus, userId });
+        return sendJson(201, { success: true, message: `Group "${name}" created`, data: newGroup });
       } catch (e) {
-        if (e.message.includes('already exists')) {
-          return sendJson(409, { success: false, error: e.message });
-        }
+        if (e.message.includes('already exists')) return sendJson(409, { success: false, error: e.message });
         throw e;
       }
     }
@@ -240,19 +398,11 @@ export async function handleApiRequest(req, res, next) {
       const groupId = updateMatch[1];
       const body = await getBody();
       try {
-        const updated = await dbUpdateSkuGroup(groupId, body);
-        return sendJson(200, {
-          success: true,
-          message: `Group "${updated.name}" updated`,
-          data: updated
-        });
+        const updated = await dbUpdateSkuGroup(groupId, body, userId);
+        return sendJson(200, { success: true, message: `Group "${updated.name}" updated`, data: updated });
       } catch (e) {
-        if (e.message.includes('not found')) {
-          return sendJson(404, { success: false, error: e.message });
-        }
-        if (e.message.includes('already exists')) {
-          return sendJson(409, { success: false, error: e.message });
-        }
+        if (e.message.includes('not found')) return sendJson(404, { success: false, error: e.message });
+        if (e.message.includes('already exists')) return sendJson(409, { success: false, error: e.message });
         throw e;
       }
     }
@@ -262,16 +412,10 @@ export async function handleApiRequest(req, res, next) {
     if (req.method === 'DELETE' && deleteMatch) {
       const groupId = deleteMatch[1];
       try {
-        const deleted = await dbDeleteSkuGroup(groupId);
-        return sendJson(200, {
-          success: true,
-          message: `Group "${deleted.name}" deleted`,
-          data: deleted
-        });
+        const deleted = await dbDeleteSkuGroup(groupId, userId);
+        return sendJson(200, { success: true, message: `Group "${deleted.name}" deleted`, data: deleted });
       } catch (e) {
-        if (e.message.includes('not found')) {
-          return sendJson(404, { success: false, error: e.message });
-        }
+        if (e.message.includes('not found')) return sendJson(404, { success: false, error: e.message });
         throw e;
       }
     }
@@ -283,7 +427,7 @@ export async function handleApiRequest(req, res, next) {
       const body = await getBody();
       const cost = parseFloat(body.rawCost ?? body.cost) || 0;
 
-      const updated = await dbUpdateSkuCost(sku, cost);
+      const updated = await dbUpdateSkuCost(sku, cost, userId);
       return sendJson(200, {
         success: true,
         message: `Cost for SKU "${sku}" updated to ₹${cost}`,

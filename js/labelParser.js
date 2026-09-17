@@ -48,9 +48,10 @@ function normalizeCourierName(name) {
 /**
  * Parse a single PDF file and extract label data from each page
  * @param {ArrayBuffer|Uint8Array} inputData — Raw PDF bytes
+ * @param {string} [platform='auto'] — 'meesho' | 'flipkart' | 'auto'
  * @returns {Promise<Array<LabelData>>} — Array of label data objects
  */
-export async function parseLabelPDF(inputData) {
+export async function parseLabelPDF(inputData, platform = 'auto') {
   // Defensive clone: create an independent Uint8Array so worker transfer never detaches the caller's buffer
   const rawBytes = inputData instanceof Uint8Array ? inputData : new Uint8Array(inputData);
   const bufferCopy = new Uint8Array(rawBytes.length);
@@ -76,7 +77,17 @@ export async function parseLabelPDF(inputData) {
     // Full page text for regex matching
     const fullText = textItems.map(item => item.text).join(' ');
 
-    // Find TAX INVOICE Y and lowest/highest text bounds for dynamic 4x4 cropping
+    // Detect platform if set to auto
+    let effectivePlatform = platform;
+    if (!effectivePlatform || effectivePlatform === 'auto') {
+      if (/\bOD\d{16,22}\b/i.test(fullText) || /E-?Kart Logistics/i.test(fullText) || /SKU\s*ID\s*(?:\|)?\s*Description/i.test(fullText)) {
+        effectivePlatform = 'flipkart';
+      } else {
+        effectivePlatform = 'meesho';
+      }
+    }
+
+    // Find TAX INVOICE Y and lowest/highest text bounds for dynamic 4x4 cropping (Meesho)
     let taxInvoiceY = null;
     let minTextY = 9999;
     let maxTextY = -9999;
@@ -90,12 +101,15 @@ export async function parseLabelPDF(inputData) {
       }
     }
 
+    const isFlipkart = effectivePlatform === 'flipkart';
+
     const labelData = {
       pageIndex: i - 1,
-      sku: extractSKU(textItems, fullText),
-      courierPartner: extractCourierPartner(textItems, fullText),
-      quantity: extractQuantity(textItems, fullText),
-      orderNo: extractOrderNo(textItems, fullText),
+      platform: effectivePlatform,
+      sku: isFlipkart ? extractFlipkartSKU(textItems, fullText) : extractSKU(textItems, fullText),
+      courierPartner: isFlipkart ? extractFlipkartCourier(textItems, fullText) : extractCourierPartner(textItems, fullText),
+      quantity: isFlipkart ? extractFlipkartQuantity(textItems, fullText) : extractQuantity(textItems, fullText),
+      orderNo: isFlipkart ? extractFlipkartOrderNo(textItems, fullText) : extractOrderNo(textItems, fullText),
       isMultiQty: false,
       rawText: fullText,
       taxInvoiceY: taxInvoiceY,
@@ -251,17 +265,88 @@ function extractOrderNo(textItems, fullText) {
 }
 
 /**
+ * Extract SKU for Flipkart labels
+ * Flipkart labels have an item table with "SKU ID | Description" or "SKU ID Description"
+ */
+function extractFlipkartSKU(textItems, fullText) {
+  // Strategy 1: Look for "SKU ID" header in text items
+  const skuHeaderIdx = textItems.findIndex(t => /SKU\s*ID/i.test(t.text));
+  if (skuHeaderIdx !== -1) {
+    for (let i = skuHeaderIdx + 1; i < Math.min(skuHeaderIdx + 10, textItems.length); i++) {
+      const item = textItems[i].text;
+      if (/^(Description|Total|HSN|Tax|Rate|Qty|IGST|CGST|SGST|Applicable|Taxable|Amount|Invoice)$/i.test(item)) continue;
+      if (item.includes('|')) {
+        const candidate = item.split('|')[0].trim();
+        if (candidate) return candidate;
+      } else if (item.length > 1 && !/^\d+$/.test(item)) {
+        return item.trim();
+      }
+    }
+  }
+
+  // Strategy 2: Regex match on full text
+  const matchWithPipe = fullText.match(/SKU\s*ID\s*(?:\|)?\s*Description\s+([A-Za-z0-9_\-\s]+?)(?:\s*\||\s+HSN|\s+IGST|\s+Total)/i);
+  if (matchWithPipe && matchWithPipe[1]) {
+    return matchWithPipe[1].trim();
+  }
+
+  // Strategy 3: Search for SKU ID prefix
+  const skuPrefixMatch = fullText.match(/SKU\s*ID[:\s]+([A-Za-z0-9_\-\s]+?)(?:\s*\||\s+Description|\s+Qty)/i);
+  if (skuPrefixMatch && skuPrefixMatch[1]) {
+    return skuPrefixMatch[1].trim();
+  }
+
+  return 'Unknown SKU';
+}
+
+/**
+ * Extract courier partner for Flipkart labels
+ */
+function extractFlipkartCourier(textItems, fullText) {
+  if (/E-?Kart/i.test(fullText)) return 'Ekart Logistics';
+  if (/Delhivery/i.test(fullText)) return 'Delhivery';
+  if (/Shadowfax/i.test(fullText)) return 'Shadowfax';
+  if (/Xpress\s*bees/i.test(fullText)) return 'Xpressbees';
+  if (/Blue\s*Dart/i.test(fullText)) return 'Blue Dart';
+  if (/DTDC/i.test(fullText)) return 'DTDC';
+  return 'Ekart Logistics'; // Default for Flipkart
+}
+
+/**
+ * Extract Flipkart order number (OD...) or AWB
+ */
+function extractFlipkartOrderNo(textItems, fullText) {
+  const odMatch = fullText.match(/\b(OD\d{16,22})\b/i);
+  if (odMatch) return odMatch[1];
+
+  const awbMatch = fullText.match(/\b(FMPP\w+|SF\w+|DEL\w+)\b/i);
+  if (awbMatch) return awbMatch[1];
+
+  return '';
+}
+
+/**
+ * Extract Flipkart quantity
+ */
+function extractFlipkartQuantity(textItems, fullText) {
+  const qtyMatch = fullText.match(/Qty\s*[:\-]?\s*(\d+)/i);
+  if (qtyMatch) return parseInt(qtyMatch[1], 10);
+  return 1;
+}
+
+/**
  * Parse multiple PDF files and combine results
  * @param {Array<{name: string, bytes: ArrayBuffer}>} files
+ * @param {string} [platform='auto'] — 'meesho' | 'flipkart' | 'auto'
  * @returns {Promise<Array<LabelData>>}
  */
-export async function parseMultiplePDFs(files) {
+export async function parseMultiplePDFs(files, platform = 'auto') {
   const allLabels = [];
   let globalPageOffset = 0;
 
   for (const file of files) {
     try {
-      const labels = await parseLabelPDF(file.bytes);
+      const labels = await parseLabelPDF(file.bytes, platform);
       // Add file reference and adjust page indices for multi-file tracking
       labels.forEach(label => {
         label.fileName = file.name;

@@ -18,6 +18,15 @@ export default defineConfig({
     }
   ],
   server: {
-    port: 5173
+    port: 5173,
+    // Serve index.html for all non-API routes (History API / SPA routing)
+    historyApiFallback: {
+      rewrites: [
+        // Pass /api/* to the express middleware
+        { from: /^\/api\//, to: '/api' },
+        // All other routes → index.html
+        { from: /./, to: '/index.html' }
+      ]
+    }
   }
 });

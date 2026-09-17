@@ -164,6 +164,11 @@ body.sidebar-open {
   overflow: hidden;
 }
 
+/* Ensure public site views are never trapped in overflow: hidden */
+body.sidebar-open:not(:has(#appLayout:not([style*="display: none"]))) {
+  overflow-y: auto !important;
+}
+
 input, select, textarea, button {
   font-family: inherit;
   -webkit-tap-highlight-color: transparent;
@@ -2293,165 +2298,211 @@ body::before {
 .welcome-hero-content {
   position: relative;
   z-index: 1;
-  max-width: 960px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .welcome-hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 12px;
-  background: #FBF0F7;
-  border: 1px solid #F3D3E9;
+  padding: 5px 14px;
+  background: #FDF2F8;
+  border: 1px solid #FBCFE8;
   border-radius: var(--radius-full);
-  font-size: var(--font-xs);
-  font-weight: 600;
+  font-size: 0.76rem;
+  font-weight: 700;
   color: #8B1874;
-  margin-bottom: var(--space-md);
-  letter-spacing: 0.03em;
+  margin-bottom: 14px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 1px 3px rgba(139, 24, 116, 0.06);
 }
 
 .welcome-hero-title {
-  font-size: 1.85rem;
+  font-size: 2rem;
   font-weight: 800;
-  color: #1A1A1A;
-  margin-bottom: 6px;
-  letter-spacing: -0.02em;
+  color: #0F172A;
+  margin-bottom: 8px;
+  letter-spacing: -0.025em;
   font-family: var(--font-heading);
+  line-height: 1.25;
 }
 
 .welcome-hero-subtitle {
-  font-size: var(--font-base);
-  color: #555E6D;
+  font-size: 0.92rem;
+  color: #64748B;
   line-height: 1.6;
-  max-width: 680px;
+  max-width: 780px;
   margin-bottom: 26px;
 }
 
 /* ── Welcome Quick Action Cards Grid ── */
 .welcome-actions-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-lg);
-  margin-bottom: 22px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 24px;
 }
 
 .welcome-action-card {
   background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: var(--radius-lg);
-  padding: 24px 20px;
+  border: 1.5px solid #E8DFE9;
+  border-radius: 16px;
+  padding: 26px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 16px;
-  transition: all var(--transition-base);
+  gap: 18px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.welcome-action-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  opacity: 0;
-  transition: opacity var(--transition-base);
-}
-
-.welcome-action-card:hover::before {
-  opacity: 1;
+  box-shadow: 0 2px 8px rgba(139, 24, 116, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .welcome-action-card:hover {
   transform: translateY(-3px);
-  border-color: #8B1874;
+  border-color: rgba(139, 24, 116, 0.4);
   background: #FFFFFF;
-  box-shadow: 0 10px 25px -4px rgba(139, 24, 116, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 14px 30px -4px rgba(139, 24, 116, 0.12), 0 4px 10px rgba(0, 0, 0, 0.03);
 }
 
 .welcome-action-card.highlight {
-  border-color: #F1BEDD;
-  background: #FDF8FA;
-  border-top: 3px solid #8B1874;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FDF8FB 100%);
+  border-color: #E2CFDF;
 }
 
-.welcome-action-card.highlight::before {
-  background: var(--gradient-primary);
-  opacity: 1;
+.welcome-action-card.card-label-sort {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
+  border-color: #E2E8F0;
 }
 
 .welcome-action-card.card-label-sort:hover {
-  border-color: #8B1874;
-  background: #FFFFFF;
-  box-shadow: 0 10px 25px -4px rgba(139, 24, 116, 0.12);
+  border-color: #CBD5E1;
+  box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.03);
 }
 
-.welcome-action-card.card-label-sort::before {
-  background: var(--gradient-primary);
+.welcome-action-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
 
 .welcome-card-icon {
-  font-size: 1.6rem;
-  width: 44px;
-  height: 44px;
+  font-size: 1.5rem;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
-  position: relative;
-}
-
-.welcome-card-icon.icon-session {
-  background: #FBF0F7;
-  border: 1px solid #F3D3E9;
-  color: #8B1874;
+  border-radius: 12px;
+  flex-shrink: 0;
 }
 
 .welcome-card-icon.icon-upload {
-  background: #EFF6FF;
-  border: 1px solid #DBEAFE;
-  color: #2563EB;
+  background: linear-gradient(135deg, #FDF2F8 0%, #FCE7F3 100%);
+  border: 1px solid #FBCFE8;
+  color: #8B1874;
+  box-shadow: 0 2px 6px rgba(139, 24, 116, 0.08);
 }
 
 .welcome-card-icon.icon-label {
-  background: #FFFBEB;
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
   border: 1px solid #FDE68A;
   color: #D97706;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.08);
+}
+
+.welcome-card-chip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
+}
+
+.welcome-card-chip.highlight {
+  background: #FDF2F8;
+  color: #8B1874;
+  border-color: #FCE7F3;
 }
 
 .welcome-card-body h3 {
-  font-size: 1.05rem;
+  font-size: 1.16rem;
   font-weight: 700;
-  color: #111827;
+  color: #0F172A;
   margin-bottom: 6px;
+  letter-spacing: -0.01em;
 }
 
 .welcome-card-body p {
-  font-size: 0.84rem;
-  color: #6B7280;
-  line-height: 1.5;
+  font-size: 0.86rem;
+  color: #64748B;
+  line-height: 1.55;
+  margin-bottom: 12px;
 }
 
-.welcome-card-btn {
+.welcome-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.welcome-card-tags span {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748B;
+  background: #F8FAFC;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid #E2E8F0;
+}
+
+.welcome-action-btn {
   width: 100%;
-}
-
-.welcome-action-card .btn-secondary {
-  background: #FFFFFF;
-  border: 1px solid #D1D5DB;
-  color: #374151;
+  padding: 11px 16px;
+  font-size: 0.88rem;
   font-weight: 600;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
 }
 
-.welcome-action-card .btn-secondary:hover {
-  background: #FBF0F7;
-  border-color: #8B1874;
-  color: #8B1874;
+.welcome-action-btn.btn-primary {
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 2px 8px rgba(139, 24, 116, 0.25);
+}
+
+.welcome-action-btn.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(139, 24, 116, 0.35);
+  transform: translateY(-1px);
+}
+
+.welcome-action-btn.btn-secondary {
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1.5px solid #CBD5E1;
+}
+
+.welcome-action-btn.btn-secondary:hover {
+  background: #F8FAFC;
+  border-color: #94A3B8;
+  color: #0F172A;
+  transform: translateY(-1px);
 }
 
 /* ── Welcome Recent Sessions Quick Jump ── */
@@ -3169,6 +3220,98 @@ body::before {
   max-width: 640px;
   margin: 0 auto;
   backdrop-filter: blur(12px);
+}
+
+/* ── Marketplace Selector Pills (Meesho / Flipkart) ── */
+.label-platform-selector-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.label-platform-pills {
+  display: inline-flex;
+  align-items: center;
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid #E2E8F0;
+  gap: 4px;
+}
+
+.label-platform-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.label-platform-pill:hover:not(.active) {
+  color: #0F172A;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.label-platform-pill.active#platformBtnMeesho {
+  background: #8B1874;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(139, 24, 116, 0.28);
+}
+
+.label-platform-pill.active#platformBtnFlipkart {
+  background: #2874F0;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(40, 116, 240, 0.32);
+}
+
+.platform-status-badge {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.label-platform-pill.active .platform-status-badge.live {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+.label-platform-pill:not(.active) .platform-status-badge.live {
+  background: #E2E8F0;
+  color: #64748B;
+}
+
+.label-platform-pill.active .platform-status-badge.new {
+  background: #FBBF24;
+  color: #1E293B;
+}
+
+.label-platform-pill:not(.active) .platform-status-badge.new {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+
+[data-theme="dark"] .label-platform-pills {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .label-platform-pill:not(.active) {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .label-platform-pill:hover:not(.active) {
+  color: #F8FAFC;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .label-upload-header h3 {

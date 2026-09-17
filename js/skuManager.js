@@ -1,19 +1,26 @@
-/**
- * skuManager.js — SKU Groups & Costing Module (API-Powered)
- * Connects to the backend REST API (/api/sku-groups, /api/sku-costs)
- * with local caching and offline resilience.
- */
+import { authHeaders, authState } from './auth.js';
 
-const STORAGE_KEY = 'fc_sku_groups';
-const COST_STORAGE_KEY = 'fc_sku_costs';
 const API_BASE = '/api/sku-groups';
 
+function getUserStorageKeys() {
+  const uid = authState.user?.id || 'guest';
+  return {
+    groupKey: `fc_sku_groups_${uid}`,
+    costKey: `fc_sku_costs_${uid}`
+  };
+}
+
 /**
- * SKU Manager class
+ * SKU Manager class — Isolated per business / tenant
  */
 class SKUManager {
   constructor() {
-    // Initial in-memory cache loaded from localStorage for instant initial render
+    // Purge old global shared cache keys if present
+    try {
+      localStorage.removeItem('fc_sku_groups');
+      localStorage.removeItem('fc_sku_costs');
+    } catch (e) {}
+
     this.groups = this.loadLocalGroups();
     this.skuCosts = this.loadLocalCosts();
     this.listeners = [];
@@ -41,11 +48,12 @@ class SKUManager {
   }
 
   /**
-   * Load from localStorage (fallback / instant cache)
+   * Load from per-user localStorage
    */
   loadLocalGroups() {
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
+      const { groupKey } = getUserStorageKeys();
+      const data = localStorage.getItem(groupKey);
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
@@ -54,7 +62,8 @@ class SKUManager {
 
   loadLocalCosts() {
     try {
-      const data = localStorage.getItem(COST_STORAGE_KEY);
+      const { costKey } = getUserStorageKeys();
+      const data = localStorage.getItem(costKey);
       return data ? JSON.parse(data) : {};
     } catch {
       return {};
@@ -63,43 +72,52 @@ class SKUManager {
 
   saveLocalCache() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.groups));
-      localStorage.setItem(COST_STORAGE_KEY, JSON.stringify(this.skuCosts));
+      const { groupKey, costKey } = getUserStorageKeys();
+      localStorage.setItem(groupKey, JSON.stringify(this.groups));
+      localStorage.setItem(costKey, JSON.stringify(this.skuCosts));
     } catch (e) {
       console.warn('[SKUManager] Failed to write local cache:', e);
     }
   }
 
   /**
-   * Initialize and fetch from backend API
+   * Initialize and fetch from backend API (per authenticated business)
    */
   async init() {
     try {
-      const res = await fetch(API_BASE);
+      const res = await fetch(API_BASE, {
+        headers: {
+          ...authHeaders()
+        }
+      });
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const json = await res.json();
 
       if (json.success && json.data) {
-        const apiGroups = json.data.groups || [];
-        const apiCosts = json.data.skuCosts || {};
-
-        // If backend is empty but local storage has groups, auto-migrate to API
-        if (apiGroups.length === 0 && this.groups.length > 0) {
-          console.log('[SKUManager] Seeding backend API with existing local groups...');
-          await this.syncToBackend(this.groups, this.skuCosts);
-        } else {
-          this.groups = apiGroups;
-          this.skuCosts = apiCosts;
-          this.saveLocalCache();
-        }
+        // Business starts with their own data (or empty array if new)
+        this.groups = json.data.groups || [];
+        this.skuCosts = json.data.skuCosts || {};
+        this.saveLocalCache();
       }
     } catch (err) {
-      console.warn('[SKUManager] Could not connect to API, using local storage:', err.message);
+      console.warn('[SKUManager] Could not connect to API, using user local storage:', err.message);
+      this.groups = this.loadLocalGroups();
+      this.skuCosts = this.loadLocalCosts();
     } finally {
       this.isInitialized = true;
       this._notify();
     }
     return this.groups;
+  }
+
+  /**
+   * Reload for active user (e.g. after login or user switch)
+   */
+  async reloadForUser() {
+    this.groups = this.loadLocalGroups();
+    this.skuCosts = this.loadLocalCosts();
+    this._notify();
+    return await this.init();
   }
 
   /**
@@ -109,13 +127,16 @@ class SKUManager {
     try {
       const res = await fetch(`${API_BASE}/bulk-sync`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders()
+        },
         body: JSON.stringify({ groups, skuCosts })
       });
       const json = await res.json();
       if (json.success && json.data) {
-        this.groups = json.data.groups;
-        this.skuCosts = json.data.skuCosts;
+        this.groups = json.data.groups || [];
+        this.skuCosts = json.data.skuCosts || {};
         this.saveLocalCache();
       }
     } catch (err) {
@@ -145,7 +166,7 @@ class SKUManager {
     try {
       const res = await fetch(API_BASE, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(payload)
       });
       const json = await res.json();
@@ -196,7 +217,7 @@ class SKUManager {
     try {
       const res = await fetch(`${API_BASE}/${groupId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(updates)
       });
       const json = await res.json();
@@ -243,7 +264,8 @@ class SKUManager {
 
     try {
       const res = await fetch(`${API_BASE}/${groupId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { ...authHeaders() }
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
@@ -280,7 +302,7 @@ class SKUManager {
     try {
       await fetch(`/api/sku-costs/${encodeURIComponent(sku)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ cost: numCost })
       });
     } catch (err) {

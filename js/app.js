@@ -10,6 +10,7 @@ import { sessionManager } from './sessionManager.js';
 import { initLabelSorter, mountLabelSorter } from './labelSorter.js';
 import { initLandingPage, navigateTo } from './landing.js';
 import { initBottomSheetPan } from './bottomSheetPan.js';
+import { fetchMe, initOtpFlow, authHeaders, logout, updateAuthUI, openProfileModal, setupProfileModal, authState, onAuthChange } from './auth.js';
 import {
   renderStatusChart,
   renderProfitBreakdownChart,
@@ -74,6 +75,45 @@ const state = {
  * Initialize the application
  */
 async function init() {
+  // 1. Restore auth session first (checks JWT token with server)
+  //    initLandingPage() handles routing so it must know auth state
+  await fetchMe();
+  updateAuthUI();
+
+  // 2. Wire OTP flow into global so landing.js can call it
+  window.fcAuthInit = initOtpFlow;
+
+  // 3. Set up logout button in sidebar
+  const logoutBtn = document.getElementById('sidebarLogoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', logout);
+
+  // 4. Set up profile modal & sidebar user badge click
+  setupProfileModal();
+  const sidebarUserBadge = document.getElementById('sidebarUserBadge');
+  if (sidebarUserBadge) {
+    sidebarUserBadge.addEventListener('click', () => {
+      if (authState.token && authState.user) {
+        openProfileModal();
+      } else {
+        navigateTo('login');
+      }
+    });
+  }
+
+  // 5. Reload per-business SKU groups and sessions whenever user signs in or switches account
+  onAuthChange(async () => {
+    try {
+      await skuManager.reloadForUser();
+      refreshSkuManager();
+      updateSkuNavBadge();
+      await sessionManager.fetchSessions();
+      updateSessionNavBadge();
+      updateActiveSessionBadge(sessionManager.getActiveSessionName());
+    } catch (e) {
+      console.warn('[App] Error reloading per-user data on auth change:', e);
+    }
+  });
+
   setupNavigation();
   setupUploadModal();
   setupSkuManager();
@@ -588,15 +628,8 @@ function handleDeleteReport(index) {
  * Setup Monthly Session Handlers
  */
 function setupSessionHandlers() {
-  // Create New Session Buttons
-  document.getElementById('headerCreateSessionBtn')?.addEventListener('click', triggerCreateSessionModal);
-  document.getElementById('emptyCreateSessionBtn')?.addEventListener('click', triggerCreateSessionModal);
-  document.getElementById('sessionsSectionCreateBtn')?.addEventListener('click', triggerCreateSessionModal);
-  document.getElementById('welcomeCreateSessionBtn')?.addEventListener('click', triggerCreateSessionModal);
-
   // Save Session Buttons
   document.getElementById('headerSaveSessionBtn')?.addEventListener('click', triggerSaveSessionModal);
-  document.getElementById('sessionsSectionSaveBtn')?.addEventListener('click', triggerSaveSessionModal);
 
   // Clear Dashboard Button (Minimalist fresh start)
   document.getElementById('headerClearDashboardBtn')?.addEventListener('click', () => {

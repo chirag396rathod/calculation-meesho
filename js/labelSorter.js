@@ -14,6 +14,7 @@ import { showToast } from './ui.js';
 
 // ── Label Sorter State ──
 const labelState = {
+  platform: 'meesho',      // 'meesho' | 'flipkart'
   uploadedFiles: [],       // [{name, size, bytes: Uint8Array}]
   labels: [],              // Parsed label data from all files
   pdfDocs: [],             // Loaded PDFDocument instances for page copying
@@ -45,12 +46,130 @@ const SKU_COLORS = [
  * Initialize the label sorter — set up all event listeners
  */
 export function initLabelSorter() {
+  setupMarketplaceSelector();
   setupUploadZone();
   setupSortControls();
   setupTrimCropControls();
   setupComboControls();
   setupCustomMessage();
   setupActionButtons();
+}
+
+/**
+ * Set the active marketplace for sorting & cropping
+ * @param {'meesho' | 'flipkart'} platform
+ */
+export function setMarketplace(platform) {
+  labelState.platform = platform === 'flipkart' ? 'flipkart' : 'meesho';
+  const isFlipkart = labelState.platform === 'flipkart';
+
+  // Update pills in workspace
+  const btnMeesho = document.getElementById('platformBtnMeesho');
+  const btnFlipkart = document.getElementById('platformBtnFlipkart');
+  if (btnMeesho) btnMeesho.classList.toggle('active', !isFlipkart);
+  if (btnFlipkart) btnFlipkart.classList.toggle('active', isFlipkart);
+
+  // Update header and description
+  const uploadTitle = document.getElementById('labelUploadHeaderTitle');
+  const uploadSubtitle = document.getElementById('labelUploadHeaderSubtitle');
+  const uploadText = document.getElementById('labelUploadText');
+
+  if (uploadTitle) {
+    uploadTitle.textContent = isFlipkart ? 'Upload Flipkart Shipping Labels' : 'Upload Meesho Shipping Labels';
+  }
+  if (uploadSubtitle) {
+    uploadSubtitle.textContent = isFlipkart
+      ? 'Upload your Flipkart shipping label PDFs to crop invoice space, sort labels by SKU, and prepare a 3×5 thermal print file.'
+      : 'Upload your Meesho shipping label PDF to crop invoice space, sort labels, and prepare a cleaner print-ready file.';
+  }
+  if (uploadText) {
+    uploadText.textContent = isFlipkart
+      ? 'Click here to upload or Drag & Drop Flipkart Label PDFs Here'
+      : 'Click here to upload or Drag & Drop Meesho Label PDFs Here';
+  }
+
+  // Update Crop labels and sections in config panel
+  const cropCb = document.getElementById('cropInvoiceCheckbox');
+  const trimCb = document.getElementById('trim4x4Checkbox');
+  const cropLabel = document.getElementById('cropInvoiceOptionLabel');
+  const trim4x4Label = document.getElementById('trim4x4OptionLabel');
+  const comboSection = document.getElementById('comboSection');
+  const customMsgSection = document.getElementById('customMsgSection');
+  const cropTitle = document.querySelector('#cropInvoiceOptionLabel .trim-option-title');
+  const cropDesc = document.querySelector('#cropInvoiceOptionLabel .trim-option-desc');
+
+  if (isFlipkart) {
+    // For Flipkart: auto-select crop setting by default and remove 4x4, combo, and custom message
+    labelState.cropInvoice = true;
+    labelState.trim4x4 = false;
+    if (cropCb) cropCb.checked = true;
+    if (trimCb) trimCb.checked = false;
+    if (cropLabel) cropLabel.classList.add('active');
+    if (trim4x4Label) trim4x4Label.style.display = 'none';
+    if (comboSection) comboSection.style.display = 'none';
+    if (customMsgSection) customMsgSection.style.display = 'none';
+    if (cropTitle) cropTitle.textContent = '✂️ Crop labels (remove invoice section)';
+    if (cropDesc) cropDesc.textContent = 'Removes the tax-invoice block below the label.';
+  } else {
+    // For Meesho: restore 4x4 option, combo section, and meesho defaults
+    if (trim4x4Label) trim4x4Label.style.display = '';
+    if (comboSection) comboSection.style.display = '';
+    if (customMsgSection) customMsgSection.style.display = labelState.cropInvoice ? 'none' : '';
+    if (cropTitle) cropTitle.textContent = '✂️ Crop labels (remove invoice section)';
+    if (cropDesc) cropDesc.textContent = 'Removes the tax-invoice block below the label.';
+  }
+
+  // Update hero title and subtitle on public page
+  const heroTitle = document.getElementById('sbMarketplaceHeroTitle');
+  const heroDesc = document.getElementById('sbMarketplaceHeroDesc');
+  if (heroTitle) {
+    heroTitle.innerHTML = isFlipkart
+      ? 'Free Flipkart Label Crop <br><span class="highlight">&amp; Sort Tool</span>'
+      : 'Free Meesho Label Crop <br><span class="highlight">&amp; Sort Tool</span>';
+  }
+  if (heroDesc) {
+    heroDesc.innerHTML = isFlipkart
+      ? '<p>Every Flipkart seller faces the same daily problem: shipping label PDFs include both the shipping label and tax invoice on the same page.</p><p>FC Analytics helps you crop Flipkart labels away from the invoice section, sort labels by SKU, and download a clean, print-ready 3×5 file for free with no signup needed.</p>'
+      : '<p>Every Meesho seller faces the same daily problem: shipping label PDFs include both the shipping label and tax invoice on the same page.</p><p>FC Analytics helps you crop Meesho labels away from the invoice section, sort labels by SKU or courier partner, and download a clean, print-ready file for free with no signup needed.</p>';
+  }
+
+  // Sync public switcher bar if visible
+  document.querySelectorAll('.sb-meesho-switch-item').forEach(btn => {
+    const route = btn.getAttribute('data-sb-route');
+    if (isFlipkart) {
+      const isCurrent = route === 'label-sort-crop/flipkart';
+      btn.classList.toggle('active', isCurrent);
+      btn.classList.toggle('flipkart-active', isCurrent);
+    } else {
+      const isCurrent = route === 'label-sort-crop/meesho';
+      btn.classList.toggle('active', isCurrent);
+      btn.classList.remove('flipkart-active');
+    }
+  });
+
+  // Manage route change on tab change when on public tool page
+  const meeshoPageView = document.getElementById('labelCropMeeshoView');
+  if (meeshoPageView && meeshoPageView.style.display !== 'none') {
+    const targetPath = isFlipkart ? '/labels/flipkart' : '/labels/meesho';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
+  }
+}
+
+function setupMarketplaceSelector() {
+  const btnMeesho = document.getElementById('platformBtnMeesho');
+  const btnFlipkart = document.getElementById('platformBtnFlipkart');
+
+  btnMeesho?.addEventListener('click', (e) => {
+    e.preventDefault();
+    setMarketplace('meesho');
+  });
+
+  btnFlipkart?.addEventListener('click', (e) => {
+    e.preventDefault();
+    setMarketplace('flipkart');
+  });
 }
 
 // ═══════════════════════════════════════════
@@ -222,12 +341,17 @@ export async function processLabels() {
   labelState.isProcessing = true;
 
   try {
-    // Parse all PDFs
-    labelState.labels = await parseMultiplePDFs(labelState.uploadedFiles);
+    // Parse all PDFs (passing active platform)
+    labelState.labels = await parseMultiplePDFs(labelState.uploadedFiles, labelState.platform);
 
     if (labelState.labels.length === 0) {
       showToast('No labels found in the uploaded PDFs', 'error');
       return;
+    }
+
+    // Auto-detect if uploaded files are Flipkart labels
+    if (labelState.labels.some(l => l.platform === 'flipkart')) {
+      labelState.platform = 'flipkart';
     }
 
     // Load PDFDocument instances for pdf-lib manipulation
@@ -390,9 +514,9 @@ function setupTrimCropControls() {
     if (cropLabel) cropLabel.classList.toggle('active', labelState.cropInvoice);
     if (trimLabel) trimLabel.classList.toggle('active', labelState.trim4x4);
 
-    // When crop labels is selected, hide QR code / custom message section
+    // When crop labels is selected or on Flipkart, hide QR code / custom message section
     if (customMsgSection) {
-      if (labelState.cropInvoice) {
+      if (labelState.cropInvoice || labelState.platform === 'flipkart') {
         customMsgSection.style.display = 'none';
         labelState.customMessage.enabled = false;
       } else {
@@ -685,6 +809,9 @@ function showSortingPanel() {
   if (meeshoPage) {
     meeshoPage.classList.add('sorting-active');
   }
+
+  // Ensure active platform settings (e.g. Flipkart single crop setting auto-selected) apply
+  setMarketplace(labelState.platform || 'meesho');
 }
 
 function showUploadPanel() {
@@ -789,14 +916,21 @@ async function generateSortedPdf() {
 
       const [copiedPage] = await outputPdf.copyPages(srcDoc, [label.pageIndex]);
 
-      // Apply Crop 1 (Crop below Product Details / remove invoice) and/or Option 2 (4x4 Standard Trim Whitespace outer border)
-      if (labelState.cropInvoice) {
-        cropBelowProductDetails(copiedPage, label);
-        if (labelState.trim4x4) {
-          trimOuterBordersCropped(copiedPage);
+      // Apply platform-specific cropping
+      if (labelState.platform === 'flipkart') {
+        if (labelState.cropInvoice) {
+          cropFlipkartLabel(copiedPage);
         }
-      } else if (labelState.trim4x4) {
-        trimWhitespace4x4(copiedPage, label);
+      } else {
+        // Existing Meesho Crop logic — 100% untouched
+        if (labelState.cropInvoice) {
+          cropBelowProductDetails(copiedPage, label);
+          if (labelState.trim4x4) {
+            trimOuterBordersCropped(copiedPage);
+          }
+        } else if (labelState.trim4x4) {
+          trimWhitespace4x4(copiedPage, label);
+        }
       }
 
       outputPdf.addPage(copiedPage);
@@ -825,6 +959,16 @@ async function generateSortedPdf() {
       genBtn.innerHTML = '📥 Generate Sorted PDF';
     }
   }
+}
+
+/**
+ * Flipkart Thermal Shipping Label Crop (removes Tax Invoice section and outer whitespace)
+ * Target coordinates verified against sellerbox_sorted_labels_20260917.pdf:
+ * Bounding Box: [x: 185.5, y: 459.5, width: 223.5, height: 359]
+ */
+function cropFlipkartLabel(page) {
+  page.setCropBox(185.5, 459.5, 223.5, 359);
+  page.setMediaBox(185.5, 459.5, 223.5, 359);
 }
 
 /**
@@ -1172,6 +1316,8 @@ export function startOver() {
   if (qrUrl) qrUrl.value = '';
   const qrPrev = document.getElementById('customQrPreviewContainer');
   if (qrPrev) qrPrev.style.display = 'none';
+
+  setMarketplace(labelState.platform || 'meesho');
 
   showToast('Reset complete — ready for new labels', 'info');
 }

@@ -13,16 +13,16 @@ export function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  
+
   const icons = { success: '✓', error: '✕', info: 'ℹ' };
   toast.innerHTML = `
     <span class="toast-icon">${icons[type] || 'ℹ'}</span>
     <span class="toast-message">${message}</span>
   `;
-  
+
   container.appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
-  
+
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 300);
@@ -496,7 +496,7 @@ export function renderGroupDetail(groupId, allSkus, onUpdate) {
     const selectedSkus = [...panel.querySelectorAll('.chip.selected')].map(c => c.dataset.sku);
     const name = panel.querySelector('#editGroupName').value;
     const cost = panel.querySelector('#editGroupCost').value;
-    
+
     try {
       saveBtn.disabled = true;
       saveBtn.textContent = '⏳ Saving...';
@@ -533,7 +533,7 @@ export function setupCreateGroupModal(allSkus, onCreated) {
   const btn = document.getElementById('createGroupBtn');
   const closeBtn = modal.querySelector('.modal-close');
   const form = document.getElementById('createGroupForm');
-  
+
   btn.addEventListener('click', () => {
     const skus = typeof allSkus === 'function' ? allSkus() : (allSkus || []);
     renderCreateGroupSkuSelector(skus);
@@ -655,12 +655,12 @@ export function renderUploadedFiles(files, { onRename, onDelete } = {}) {
   container.innerHTML = `
     <div class="reports-list">
       ${files.map((f, idx) => {
-        const reportName = f.reportName || f.filename;
-        const uploadDate = f.uploadedAt
-          ? new Date(f.uploadedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-          : '';
-        const count = f.orderCount || (f.orders ? f.orders.length : 0);
-        return `
+    const reportName = f.reportName || f.filename;
+    const uploadDate = f.uploadedAt
+      ? new Date(f.uploadedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+      : '';
+    const count = f.orderCount || (f.orders ? f.orders.length : 0);
+    return `
           <div class="report-card-item" data-index="${idx}">
             <div class="report-card-left">
               <span class="file-icon" style="font-size: 1.5rem;">📊</span>
@@ -685,7 +685,7 @@ export function renderUploadedFiles(files, { onRename, onDelete } = {}) {
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 
@@ -789,7 +789,7 @@ export function toggleMobileSidebar() {
 export function switchSection(sectionId) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  
+
   const targetId = (sectionId === 'labelSorter') ? 'labelSorterSection' : sectionId;
   const section = document.getElementById(targetId);
   if (section) {
@@ -836,7 +836,6 @@ export function renderSessionsList(sessions, activeSessionId, { onSwitch, onEdit
         <div class="empty-description">
           Save your current month's loaded files and analytics as a session to easily revisit, view, and compare anytime!
         </div>
-        <button class="btn btn-primary" id="emptySaveSessionBtn" style="margin-top: 16px;">💾 Save Current as Session</button>
       </div>
     `;
 

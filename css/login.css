@@ -248,3 +248,692 @@
     padding: 30px 22px 26px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   OTP AUTHENTICATION FLOW
+   ══════════════════════════════════════════════════════════ */
+
+/* Loading spinner while auth.js initializes */
+.otp-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.otp-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(139, 24, 116, 0.15);
+  border-top-color: #8B1874;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Step Progress Indicator */
+.otp-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 24px;
+}
+
+.otp-step {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #F3F4F6;
+  color: #9CA3AF;
+  border: 2px solid #E5E7EB;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.otp-step.active {
+  background: #8B1874;
+  color: #fff;
+  border-color: #8B1874;
+  box-shadow: 0 0 0 4px rgba(139, 24, 116, 0.15);
+}
+
+.otp-step.done {
+  background: #10B981;
+  color: #fff;
+  border-color: #10B981;
+  font-size: 0.75rem;
+}
+
+.otp-step-line {
+  flex: 1;
+  height: 2px;
+  background: #E5E7EB;
+  max-width: 40px;
+  min-width: 16px;
+  transition: background 0.3s ease;
+}
+
+.otp-step-line.done {
+  background: #10B981;
+}
+
+/* Phone Number Input */
+.otp-phone-field {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 16px 0 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
+}
+
+.otp-phone-field:focus-within {
+  border-color: #8B1874;
+  box-shadow: 0 0 0 3px rgba(139, 24, 116, 0.1);
+}
+
+.otp-country-code {
+  padding: 0 12px;
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: #1F2937;
+  background: #F9FAFB;
+  border-right: 1.5px solid #E5E7EB;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.otp-phone-input {
+  flex: 1;
+  height: 48px;
+  border: none;
+  outline: none;
+  padding: 0 16px;
+  font-size: 0.94rem;
+  font-family: 'Inter', sans-serif;
+  color: #1F2937;
+  background: transparent;
+  letter-spacing: 0.04em;
+}
+
+.otp-phone-input::placeholder {
+  color: #9CA3AF;
+  letter-spacing: 0;
+}
+
+/* Helper text */
+.otp-helper-text {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+  margin: 0 0 16px;
+  text-align: left;
+}
+
+/* OTP 6-digit boxes */
+.otp-boxes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.otp-box {
+  width: 44px;
+  height: 52px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1F2937;
+  font-family: 'IBM Plex Mono', monospace;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  background: #fff;
+  caret-color: #8B1874;
+}
+
+.otp-box:focus {
+  border-color: #8B1874;
+  box-shadow: 0 0 0 3px rgba(139, 24, 116, 0.12);
+  background: #FBF8FC;
+}
+
+.otp-box:not(:placeholder-shown) {
+  background: #F0FDF4;
+  border-color: #10B981;
+}
+
+/* Shake animation for wrong OTP */
+@keyframes otpShake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+}
+
+.otp-shake .otp-box {
+  animation: otpShake 0.55s ease;
+  border-color: #EF4444 !important;
+  background: #FFF1F2 !important;
+}
+
+/* Timer */
+.otp-timer {
+  font-size: 0.84rem;
+  color: #9CA3AF;
+  margin-bottom: 8px;
+}
+
+.otp-resend-btn {
+  background: none;
+  border: none;
+  color: #8B1874;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  transition: background 0.15s ease;
+}
+
+.otp-resend-btn:hover {
+  background: rgba(139, 24, 116, 0.06);
+}
+
+/* Primary Action Button */
+.otp-action-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 0.96rem;
+  font-weight: 600;
+  margin-top: 8px;
+  border-radius: 12px;
+}
+
+/* Error message */
+.otp-error-msg {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #B91C1C;
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+  text-align: left;
+  line-height: 1.45;
+}
+
+/* Back button */
+.otp-back-btn {
+  background: none;
+  border: none;
+  color: #6B7280;
+  font-size: 0.84rem;
+  cursor: pointer;
+  padding: 8px;
+  margin-top: 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.otp-back-btn:hover {
+  color: #1F2937;
+  background: rgba(0,0,0,0.04);
+}
+
+/* Profile Step Fields */
+.otp-profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+  text-align: left;
+}
+
+.otp-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.otp-profile-input {
+  width: 100%;
+  height: 48px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 0.94rem;
+  font-family: 'Inter', sans-serif;
+  color: #1F2937;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.otp-profile-input:focus {
+  border-color: #8B1874;
+  box-shadow: 0 0 0 3px rgba(139, 24, 116, 0.1);
+}
+
+.otp-profile-input::placeholder {
+  color: #9CA3AF;
+}
+
+.otp-field-hint {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  margin: 0;
+  padding-left: 2px;
+}
+
+@media (max-width: 480px) {
+  .otp-box {
+    width: 38px;
+    height: 46px;
+    font-size: 1.2rem;
+  }
+
+  .otp-boxes {
+    gap: 6px;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   UNIFIED INPUT (mobile/email) — Step 1
+   ══════════════════════════════════════════════════ */
+
+.otp-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 16px 0 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
+}
+
+.otp-input-wrap:focus-within {
+  border-color: #8B1874;
+  box-shadow: 0 0 0 3px rgba(139, 24, 116, 0.1);
+}
+
+.otp-input-prefix {
+  padding: 0 13px;
+  background: #F9FAFB;
+  border-right: 1.5px solid #E5E7EB;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #8B1874;
+  transition: color 0.2s ease;
+}
+
+.otp-input-wrap:focus-within .otp-input-prefix {
+  color: #8B1874;
+  background: #FBF6FA;
+}
+
+.otp-contact-input {
+  flex: 1;
+  height: 50px;
+  border: none;
+  outline: none;
+  padding: 0 14px;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  color: #1F2937;
+  background: transparent;
+}
+
+.otp-contact-input::placeholder {
+  color: #9CA3AF;
+}
+
+.otp-channel-hint {
+  font-size: 0.76rem;
+  color: #6B7280;
+  margin: 6px 0 14px;
+  padding: 5px 10px;
+  background: #F9FAFB;
+  border-radius: 6px;
+  border: 1px solid #F3F4F6;
+}
+
+.otp-channel-label {
+  font-size: 0.8rem;
+  color: #0EA5E9;
+  font-weight: 500;
+  margin: -8px 0 12px;
+}
+
+.otp-timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  min-height: 24px;
+}
+
+.otp-legal-footer {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+.otp-legal-footer a {
+  color: #8B1874;
+  text-decoration: none;
+}
+
+.otp-legal-footer a:hover {
+  text-decoration: underline;
+}
+
+.otp-skip-btn {
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 6px;
+  margin-top: 6px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.otp-skip-btn:hover {
+  color: #6B7280;
+  background: rgba(0,0,0,0.03);
+}
+
+/* Logged-in state of the header login button */
+.sb-btn-logged-in {
+  background: rgba(139, 24, 116, 0.08) !important;
+  color: #8B1874 !important;
+  border-color: rgba(139, 24, 116, 0.25) !important;
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════
+   SIDEBAR USER BADGE + LOGOUT BUTTON
+   ══════════════════════════════════════════════════ */
+
+.sidebar-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid #E8DFE9;
+  box-shadow: 0 2px 6px rgba(139, 24, 116, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  position: relative;
+}
+
+.sidebar-user-badge:hover {
+  background: #FCF8FB;
+  border-color: rgba(139, 24, 116, 0.35);
+  box-shadow: 0 4px 14px rgba(139, 24, 116, 0.12);
+  transform: translateY(-1px);
+}
+
+.sidebar-user-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sidebar-user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8B1874 0%, #C2185B 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(139, 24, 116, 0.28);
+}
+
+.sidebar-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22C55E;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-user-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0F172A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.sidebar-user-meta {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.sidebar-user-arrow {
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-user-badge:hover .sidebar-user-arrow {
+  color: #8B1874;
+  transform: translateX(2px);
+}
+
+.sidebar-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: #FEF2F2;
+  color: #DC2626;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+}
+
+.sidebar-logout-btn:hover {
+  background: #FEE2E2;
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #B91C1C;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.12);
+}
+
+.sidebar-logout-btn svg {
+  flex-shrink: 0;
+}
+
+/* ── Profile Modal Card & Elements ── */
+.profile-modal-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #FAF4F8 0%, #FFFFFF 100%);
+  border: 1px solid #EEDCE8;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.profile-modal-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8B1874 0%, #C2185B 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 10px rgba(139, 24, 116, 0.28);
+  flex-shrink: 0;
+}
+
+.profile-modal-hero-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.3;
+}
+
+.profile-modal-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8B1874;
+  background: rgba(139, 24, 116, 0.08);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.profile-tenant-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.profile-tenant-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748B;
+}
+
+.profile-tenant-code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  color: #334155;
+  background: #FFFFFF;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #CBD5E1;
+}
+
+.profile-modal-status {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.profile-modal-status.success {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
+}
+
+.profile-modal-status.error {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FCA5A5;
+}
+
+/* ── Brand prefix badge (top of Get Started form) ── */
+.otp-brand-prefix {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(139,24,116,0.08), rgba(194,24,91,0.06));
+  border: 1px solid rgba(139,24,116,0.18);
+  border-radius: 999px;
+  padding: 5px 14px 5px 8px;
+  margin-bottom: 18px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #8B1874;
+}
+
+.otp-brand-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.otp-brand-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
