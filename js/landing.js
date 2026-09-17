@@ -4,7 +4,8 @@
  * ══════════════════════════════════════════════════════════════════════
  */
 import { renderInfoPage, INFO_PAGES } from './infoPages.js';
-import { mountLabelSorter, setMarketplace } from './labelSorter.js';
+import { mountLabelSorter, setMarketplace, resetForMarketplaceSwitch } from './labelSorter.js';
+import { initMotionPrimitives } from './motionPrimitives.js';
 
 // Feature Showcase Tab Definitions
 const FEATURE_TABS = {
@@ -158,6 +159,7 @@ export function initLandingPage() {
   initMobileMenu();
   initLoginScreen();
   initLabelCropPage();
+  initMotionPrimitives();
   setupClientRouting();
 }
 
@@ -392,10 +394,12 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     'contact-us': 'contact'
   };
 
-  // Helper: push to browser history without hash
+  // Helper: push or replace browser history without hash
   const pushCleanUrl = (path) => {
     if (doPush && window.location.pathname !== path) {
       history.pushState({ route }, '', path);
+    } else if (!doPush && window.location.pathname !== path) {
+      history.replaceState({ route }, '', path);
     }
   };
 
@@ -417,7 +421,9 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (route === 'label-sort-crop/flipkart' || route === 'label-sort-crop-flipkart' || route === 'labels/flipkart') {
     // Public Flipkart Label Crop & Sort Page (no login required)
+    const wasAlreadyOnTool = labelCropMeeshoView && labelCropMeeshoView.style.display === 'block';
     mountLabelSorter('public');
+    if (typeof resetForMarketplaceSwitch === 'function') resetForMarketplaceSwitch();
     setMarketplace('flipkart');
     if (publicSite) publicSite.style.display = 'block';
     landingView.style.display = 'none';
@@ -428,10 +434,14 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     if (footer) footer.style.display = 'block';
     appLayout.style.display = 'none';
     pushCleanUrl('/labels/flipkart');
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (!wasAlreadyOnTool) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   } else if (route === 'label-sort-crop/meesho' || route === 'label-sort-crop-meesho' || route === 'labels/meesho' || route === 'label-sort' || route === 'labels') {
     // Public Meesho Label Crop & Sort Page (no login required)
+    const wasAlreadyOnTool = labelCropMeeshoView && labelCropMeeshoView.style.display === 'block';
     mountLabelSorter('public');
+    if (typeof resetForMarketplaceSwitch === 'function') resetForMarketplaceSwitch();
     setMarketplace('meesho');
     if (publicSite) publicSite.style.display = 'block';
     landingView.style.display = 'none';
@@ -442,7 +452,9 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     if (footer) footer.style.display = 'block';
     appLayout.style.display = 'none';
     pushCleanUrl('/labels/meesho');
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (!wasAlreadyOnTool) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   } else if (route === 'label-sort-crop') {
     // Marketplace Label Selector Directory
     if (publicSite) publicSite.style.display = 'block';
@@ -456,6 +468,13 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     pushCleanUrl('/labels');
     window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (route === 'login' || route === 'signin') {
+    // Auth guard: If user is already authenticated, prevent accessing login page and redirect to dashboard
+    const token = localStorage.getItem('fc_auth_token');
+    if (token) {
+      navigateTo('dashboard', { pushState: doPush });
+      return;
+    }
+
     // Dedicated Login / OTP Authentication Screen
     if (publicSite) publicSite.style.display = 'block';
     landingView.style.display = 'none';
@@ -600,7 +619,13 @@ function handlePathname() {
   } else if (path === '/labels') {
     navigateTo('label-sort-crop', { pushState: false });
   } else if (path === '/login' || path === '/signin') {
-    navigateTo('login', { pushState: false });
+    const token = localStorage.getItem('fc_auth_token');
+    if (token) {
+      history.replaceState({ route: 'dashboard' }, '', '/dashboard');
+      navigateTo('dashboard', { pushState: false });
+    } else {
+      navigateTo('login', { pushState: false });
+    }
   } else if (path === '/privacy' || path === '/privacy-policy') {
     navigateTo('privacy', { pushState: false });
   } else if (path === '/terms' || path === '/terms-and-conditions') {

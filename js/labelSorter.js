@@ -53,6 +53,7 @@ export function initLabelSorter() {
   setupComboControls();
   setupCustomMessage();
   setupActionButtons();
+  setMarketplace(labelState.platform || 'meesho');
 }
 
 /**
@@ -63,11 +64,25 @@ export function setMarketplace(platform) {
   labelState.platform = platform === 'flipkart' ? 'flipkart' : 'meesho';
   const isFlipkart = labelState.platform === 'flipkart';
 
+  // Toggle container platform class and data attribute for CSS targeting
+  const sorter = document.getElementById('labelSorter');
+  if (sorter) {
+    sorter.setAttribute('data-platform', labelState.platform);
+    sorter.classList.toggle('platform-flipkart', isFlipkart);
+    sorter.classList.toggle('platform-meesho', !isFlipkart);
+  }
+
   // Update pills in workspace
   const btnMeesho = document.getElementById('platformBtnMeesho');
   const btnFlipkart = document.getElementById('platformBtnFlipkart');
   if (btnMeesho) btnMeesho.classList.toggle('active', !isFlipkart);
   if (btnFlipkart) btnFlipkart.classList.toggle('active', isFlipkart);
+
+  // Update section title
+  const trimCropTitle = document.getElementById('trimCropConfigTitle');
+  if (trimCropTitle) {
+    trimCropTitle.textContent = isFlipkart ? 'Crop Settings' : 'Trim & Crop';
+  }
 
   // Update header and description
   const uploadTitle = document.getElementById('labelUploadHeaderTitle');
@@ -99,22 +114,28 @@ export function setMarketplace(platform) {
   const cropDesc = document.querySelector('#cropInvoiceOptionLabel .trim-option-desc');
 
   if (isFlipkart) {
-    // For Flipkart: auto-select crop setting by default and remove 4x4, combo, and custom message
+    // For Flipkart: auto-select crop setting by default and strictly remove 4x4, combo, and custom message
     labelState.cropInvoice = true;
     labelState.trim4x4 = false;
     if (cropCb) cropCb.checked = true;
     if (trimCb) trimCb.checked = false;
     if (cropLabel) cropLabel.classList.add('active');
-    if (trim4x4Label) trim4x4Label.style.display = 'none';
-    if (comboSection) comboSection.style.display = 'none';
-    if (customMsgSection) customMsgSection.style.display = 'none';
+    if (trim4x4Label) {
+      trim4x4Label.style.setProperty('display', 'none', 'important');
+      trim4x4Label.classList.remove('active');
+    }
+    if (comboSection) comboSection.style.setProperty('display', 'none', 'important');
+    if (customMsgSection) customMsgSection.style.setProperty('display', 'none', 'important');
     if (cropTitle) cropTitle.textContent = '✂️ Crop labels (remove invoice section)';
     if (cropDesc) cropDesc.textContent = 'Removes the tax-invoice block below the label.';
   } else {
     // For Meesho: restore 4x4 option, combo section, and meesho defaults
-    if (trim4x4Label) trim4x4Label.style.display = '';
-    if (comboSection) comboSection.style.display = '';
-    if (customMsgSection) customMsgSection.style.display = labelState.cropInvoice ? 'none' : '';
+    if (trim4x4Label) trim4x4Label.style.removeProperty('display');
+    if (comboSection) comboSection.style.removeProperty('display');
+    if (customMsgSection) {
+      customMsgSection.style.removeProperty('display');
+      customMsgSection.style.display = labelState.cropInvoice ? 'none' : '';
+    }
     if (cropTitle) cropTitle.textContent = '✂️ Crop labels (remove invoice section)';
     if (cropDesc) cropDesc.textContent = 'Removes the tax-invoice block below the label.';
   }
@@ -157,18 +178,54 @@ export function setMarketplace(platform) {
   }
 }
 
+/**
+ * Reset file upload area to a fresh state when switching marketplaces
+ * (clears files and returns to upload panel, without scrolling the page)
+ */
+export function resetForMarketplaceSwitch() {
+  labelState.uploadedFiles = [];
+  labelState.labels = [];
+  labelState.pdfDocs = [];
+  labelState.skuOrder = [];
+  labelState.excludedKeys = new Set();
+  labelState.isProcessing = false;
+  labelState.isParsed = false;
+  labelState.generatedPdfBytes = null;
+  labelState.stats = null;
+
+  // Clear file input element
+  const fileInput = document.getElementById('labelFileInput');
+  if (fileInput) fileInput.value = '';
+
+  // Return to upload panel cleanly
+  showUploadPanel();
+  renderUploadedFileList();
+  updatePrepareButtonState();
+
+  const meeshoPage = document.getElementById('labelCropMeeshoView');
+  if (meeshoPage) {
+    meeshoPage.classList.remove('sorting-active');
+  }
+}
+
 function setupMarketplaceSelector() {
   const btnMeesho = document.getElementById('platformBtnMeesho');
   const btnFlipkart = document.getElementById('platformBtnFlipkart');
 
   btnMeesho?.addEventListener('click', (e) => {
     e.preventDefault();
-    setMarketplace('meesho');
+    if (labelState.platform !== 'meesho') {
+      resetForMarketplaceSwitch();
+      setMarketplace('meesho');
+    }
   });
 
   btnFlipkart?.addEventListener('click', (e) => {
     e.preventDefault();
-    setMarketplace('flipkart');
+    if (labelState.platform !== 'flipkart') {
+      resetForMarketplaceSwitch();
+      setMarketplace('flipkart');
+    }
   });
 }
 
@@ -351,7 +408,7 @@ export async function processLabels() {
 
     // Auto-detect if uploaded files are Flipkart labels
     if (labelState.labels.some(l => l.platform === 'flipkart')) {
-      labelState.platform = 'flipkart';
+      setMarketplace('flipkart');
     }
 
     // Load PDFDocument instances for pdf-lib manipulation
@@ -495,6 +552,23 @@ function setupTrimCropControls() {
   const customMsgSection = document.getElementById('customMsgSection');
 
   function syncTrimCropState(selected) {
+    if (labelState.platform === 'flipkart') {
+      labelState.cropInvoice = true;
+      labelState.trim4x4 = false;
+      if (cropCb) cropCb.checked = true;
+      if (trimCb) trimCb.checked = false;
+      if (cropLabel) cropLabel.classList.add('active');
+      if (trimLabel) {
+        trimLabel.style.setProperty('display', 'none', 'important');
+        trimLabel.classList.remove('active');
+      }
+      if (customMsgSection) {
+        customMsgSection.style.setProperty('display', 'none', 'important');
+        labelState.customMessage.enabled = false;
+      }
+      return;
+    }
+
     if (selected === 'crop') {
       if (cropCb) cropCb.checked = true;
       if (trimCb) trimCb.checked = false;

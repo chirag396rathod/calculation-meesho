@@ -132,6 +132,12 @@ export function updateAuthUI() {
       sidebarLogoutBtn.style.display = 'flex';
     }
 
+    const footerLoginLink = document.getElementById('sbFooterLoginLink');
+    if (footerLoginLink) {
+      footerLoginLink.textContent = 'Dashboard';
+      footerLoginLink.dataset.sbRoute = 'dashboard';
+    }
+
   } else {
     // ── NOT LOGGED IN ──
     // Show "Get Started", hide "Dashboard →"
@@ -147,6 +153,12 @@ export function updateAuthUI() {
       dashBtn.style.setProperty('display', 'none', 'important');
       dashBtn.classList.add('sb-header-btn-hidden');
       dashBtn.setAttribute('hidden', '');
+    }
+
+    const footerLoginLink = document.getElementById('sbFooterLoginLink');
+    if (footerLoginLink) {
+      footerLoginLink.textContent = 'Login / Sign In';
+      footerLoginLink.dataset.sbRoute = 'login';
     }
 
     if (sidebarUserName) sidebarUserName.textContent = 'Guest User';
@@ -224,6 +236,12 @@ export function logout() {
 // ────────────────────────────────────────────────
 
 export function initOtpFlow() {
+  const token = getToken();
+  if (token) {
+    import('./landing.js').then(({ navigateTo }) => navigateTo('dashboard'));
+    return;
+  }
+
   const loginView = document.getElementById('loginView');
   if (!loginView) return;
 

@@ -3413,6 +3413,20 @@ body::before {
   color: #FFFFFF;
 }
 
+/* ── Flipkart Cropping Mode: strictly hide 4x4, combo, and custom message ── */
+#labelSorter.platform-flipkart #trim4x4OptionLabel,
+#labelSorter[data-platform="flipkart"] #trim4x4OptionLabel,
+.platform-flipkart #trim4x4OptionLabel,
+#labelSorter.platform-flipkart #comboSection,
+#labelSorter[data-platform="flipkart"] #comboSection,
+.platform-flipkart #comboSection,
+#labelSorter.platform-flipkart #customMsgSection,
+#labelSorter[data-platform="flipkart"] #customMsgSection,
+.platform-flipkart #customMsgSection {
+  display: none !important;
+}
+
+
 .label-platform-pill:not(.active) .platform-status-badge.live {
   background: #E2E8F0;
   color: #64748B;

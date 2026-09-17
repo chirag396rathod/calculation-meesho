@@ -18,8 +18,10 @@
   <link rel="stylesheet" href="/css/infoPages.css">
   <link rel="stylesheet" href="/css/login.css">
   <link rel="stylesheet" href="/css/labelCrop.css">
+  <link rel="stylesheet" href="/css/motion.css">
 </head>
 <body>
+  <div id="scrollProgressBar" class="motion-scroll-progress"></div>
   <!-- ══════════════════════════════════════════════════════════════════════
        PUBLIC MARKETING & INFORMATION EXPERIENCE
        ══════════════════════════════════════════════════════════════════════ -->
@@ -65,7 +67,7 @@
 
             <h1 class="sb-hero-title">
               The Free Meesho Seller Dashboard:
-              <span class="sb-highlight">Label Crop, Sort & Profit Tracking</span>
+              <span class="sb-highlight motion-text-shimmer">Label Crop, Sort &amp; Profit Tracking</span>
             </h1>
 
             <p class="sb-hero-desc">
@@ -73,11 +75,11 @@
             </p>
 
             <div class="sb-hero-actions">
-              <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard">
+              <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard" data-motion-magnetic>
                 Get Started for Free →
               </button>
-              <button class="sb-btn sb-btn-outline sb-btn-lg" data-sb-route="label-sort">
-                🏷️ Sort & Crop Labels
+              <button class="sb-btn sb-btn-outline sb-btn-lg" data-sb-route="label-sort" data-motion-magnetic>
+                🏷️ Sort &amp; Crop Labels
               </button>
             </div>
 
@@ -102,7 +104,7 @@
 
           <!-- Hero Visual Mockup -->
           <div class="sb-hero-visual">
-            <div class="sb-mockup-card">
+            <div class="sb-mockup-card" data-motion-tilt data-tilt-max="5">
               <div class="sb-mockup-header">
                 <div class="sb-mockup-dots">
                   <span></span><span></span><span></span>
@@ -113,11 +115,11 @@
               <div class="sb-mockup-stats-row">
                 <div class="sb-preview-metric">
                   <div class="sb-metric-caption">Net Profit Margin</div>
-                  <div class="sb-metric-val green">+29.4%</div>
+                  <div class="sb-metric-val green" data-motion-count="29.4" data-motion-prefix="+" data-motion-suffix="%" data-motion-decimals="1">+29.4%</div>
                 </div>
                 <div class="sb-preview-metric">
                   <div class="sb-metric-caption">Labels Processed</div>
-                  <div class="sb-metric-val blue">14,280</div>
+                  <div class="sb-metric-val blue" data-motion-count="14280" data-motion-decimals="0">14,280</div>
                 </div>
               </div>
 
@@ -158,26 +160,26 @@
           <p class="sb-section-subtitle">Transform your raw Meesho exports and shipping label PDFs into a professional operations center in minutes.</p>
         </div>
 
-        <div class="sb-steps-grid">
-          <div class="sb-step-card">
+        <div class="sb-steps-grid motion-in-view-group">
+          <div class="sb-step-card motion-stagger-item" data-motion-spotlight>
             <span class="sb-step-badge">Step 1</span>
             <div class="sb-step-icon-wrap">📂</div>
             <h3 class="sb-step-title">Upload Supplier Data</h3>
             <p class="sb-step-desc">Import order and payment Excel files directly from your Meesho or marketplace supplier panel into the dashboard.</p>
           </div>
 
-          <div class="sb-step-card">
+          <div class="sb-step-card motion-stagger-item" data-motion-spotlight>
             <span class="sb-step-badge">Step 2</span>
             <div class="sb-step-icon-wrap">💰</div>
             <h3 class="sb-step-title">Calculate Real Margins</h3>
             <p class="sb-step-desc">Add SKU manufacturing and packaging costs to instantly reveal true net profit per product after returns and shipping deductions.</p>
           </div>
 
-          <div class="sb-step-card">
+          <div class="sb-step-card motion-stagger-item" data-motion-spotlight>
             <span class="sb-step-badge">Step 3</span>
             <div class="sb-step-icon-wrap">🏷️</div>
-            <h3 class="sb-step-title">Crop, Sort & Dispatch</h3>
-            <p class="sb-step-desc">Batch crop shipping labels below product details, sort by courier partner, attach custom messages & QR codes, and print clean PDFs.</p>
+            <h3 class="sb-step-title">Crop, Sort &amp; Dispatch</h3>
+            <p class="sb-step-desc">Batch crop shipping labels below product details, sort by courier partner, attach custom messages &amp; QR codes, and print clean PDFs.</p>
           </div>
         </div>
       </div>
@@ -191,28 +193,28 @@
             <div class="sb-stat-item">
               <div class="sb-stat-icon-box">👥</div>
               <div>
-                <div class="sb-stat-num">5,000+</div>
+                <div class="sb-stat-num" data-motion-count="5000" data-motion-suffix="+">5,000+</div>
                 <div class="sb-stat-label">Active Sellers</div>
               </div>
             </div>
             <div class="sb-stat-item">
               <div class="sb-stat-icon-box">🏷️</div>
               <div>
-                <div class="sb-stat-num">2.5M+</div>
-                <div class="sb-stat-label">Labels Sorted & Cropped</div>
+                <div class="sb-stat-num" data-motion-count="2.5" data-motion-suffix="M+" data-motion-decimals="1">2.5M+</div>
+                <div class="sb-stat-label">Labels Sorted &amp; Cropped</div>
               </div>
             </div>
             <div class="sb-stat-item">
               <div class="sb-stat-icon-box">📦</div>
               <div>
-                <div class="sb-stat-num">8.4M+</div>
+                <div class="sb-stat-num" data-motion-count="8.4" data-motion-suffix="M+" data-motion-decimals="1">8.4M+</div>
                 <div class="sb-stat-label">Orders Reconciled</div>
               </div>
             </div>
             <div class="sb-stat-item">
               <div class="sb-stat-icon-box">₹</div>
               <div>
-                <div class="sb-stat-num">₹120Cr+</div>
+                <div class="sb-stat-num" data-motion-count="120" data-motion-prefix="₹" data-motion-suffix="Cr+">₹120Cr+</div>
                 <div class="sb-stat-label">Order Value Processed</div>
               </div>
             </div>
@@ -233,9 +235,9 @@
           <p class="sb-section-subtitle">Select your marketplace to crop, sort, and prepare clean thermal PDF labels for daily packing.</p>
         </div>
 
-        <div class="sb-market-tools-grid">
+        <div class="sb-market-tools-grid motion-in-view-group">
           <!-- Meesho (ACTIVE) -->
-          <div class="sb-market-card active">
+          <div class="sb-market-card active motion-stagger-item" data-motion-spotlight data-motion-tilt data-tilt-max="4">
             <div>
               <div class="sb-market-card-top">
                 <div class="sb-market-icon-name" style="color: var(--sb-primary); display: flex; align-items: center; gap: 10px;">
@@ -245,16 +247,16 @@
                 <span class="sb-badge-live">✓ Live Now</span>
               </div>
               <p class="sb-market-card-desc">
-                Crop below product details, 4×4 standard thermal trim, auto-group by courier (Xpress Bees, Valmo, Shadowfax), with custom seller message & QR code generator.
+                Crop below product details, 4×4 standard thermal trim, auto-group by courier (Xpress Bees, Valmo, Shadowfax), with custom seller message &amp; QR code generator.
               </p>
             </div>
-            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort-crop/meesho" style="width: 100%;">
+            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort-crop/meesho" style="width: 100%;" data-motion-magnetic>
               Open Meesho Cropper →
             </button>
           </div>
 
           <!-- Flipkart (ACTIVE - Next to Meesho) -->
-          <div class="sb-market-card active flipkart" style="border-color: #2874F0;">
+          <div class="sb-market-card active flipkart motion-stagger-item" style="border-color: #2874F0;" data-motion-spotlight data-motion-tilt data-tilt-max="4">
             <div>
               <div class="sb-market-card-top">
                 <div class="sb-market-icon-name" style="color: #2874F0; display: flex; align-items: center; gap: 10px;">
@@ -267,7 +269,7 @@
                 Crop tax invoice section away, 3×5 thermal print format, auto-group by courier (Ekart Logistics, Delhivery, Shadowfax), and alphabetical SKU sorting.
               </p>
             </div>
-            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort-crop/flipkart" style="width: 100%; background: #2874F0; border-color: #2874F0;">
+            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort-crop/flipkart" style="width: 100%; background: #2874F0; border-color: #2874F0;" data-motion-magnetic>
               Open Flipkart Cropper →
             </button>
           </div>
@@ -309,7 +311,7 @@
           <button class="sb-tab-btn" data-tab="reconciliation">⚖️ Settlement Reconciliation</button>
         </div>
 
-        <div class="sb-showcase-box">
+        <div class="sb-showcase-box" data-motion-spotlight>
           <div class="sb-showcase-grid">
             <div class="sb-showcase-info">
               <h3 id="sbShowcaseTitle">Meesho & Marketplace Shipping Label Crop & Sorter</h3>
@@ -324,17 +326,17 @@
               </ul>
 
               <div class="sb-showcase-btn-group">
-                <button class="sb-btn sb-btn-primary" data-sb-route="label-sort">
+                <button class="sb-btn sb-btn-primary" data-sb-route="label-sort" data-motion-magnetic>
                   Open Label Tool Now →
                 </button>
-                <button class="sb-btn sb-btn-outline" data-sb-route="dashboard">
+                <button class="sb-btn sb-btn-outline" data-sb-route="dashboard" data-motion-magnetic>
                   Explore Full Dashboard
                 </button>
               </div>
             </div>
 
             <div class="sb-showcase-preview-frame" id="sbShowcasePreview">
-              <div style="background: white; border-radius: 12px; padding: 14px; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+              <div style="background: white; border-radius: 12px; padding: 14px; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);" data-motion-tilt data-tilt-max="4">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #F1F4F9; padding-bottom: 8px; gap: 8px;">
                   <span style="font-weight: 600; color: #8B1874; font-size: 13px; white-space: nowrap;">🏷️ Thermal Label Preview</span>
                   <span style="background: #FBF0F7; color: #8B1874; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">Cropped Details</span>
@@ -373,7 +375,7 @@
           <p class="sb-section-subtitle">Simulate real profitability including return freight penalties, marketplace commission, and GST.</p>
         </div>
 
-        <div class="sb-calc-card">
+        <div class="sb-calc-card" data-motion-spotlight>
           <div class="sb-calc-grid">
             <div class="sb-calc-inputs">
               <div class="sb-input-group">
@@ -456,7 +458,7 @@
                 </div>
               </div>
 
-              <button class="sb-btn sb-btn-primary" data-sb-route="dashboard" style="width: 100%; margin-top: 16px;">
+              <button class="sb-btn sb-btn-primary" data-sb-route="dashboard" style="width: 100%; margin-top: 16px;" data-motion-magnetic>
                 Analyze Entire Catalog →
               </button>
             </div>
@@ -476,38 +478,38 @@
           <h2 class="sb-section-title">Everything an e-commerce seller needs to sell smarter.</h2>
         </div>
 
-        <div class="sb-benefits-grid">
-          <div class="sb-benefit-card">
+        <div class="sb-benefits-grid motion-in-view-group">
+          <div class="sb-benefit-card motion-stagger-item" data-motion-spotlight data-motion-tilt data-tilt-max="3">
             <div class="sb-benefit-icon">📈</div>
             <h3 class="sb-benefit-title">Live Order Tracking</h3>
             <p class="sb-benefit-desc">Monitor every marketplace order, transit status, and delivery milestones from one centralized view.</p>
           </div>
 
-          <div class="sb-benefit-card">
+          <div class="sb-benefit-card motion-stagger-item" data-motion-spotlight data-motion-tilt data-tilt-max="3">
             <div class="sb-benefit-icon">🏬</div>
             <h3 class="sb-benefit-title">Multi-Store Management</h3>
             <p class="sb-benefit-desc">Manage Meesho, Amazon, and Flipkart seller accounts simultaneously without tab-switching chaos.</p>
           </div>
 
-          <div class="sb-benefit-card">
+          <div class="sb-benefit-card motion-stagger-item" data-motion-spotlight data-motion-tilt data-tilt-max="3">
             <div class="sb-benefit-icon">⚖️</div>
             <h3 class="sb-benefit-title">Smart Reconciliation</h3>
             <p class="sb-benefit-desc">Automatically cross-match marketplace remittance files against bank accounts to identify missing credits.</p>
           </div>
 
-          <div class="sb-benefit-card">
+          <div class="sb-benefit-card motion-stagger-item" data-motion-spotlight data-motion-tilt data-tilt-max="3">
             <div class="sb-benefit-icon">📦</div>
             <h3 class="sb-benefit-title">SKU Performance Analytics</h3>
             <p class="sb-benefit-desc">Gain instant clarity on which product variants drive profits and which ones drain cash on return logistics.</p>
           </div>
 
-          <div class="sb-benefit-card">
+          <div class="sb-benefit-card motion-stagger-item" data-motion-spotlight data-motion-tilt data-tilt-max="3">
             <div class="sb-benefit-icon">🔒</div>
             <h3 class="sb-benefit-title">100% Client-Side Privacy</h3>
             <p class="sb-benefit-desc">Your customer names, addresses, and financials never leave your browser. Zero third-party cloud data risks.</p>
           </div>
 
-          <div class="sb-benefit-card">
+          <div class="sb-benefit-card motion-stagger-item" data-motion-spotlight data-motion-tilt data-tilt-max="3">
             <div class="sb-benefit-icon">💬</div>
             <h3 class="sb-benefit-title">Dedicated Community & Support</h3>
             <p class="sb-benefit-desc">Get prompt assistance, feature tutorials, and connect directly with other high-volume marketplace sellers.</p>
@@ -532,17 +534,17 @@
               Here is everything you need to know about label sorting, profit tracking, and account management.
             </p>
 
-            <div style="background: white; border: 4px solid var(--sb-border); border-radius: 24px; padding: 24px;">
+            <div style="background: white; border: 4px solid var(--sb-border); border-radius: 24px; padding: 24px;" data-motion-spotlight>
               <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Still have questions?</h4>
               <p style="color: var(--sb-text-muted); font-size: 0.92rem; margin-bottom: 16px;">Chat with our seller support team on WhatsApp.</p>
-              <a href="https://api.whatsapp.com/send?phone=917069051397&text=Hi+I+need+help+with+FC+Analytics" target="_blank" class="sb-btn sb-btn-primary" style="text-decoration: none;">
+              <a href="https://api.whatsapp.com/send?phone=918866275945&text=Hi+I+need+help+with+FC+Analytics" target="_blank" class="sb-btn sb-btn-primary" style="text-decoration: none;" data-motion-magnetic>
                 Chat on WhatsApp 💬
               </a>
             </div>
           </div>
 
-          <div class="sb-faq-list">
-            <div class="sb-faq-item open">
+          <div class="sb-faq-list motion-in-view-group">
+            <div class="sb-faq-item open motion-stagger-item" data-motion-spotlight>
               <div class="sb-faq-question">
                 <span>1. What is FC Analytics?</span>
                 <span class="sb-faq-toggle-icon">▼</span>
@@ -552,7 +554,7 @@
               </div>
             </div>
 
-            <div class="sb-faq-item">
+            <div class="sb-faq-item motion-stagger-item" data-motion-spotlight>
               <div class="sb-faq-question">
                 <span>2. How does the Label Crop & Sort tool work?</span>
                 <span class="sb-faq-toggle-icon">▼</span>
@@ -562,7 +564,7 @@
               </div>
             </div>
 
-            <div class="sb-faq-item">
+            <div class="sb-faq-item motion-stagger-item" data-motion-spotlight>
               <div class="sb-faq-question">
                 <span>3. Is my sensitive sales and customer data safe?</span>
                 <span class="sb-faq-toggle-icon">▼</span>
@@ -572,7 +574,7 @@
               </div>
             </div>
 
-            <div class="sb-faq-item">
+            <div class="sb-faq-item motion-stagger-item" data-motion-spotlight>
               <div class="sb-faq-question">
                 <span>4. Can I factor in RTO losses when calculating SKU profit?</span>
                 <span class="sb-faq-toggle-icon">▼</span>
@@ -582,7 +584,7 @@
               </div>
             </div>
 
-            <div class="sb-faq-item">
+            <div class="sb-faq-item motion-stagger-item" data-motion-spotlight>
               <div class="sb-faq-question">
                 <span>5. Which courier partners are recognized automatically?</span>
                 <span class="sb-faq-toggle-icon">▼</span>
@@ -592,7 +594,7 @@
               </div>
             </div>
 
-            <div class="sb-faq-item">
+            <div class="sb-faq-item motion-stagger-item" data-motion-spotlight>
               <div class="sb-faq-question">
                 <span>6. How does Monthly Session saving work?</span>
                 <span class="sb-faq-toggle-icon">▼</span>
@@ -602,7 +604,7 @@
               </div>
             </div>
 
-            <div class="sb-faq-item">
+            <div class="sb-faq-item motion-stagger-item" data-motion-spotlight>
               <div class="sb-faq-question">
                 <span>7. Is FC Analytics free to use?</span>
                 <span class="sb-faq-toggle-icon">▼</span>
@@ -618,14 +620,14 @@
 
     <!-- ═══ WhatsApp CTA Banner ═══ -->
     <div class="sb-container">
-      <div class="sb-cta-banner">
+      <div class="sb-cta-banner" data-motion-spotlight data-motion-tilt data-tilt-max="2">
         <h2>Start selling smarter with complete operational clarity.</h2>
         <p>Save hours of manual dispatch sorting and eliminate spreadsheet errors starting today.</p>
         <div class="sb-banner-btn-group">
-          <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard">
+          <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard" data-motion-magnetic>
             Launch Free Dashboard →
           </button>
-          <a href="https://api.whatsapp.com/send?phone=917069051397&text=Hi+I+need+help+with+FC+Analytics" target="_blank" class="sb-btn sb-btn-outline sb-btn-lg" style="text-decoration: none;">
+          <a href="https://api.whatsapp.com/send?phone=918866275945&text=Hi+I+need+help+with+FC+Analytics" target="_blank" class="sb-btn sb-btn-outline sb-btn-lg" style="text-decoration: none;" data-motion-magnetic>
             Chat on WhatsApp 💬
           </a>
         </div>
@@ -1147,7 +1149,7 @@
 
                       <!-- Trim & Crop (2 Checkbox Options) -->
                       <div class="label-config-section">
-                        <div class="label-config-title">Trim &amp; Crop</div>
+                        <div class="label-config-title" id="trimCropConfigTitle">Trim &amp; Crop</div>
                         <label class="trim-option" id="cropInvoiceOptionLabel">
                           <input type="checkbox" id="cropInvoiceCheckbox" name="cropInvoice" checked>
                           <div class="trim-option-content">
@@ -1495,7 +1497,7 @@
             <h4>Quick Navigation</h4>
             <ul class="sb-footer-links">
               <li><a href="#" data-sb-route="home">Home</a></li>
-              <li><a href="#" data-sb-route="login">Login / Sign In</a></li>
+              <li><a href="#" data-sb-route="login" id="sbFooterLoginLink">Login / Sign In</a></li>
               <li><a href="#" data-sb-route="label-sort">Shipping Label Sorter</a></li>
               <li><a href="#calculator">Meesho Profit Calculator</a></li>
               <li><a href="#" data-sb-route="dashboard">Full Business Dashboard</a></li>

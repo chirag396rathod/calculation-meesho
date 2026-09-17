@@ -269,7 +269,7 @@ export const INFO_PAGES = {
           </div>
 
           <div style="margin-top: 24px;">
-            <a href="https://api.whatsapp.com/send?phone=917069051397&text=Hi+I+need+help+with+FC+Analytics" target="_blank" class="sb-btn sb-btn-primary" style="width: 100%; text-decoration: none; justify-content: center;">
+            <a href="https://api.whatsapp.com/send?phone=918866275945&text=Hi+I+need+help+with+FC+Analytics" target="_blank" class="sb-btn sb-btn-primary" style="width: 100%; text-decoration: none; justify-content: center;">
               💬 Chat on WhatsApp Now
             </a>
           </div>

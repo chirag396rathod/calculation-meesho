@@ -1,0 +1,407 @@
+/* ══════════════════════════════════════════════════════════════════════
+   MOTION-PRIMITIVES DESIGN SYSTEM & ANIMATION SUITE FOR FC ANALYTICS
+   Inspired by motion-primitives.com:
+   - Spotlight Glow
+   - 3D Interactive Perspective Tilt
+   - Luminous Border Trail / Beam
+   - Text Shimmer & Dynamic Text Loop
+   - Scroll Progress Bar
+   - In-View Stagger Fade-Up Entrances
+   - Magnetic Interactive Buttons
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Scroll Progress Bar (/docs/scroll-progress) ── */
+.motion-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #8B1874 0%, #FF6B9D 50%, #8B1874 100%);
+  background-size: 200% 100%;
+  box-shadow: 0 0 10px rgba(255, 107, 157, 0.6), 0 0 4px rgba(139, 24, 116, 0.4);
+  z-index: 9999;
+  pointer-events: none;
+  transition: width 0.08s ease-out;
+  animation: motionShimmerGradient 3s linear infinite;
+}
+
+@keyframes motionShimmerGradient {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ── 2. Spotlight Glow Effect (/docs/spotlight, /docs/glow-effect) ── */
+[data-motion-spotlight] {
+  position: relative;
+  overflow: hidden;
+  --mouse-x: -999px;
+  --mouse-y: -999px;
+  --spotlight-color: rgba(139, 24, 116, 0.07);
+  --spotlight-size: 320px;
+}
+
+[data-motion-spotlight]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    var(--spotlight-size) circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-color),
+    transparent 80%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+[data-motion-spotlight]:hover::before {
+  opacity: 1;
+}
+
+/* ── 3. 3D Perspective Tilt (/docs/tilt) ── */
+[data-motion-tilt] {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease;
+}
+
+/* ── 4. Luminous Border Trail / Border Beam (/docs/border-trail) ── */
+.motion-border-trail-wrap {
+  position: relative;
+  border-radius: inherit;
+}
+
+.motion-border-trail {
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.motion-border-trail::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(255, 107, 157, 0.1) 40deg,
+    rgba(255, 107, 157, 0.95) 80deg,
+    rgba(139, 24, 116, 0.9) 110deg,
+    transparent 140deg,
+    transparent 360deg
+  );
+  animation: borderTrailRotate 5s linear infinite;
+  mask: radial-gradient(circle at center, transparent calc(100% - 3px), black calc(100% - 2.5px));
+  -webkit-mask: radial-gradient(farthest-side at center, transparent calc(100% - 3px), black calc(100% - 2.5px));
+}
+
+@keyframes borderTrailRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── 5. Text Shimmer (/docs/text-shimmer) ── */
+.motion-text-shimmer {
+  background: linear-gradient(
+    110deg,
+    #8B1874 0%,
+    #8B1874 35%,
+    #FF85B3 50%,
+    #8B1874 65%,
+    #8B1874 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmerSweep 4s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes textShimmerSweep {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* Pill badge shimmer */
+.sb-pill-badge,
+.sb-meesho-pill-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.sb-pill-badge::after,
+.sb-meesho-pill-badge::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.65),
+    transparent
+  );
+  transform: skewX(-20deg);
+  animation: badgeSheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes badgeSheen {
+  0%, 65% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* ── 6. Dynamic Text Loop (/docs/text-loop, /docs/text-roll) ── */
+.motion-text-loop-container {
+  display: inline-block;
+  vertical-align: baseline;
+  position: relative;
+  overflow: hidden;
+  height: 1.25em;
+  min-width: 280px;
+}
+
+.motion-text-loop-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.motion-text-loop-item {
+  height: 1.25em;
+  line-height: 1.25em;
+  white-space: nowrap;
+  opacity: 0.2;
+  transform: translateY(6px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.motion-text-loop-item.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── 7. In-View Stagger Entrance (/docs/in-view, /docs/animated-group) ── */
+.motion-in-view-group {
+  opacity: 1;
+  transform: none;
+  will-change: opacity, transform;
+}
+
+.motion-in-view-group.in-view {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger delay utility classes */
+.motion-delay-1 { transition-delay: 0.08s !important; }
+.motion-delay-2 { transition-delay: 0.16s !important; }
+.motion-delay-3 { transition-delay: 0.24s !important; }
+.motion-delay-4 { transition-delay: 0.32s !important; }
+.motion-delay-5 { transition-delay: 0.40s !important; }
+
+/* ── 8. Magnetic Buttons (/docs/magnetic) ── */
+[data-motion-magnetic] {
+  will-change: transform;
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  display: inline-flex;
+}
+
+/* ── 9. Interactive Hero Floating Badge Float ── */
+.sb-floating-badge-bottom {
+  animation: floatingBadgeSubtle 4s ease-in-out infinite alternate;
+}
+
+@keyframes floatingBadgeSubtle {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-4px); }
+}
+
+/* ── 10. Pulse Dots & Live Badges Enhancement ── */
+.sb-pulse-dot {
+  position: relative;
+}
+
+.sb-pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sb-primary);
+  animation: dotRipple 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  opacity: 0;
+}
+
+@keyframes dotRipple {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* ── 12. Dashboard Button Motion & Interactive Physics Suite ── */
+.btn,
+.welcome-action-btn,
+.sidebar-logout-btn,
+.session-card .btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background-color 0.2s ease,
+              border-color 0.2s ease,
+              color 0.2s ease !important;
+}
+
+/* Tactile Spring Hover */
+.btn:hover,
+.welcome-action-btn:hover,
+.session-card .btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Tactile Physical Press */
+.btn:active,
+.welcome-action-btn:active,
+.sidebar-logout-btn:active,
+.session-card .btn:active {
+  transform: translateY(1px) scale(0.965) !important;
+  transition: transform 0.08s ease !important;
+}
+
+/* Primary Button Glow Bloom & Elevation */
+.btn-primary:hover,
+.welcome-action-btn.btn-primary:hover {
+  transform: translateY(-2px) scale(1.015);
+  box-shadow: 0 6px 20px rgba(139, 24, 116, 0.32), 0 0 10px rgba(255, 107, 157, 0.2) !important;
+}
+
+/* Primary Button Luminous Light Sweep */
+.btn-primary::after,
+.welcome-action-btn.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -120%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.32) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  transition: left 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+.btn-primary:hover::after,
+.welcome-action-btn.btn-primary:hover::after {
+  left: 150%;
+}
+
+/* Micro-Motion Bounce on Button Icons/Emojis */
+.btn:hover > svg,
+.btn:hover > span:first-child,
+.welcome-action-btn:hover svg,
+.welcome-action-btn:hover span:first-child,
+.sidebar-logout-btn:hover svg {
+  transform: translateY(-1.5px) scale(1.15) rotate(-3deg);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Radial Ripple Wave Effect */
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 75%);
+  transform: scale(0);
+  animation: btnRippleWave 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+.btn-secondary .btn-ripple,
+.btn-outline .btn-ripple,
+.welcome-action-btn.btn-secondary .btn-ripple {
+  background: radial-gradient(circle, rgba(139, 24, 116, 0.25) 0%, rgba(139, 24, 116, 0) 75%);
+}
+
+@keyframes btnRippleWave {
+  0% {
+    transform: scale(0);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+/* Interactive Breathing Pulse for Upload Triggers */
+.upload-trigger.btn-primary {
+  animation: uploadBtnGlow 3.5s ease-in-out infinite;
+}
+
+@keyframes uploadBtnGlow {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(139, 24, 116, 0.25);
+  }
+  50% {
+    box-shadow: 0 4px 18px rgba(139, 24, 116, 0.45), 0 0 12px rgba(255, 107, 157, 0.35);
+  }
+}
+
+/* Sidebar Nav Item Motion */
+.nav-item {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.2s ease,
+              color 0.2s ease !important;
+}
+
+.nav-item:hover {
+  transform: translateX(4px);
+}
+
+.nav-item:hover .nav-icon {
+  transform: scale(1.2) rotate(-5deg);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-item:active {
+  transform: translateX(2px) scale(0.98);
+}
+
+/* ── 11. Accessibility: Respect prefers-reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .motion-scroll-progress,
+  .motion-border-trail::before,
+  .motion-text-shimmer,
+  .sb-pill-badge::after,
+  .sb-meesho-pill-badge::after,
+  .sb-floating-badge-bottom,
+  .sb-pulse-dot::after {
+    animation: none !important;
+  }
+
+  [data-motion-tilt],
+  [data-motion-magnetic],
+  .motion-in-view-group {
+    transform: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+  }
+}
