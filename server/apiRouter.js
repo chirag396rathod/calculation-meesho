@@ -151,10 +151,7 @@ export async function handleApiRequest(req, res, next) {
       const otpKey = contact.mobile || contact.email;
 
       await dbSaveOtp({ mobile: otpKey, otpHash, expiresAt });
-      const delivery = await sendOtp(contact, otp);
-
-      // Check if delivery was simulated/mocked (e.g. WHATSAPP_PROVIDER=mock or no paid gateway configured)
-      const isMock = delivery?.provider?.startsWith('mock') || process.env.WHATSAPP_PROVIDER === 'mock' || !process.env.WHATSAPP_TOKEN;
+      await sendOtp(contact, otp);
 
       const maskedDest = contact.mobile
         ? contact.mobile.replace(/(\+91)(\d{2})\d{4}(\d{4})/, '$1$2****$3')
@@ -162,12 +159,9 @@ export async function handleApiRequest(req, res, next) {
 
       return sendJson(200, {
         success: true,
-        message: isMock ? `Verification code generated for ${maskedDest}` : `OTP sent to ${maskedDest}`,
+        message: `OTP sent to ${maskedDest}`,
         channel: contact.type,   // 'mobile' or 'email'
-        expiresIn: OTP_TTL_MINUTES * 60,
-        // In mock mode or when gateway is not active, return OTP so UI can display it & allow instant login
-        otp: isMock ? otp : undefined,
-        isMock: Boolean(isMock)
+        expiresIn: OTP_TTL_MINUTES * 60
       });
     }
 

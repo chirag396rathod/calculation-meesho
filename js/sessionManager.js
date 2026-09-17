@@ -6,7 +6,7 @@
  * Vercel Serverless Function 4.5 MB payload limits.
  */
 
-import { authHeaders } from './auth.js';
+import { authHeaders, authState } from './auth.js';
 
 const API_BASE = '/api/sessions';
 const ACTIVE_SESSION_KEY = 'fc_active_session_id';
@@ -104,6 +104,13 @@ class SessionManager {
    * Fetch all sessions summary list from API
    */
   async fetchSessions() {
+    // If user is not logged in, do not call backend API
+    if (!authState.token || !authState.user) {
+      this.sessions = [];
+      this._notify();
+      return [];
+    }
+
     try {
       const res = await fetch(API_BASE, {
         headers: { ...authHeaders() }
@@ -125,6 +132,10 @@ class SessionManager {
    * Fetch full session content (auto-decompresses if gzipped)
    */
   async fetchSession(id) {
+    if (!authState.token || !authState.user) {
+      throw new Error('Please sign in to view sessions');
+    }
+
     const res = await fetch(`${API_BASE}/${id}`, {
       headers: { ...authHeaders() }
     });

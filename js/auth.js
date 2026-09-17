@@ -335,9 +335,7 @@ function renderStepInput(container) {
         input: raw,
         channel: data.channel,
         expiresIn: data.expiresIn || 600,
-        message: data.message,
-        otp: data.otp,
-        isMock: data.isMock
+        message: data.message
       });
 
     } catch (e) {
@@ -351,7 +349,7 @@ function renderStepInput(container) {
 //  STEP 2: OTP Verification
 // ────────────────────────────────────────────────
 
-function renderStepOtp(container, { input, channel, expiresIn, message, otp, isMock }) {
+function renderStepOtp(container, { input, channel, expiresIn, message }) {
   const isEmail   = channel === 'email';
   const channelIcon = isEmail ? '✉️' : '💬';
   const channelLabel = isEmail
@@ -375,14 +373,6 @@ function renderStepOtp(container, { input, channel, expiresIn, message, otp, isM
     <p class="sb-login-card-desc">${message || 'OTP sent successfully'}</p>
     <p class="otp-channel-label">${channelLabel}</p>
 
-    ${otp ? `
-      <div class="otp-mock-notice">
-        <div class="otp-mock-title">🔑 Test / Demo Verification Code</div>
-        <div class="otp-mock-code">${otp}</div>
-        <div class="otp-mock-sub">Code auto-filled below for instant testing (WhatsApp gateway in test mode)</div>
-      </div>
-    ` : ''}
-
     <div class="otp-boxes" id="otpBoxes">
       ${[0,1,2,3,4,5].map(i =>
         `<input type="text" class="otp-box" id="otpBox${i}" maxlength="1" inputmode="numeric" autocomplete="one-time-code" placeholder="·">`
@@ -402,10 +392,10 @@ function renderStepOtp(container, { input, channel, expiresIn, message, otp, isM
     <button class="otp-back-btn" id="otpBackBtn" type="button">← Change ${isEmail ? 'email' : 'number'}</button>
   `;
 
-  setupOtpBoxes(container, input, expiresIn, otp);
+  setupOtpBoxes(container, input, expiresIn);
 }
 
-function setupOtpBoxes(container, inputVal, expiresIn, devOtp) {
+function setupOtpBoxes(container, inputVal, expiresIn) {
   const boxes     = Array.from(container.querySelectorAll('.otp-box'));
   const verifyBtn = container.querySelector('#verifyOtpBtn');
   const err       = container.querySelector('#otpErrorMsg');
@@ -414,18 +404,7 @@ function setupOtpBoxes(container, inputVal, expiresIn, devOtp) {
   const resendBtn = container.querySelector('#resendOtpBtn');
   const backBtn   = container.querySelector('#otpBackBtn');
 
-  // Auto-fill OTP if provided in test/mock mode
-  if (devOtp) {
-    const chars = String(devOtp).trim().split('');
-    boxes.forEach((box, i) => {
-      box.value = chars[i] || '';
-    });
-    setTimeout(() => {
-      verifyBtn?.focus();
-    }, 150);
-  } else {
-    boxes[0]?.focus();
-  }
+  boxes[0]?.focus();
 
   boxes.forEach((box, i) => {
     box.addEventListener('input', () => {
@@ -471,9 +450,7 @@ function setupOtpBoxes(container, inputVal, expiresIn, devOtp) {
           input: inputVal,
           channel: data.channel,
           expiresIn: data.expiresIn || 600,
-          message: data.message,
-          otp: data.otp,
-          isMock: data.isMock
+          message: data.message
         });
       } else {
         showError(err, data.error || 'Could not resend OTP.');

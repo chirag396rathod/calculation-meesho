@@ -84,6 +84,15 @@ class SKUManager {
    * Initialize and fetch from backend API (per authenticated business)
    */
   async init() {
+    // If user is not logged in, do not call backend API
+    if (!authState.token || !authState.user) {
+      this.groups = [];
+      this.skuCosts = {};
+      this.isInitialized = true;
+      this._notify();
+      return [];
+    }
+
     try {
       const res = await fetch(API_BASE, {
         headers: {
@@ -114,6 +123,13 @@ class SKUManager {
    * Reload for active user (e.g. after login or user switch)
    */
   async reloadForUser() {
+    if (!authState.token || !authState.user) {
+      this.groups = [];
+      this.skuCosts = {};
+      this.isInitialized = true;
+      this._notify();
+      return [];
+    }
     this.groups = this.loadLocalGroups();
     this.skuCosts = this.loadLocalCosts();
     this._notify();

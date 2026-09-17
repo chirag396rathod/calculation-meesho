@@ -100,17 +100,31 @@ async function init() {
     });
   }
 
-  // 5. Reload per-business SKU groups and sessions whenever user signs in or switches account
+  // 5. Reload per-business SKU groups and sessions ONLY when user signs in
   onAuthChange(async () => {
     try {
-      await skuManager.reloadForUser();
-      refreshSkuManager();
-      updateSkuNavBadge();
-      await sessionManager.fetchSessions();
-      updateSessionNavBadge();
-      updateActiveSessionBadge(sessionManager.getActiveSessionName());
+      if (authState.token && authState.user) {
+        await skuManager.reloadForUser();
+        refreshSkuManager();
+        updateSkuNavBadge();
+        await sessionManager.fetchSessions();
+        updateSessionNavBadge();
+        updateActiveSessionBadge(sessionManager.getActiveSessionName());
+      } else {
+        // Logged out: reset data locally without making backend API calls
+        skuManager.groups = [];
+        skuManager.skuCosts = {};
+        skuManager._notify();
+        sessionManager.sessions = [];
+        sessionManager.setActiveSession(null, null);
+        sessionManager._notify();
+        refreshSkuManager();
+        updateSkuNavBadge();
+        updateSessionNavBadge();
+        updateActiveSessionBadge(null);
+      }
     } catch (e) {
-      console.warn('[App] Error reloading per-user data on auth change:', e);
+      console.warn('[App] Error handling per-user data on auth change:', e);
     }
   });
 
@@ -126,24 +140,28 @@ async function init() {
   initLandingPage();
   initBottomSheetPan();
 
-  // Initialize SKU Groups from backend REST API
-  try {
-    await skuManager.init();
-    refreshSkuManager();
-    updateSkuNavBadge();
-  } catch (err) {
-    console.warn('[App] SKU Manager API init error:', err);
-    refreshSkuManager();
-    updateSkuNavBadge();
-  }
+  // Initialize SKU Groups and Sessions from backend REST API ONLY if logged in
+  if (authState.token && authState.user) {
+    try {
+      await skuManager.init();
+      refreshSkuManager();
+      updateSkuNavBadge();
+    } catch (err) {
+      console.warn('[App] SKU Manager API init error:', err);
+    }
 
-  // Initialize Monthly Sessions from backend REST API
-  try {
-    await sessionManager.fetchSessions();
+    try {
+      await sessionManager.fetchSessions();
+      updateSessionNavBadge();
+      updateActiveSessionBadge(sessionManager.getActiveSessionName());
+    } catch (err) {
+      console.warn('[App] Session Manager init error:', err);
+    }
+  } else {
+    // When logged out, render empty states without making any network requests
+    refreshSkuManager();
+    updateSkuNavBadge();
     updateSessionNavBadge();
-    updateActiveSessionBadge(sessionManager.getActiveSessionName());
-  } catch (err) {
-    console.warn('[App] Session Manager init error:', err);
   }
 
   // Listen for SKU cost changes to recalculate
