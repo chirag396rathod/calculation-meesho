@@ -206,16 +206,16 @@ export async function handleApiRequest(req, res, next) {
 
       const isNewUser = !user;
       if (!user) {
-        // New user — create with whatever contact info we have
+        // New user — create with whatever contact info we have (null if not provided)
         user = await dbCreateUser({
-          mobile: contact.mobile || '',
-          email:  contact.email  || ''
+          mobile: contact.mobile || null,
+          email:  contact.email  || null
         });
       } else {
         // Returning user — always refresh lastLogin and fill in any missing contact info
         const updates = { lastLogin: new Date().toISOString() };
-        if (contact.mobile) updates.mobile = contact.mobile; // always write mobile if used to login
-        if (contact.email)  updates.email  = contact.email;  // always write email if used to login
+        if (contact.mobile && !user.mobile) updates.mobile = contact.mobile;
+        if (contact.email && !user.email)   updates.email  = contact.email;
         await dbUpdateUser(user.id, updates);
         user = await dbGetUserById(user.id);
       }

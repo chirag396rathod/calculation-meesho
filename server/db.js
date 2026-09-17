@@ -167,16 +167,55 @@ export async function initDatabase() {
     });
 
     // ── Users table (multi-tenant) ──
+    // mobile & email are UNIQUE but nullable so users can register via either channel
     await client.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id         TEXT PRIMARY KEY,
-        mobile     TEXT NOT NULL UNIQUE,
+        mobile     TEXT UNIQUE,
         name       TEXT DEFAULT '',
-        email      TEXT DEFAULT '',
+        email      TEXT UNIQUE,
         created_at TEXT,
         last_login TEXT
       );
     `);
+
+    // Auto-migration check: ensure mobile does not have NOT NULL constraint and empty strings are NULL
+    try {
+      const tableInfo = await client.execute('PRAGMA table_info(users)');
+      const mobileCol = tableInfo.rows.find(r => r.name === 'mobile');
+      if (mobileCol && mobileCol.notnull === 1) {
+        console.log('[Database] Migrating users table: removing NOT NULL constraint on mobile column...');
+        await client.execute(`
+          CREATE TABLE IF NOT EXISTS users_migration (
+            id         TEXT PRIMARY KEY,
+            mobile     TEXT UNIQUE,
+            name       TEXT DEFAULT '',
+            email      TEXT UNIQUE,
+            created_at TEXT,
+            last_login TEXT
+          )
+        `);
+        await client.execute(`
+          INSERT OR REPLACE INTO users_migration (id, mobile, name, email, created_at, last_login)
+          SELECT 
+            id,
+            CASE WHEN mobile IS NULL OR TRIM(mobile) = '' THEN NULL ELSE TRIM(mobile) END,
+            COALESCE(name, ''),
+            CASE WHEN email IS NULL OR TRIM(email) = '' THEN NULL ELSE LOWER(TRIM(email)) END,
+            created_at,
+            last_login
+          FROM users
+        `);
+        await client.execute('DROP TABLE users');
+        await client.execute('ALTER TABLE users_migration RENAME TO users');
+        console.log('[Database] Users table migration completed.');
+      } else {
+        await client.execute(`UPDATE users SET mobile = NULL WHERE mobile = '' OR TRIM(mobile) = ''`);
+        await client.execute(`UPDATE users SET email = NULL WHERE email = '' OR TRIM(email) = ''`);
+      }
+    } catch (migErr) {
+      console.warn('[Database] Note during users table schema check:', migErr.message);
+    }
 
     // ── OTP requests table (short-lived tokens) ──
     await client.execute(`
@@ -787,13 +826,27 @@ export async function dbDeleteSession(id, userId = 'legacy') {
 // ═════════════════════════════════════════════════════
 
 /**
- * Find user by mobile number
+ * Find user by mobile number (handles +91 and 10-digit formats)
  */
 export async function dbGetUserByMobile(mobile) {
   await initDatabase();
-  if (!client) return _localGetUserBy('mobile', mobile);
+  if (!mobile || !String(mobile).trim()) return null;
+  const clean = String(mobile).trim();
+  const digits = clean.replace(/\D/g, '');
+  const withPlus91 = digits.length === 10 ? `+91${digits}` : clean;
+  const withoutPrefix = digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits;
+
+  if (!client) {
+    const user = _localGetUserBy('mobile', clean) ||
+                 _localGetUserBy('mobile', withPlus91) ||
+                 _localGetUserBy('mobile', withoutPrefix);
+    return user;
+  }
   try {
-    const res = await client.execute({ sql: 'SELECT * FROM users WHERE mobile = ?', args: [mobile] });
+    const res = await client.execute({
+      sql: 'SELECT * FROM users WHERE mobile = ? OR mobile = ? OR mobile = ? LIMIT 1',
+      args: [clean, withPlus91, withoutPrefix]
+    });
     return res.rows.length ? _rowToUser(res.rows[0]) : null;
   } catch (err) {
     console.error('[Database] Error fetching user by mobile:', err);
@@ -802,13 +855,15 @@ export async function dbGetUserByMobile(mobile) {
 }
 
 /**
- * Find user by email address
+ * Find user by email address (case-insensitive)
  */
 export async function dbGetUserByEmail(email) {
   await initDatabase();
-  if (!client) return _localGetUserBy('email', email);
+  if (!email || !String(email).trim()) return null;
+  const clean = String(email).trim().toLowerCase();
+  if (!client) return _localGetUserBy('email', clean);
   try {
-    const res = await client.execute({ sql: 'SELECT * FROM users WHERE email = ?', args: [email] });
+    const res = await client.execute({ sql: 'SELECT * FROM users WHERE LOWER(email) = ? LIMIT 1', args: [clean] });
     return res.rows.length ? _rowToUser(res.rows[0]) : null;
   } catch (err) {
     console.error('[Database] Error fetching user by email:', err);
@@ -821,6 +876,7 @@ export async function dbGetUserByEmail(email) {
  */
 export async function dbGetUserById(id) {
   await initDatabase();
+  if (!id) return null;
   if (!client) return _localGetUserBy('id', id);
   try {
     const res = await client.execute({ sql: 'SELECT * FROM users WHERE id = ?', args: [id] });
@@ -833,6 +889,7 @@ export async function dbGetUserById(id) {
 
 /**
  * Create a new user (first login via mobile or email)
+ * Store null instead of empty string so SQLite UNIQUE constraint allows multiple nulls.
  * @param {{ mobile?: string, email?: string, name?: string }}
  */
 export async function dbCreateUser({ mobile = '', email = '', name = '' }) {
@@ -840,18 +897,32 @@ export async function dbCreateUser({ mobile = '', email = '', name = '' }) {
   const id = `usr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
   const now = new Date().toISOString();
 
+  const cleanMobile = mobile && String(mobile).trim() ? String(mobile).trim() : null;
+  const cleanEmail  = email && String(email).trim()   ? String(email).trim().toLowerCase() : null;
+  const cleanName   = name && String(name).trim()     ? String(name).trim() : '';
+
   if (!client) {
-    const user = { id, mobile, name, email, created_at: now, last_login: now };
+    const user = { id, mobile: cleanMobile || '', name: cleanName, email: cleanEmail || '', created_at: now, last_login: now };
     _localSaveUser(user);
     return _rowToUser(user);
   }
   try {
     await client.execute({
       sql: `INSERT INTO users (id, mobile, name, email, created_at, last_login) VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [id, mobile || '', email || '', name || '', now, now]
+      args: [id, cleanMobile, cleanName, cleanEmail, now, now]
     });
-    return { id, mobile, email, name, createdAt: now, lastLogin: now };
+    return { id, mobile: cleanMobile || '', email: cleanEmail || '', name: cleanName, createdAt: now, lastLogin: now };
   } catch (err) {
+    // If conflict on mobile or email, fetch and return existing user instead of failing
+    if (err.message && (err.message.includes('UNIQUE constraint failed') || err.message.includes('SQLITE_CONSTRAINT'))) {
+      console.warn('[Database] User unique constraint conflict, attempting lookup fallback:', err.message);
+      let existing = null;
+      if (cleanMobile) existing = await dbGetUserByMobile(cleanMobile);
+      if (!existing && cleanEmail) existing = await dbGetUserByEmail(cleanEmail);
+      if (existing) {
+        return existing;
+      }
+    }
     console.error('[Database] Error creating user:', err);
     throw err;
   }
@@ -864,21 +935,25 @@ export async function dbUpdateUser(id, { name, email, mobile, lastLogin }) {
   await initDatabase();
   const now = new Date().toISOString();
 
+  const cleanMobile = mobile !== undefined ? (mobile && String(mobile).trim() ? String(mobile).trim() : null) : undefined;
+  const cleanEmail  = email !== undefined  ? (email && String(email).trim() ? String(email).trim().toLowerCase() : null) : undefined;
+  const cleanName   = name !== undefined   ? (name ? String(name).trim() : '') : undefined;
+
   if (!client) {
     // Only pass fields that are actually defined — never overwrite with undefined
     const safeUpdates = {};
-    if (name   !== undefined) safeUpdates.name   = name;
-    if (email  !== undefined) safeUpdates.email  = email;
-    if (mobile !== undefined) safeUpdates.mobile = mobile;
+    if (cleanName   !== undefined) safeUpdates.name   = cleanName;
+    if (cleanEmail  !== undefined) safeUpdates.email  = cleanEmail || '';
+    if (cleanMobile !== undefined) safeUpdates.mobile = cleanMobile || '';
     safeUpdates.last_login = lastLogin || now;
     return _localUpdateUser(id, safeUpdates);
   }
   try {
     const sets = [];
     const args = [];
-    if (name   !== undefined) { sets.push('name = ?');   args.push(name); }
-    if (email  !== undefined) { sets.push('email = ?');  args.push(email); }
-    if (mobile !== undefined) { sets.push('mobile = ?'); args.push(mobile); }
+    if (cleanName   !== undefined) { sets.push('name = ?');   args.push(cleanName); }
+    if (cleanEmail  !== undefined) { sets.push('email = ?');  args.push(cleanEmail); }
+    if (cleanMobile !== undefined) { sets.push('mobile = ?'); args.push(cleanMobile); }
     sets.push('last_login = ?');
     args.push(lastLogin || now);
     args.push(id);
@@ -1022,8 +1097,13 @@ function _writeLocalUsers(users) {
 }
 
 function _localGetUserBy(field, value) {
+  if (!value || !String(value).trim()) return null;
+  const searchVal = String(value).trim().toLowerCase();
   const users = _readLocalUsers();
-  const user = Object.values(users).find(u => u[field] === value);
+  const user = Object.values(users).find(u => {
+    const val = u[field];
+    return val && String(val).trim().toLowerCase() === searchVal;
+  });
   return user ? _rowToUser(user) : null;
 }
 
