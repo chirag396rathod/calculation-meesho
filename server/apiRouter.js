@@ -53,8 +53,14 @@ import {
 export async function handleApiRequest(req, res, next) {
   // Determine actual requested API path (supports Vite, Vercel rewrites, and serverless catch-alls)
   let rawUrl = req.url || '';
-  if (req.headers && req.headers['x-forwarded-uri']) {
+  if (req.headers && req.headers['x-invoke-path']) {
+    rawUrl = req.headers['x-invoke-path'];
+  } else if (req.headers && req.headers['x-vercel-original-path']) {
+    rawUrl = req.headers['x-vercel-original-path'];
+  } else if (req.headers && req.headers['x-forwarded-uri']) {
     rawUrl = req.headers['x-forwarded-uri'];
+  } else if (req.headers && req.headers['x-matched-path'] && !req.headers['x-matched-path'].includes('[...')) {
+    rawUrl = req.headers['x-matched-path'];
   } else if (req.query && req.query.path) {
     const p = Array.isArray(req.query.path) ? req.query.path.join('/') : req.query.path;
     rawUrl = `/api/${p}`;
@@ -145,7 +151,10 @@ export async function handleApiRequest(req, res, next) {
       const otpKey = contact.mobile || contact.email;
 
       await dbSaveOtp({ mobile: otpKey, otpHash, expiresAt });
-      await sendOtp(contact, otp);
+      const delivery = await sendOtp(contact, otp);
+
+      // Check if delivery was simulated/mocked (e.g. WHATSAPP_PROVIDER=mock or no paid gateway configured)
+      const isMock = delivery?.provider?.startsWith('mock') || process.env.WHATSAPP_PROVIDER === 'mock' || !process.env.WHATSAPP_TOKEN;
 
       const maskedDest = contact.mobile
         ? contact.mobile.replace(/(\+91)(\d{2})\d{4}(\d{4})/, '$1$2****$3')
@@ -153,9 +162,12 @@ export async function handleApiRequest(req, res, next) {
 
       return sendJson(200, {
         success: true,
-        message: `OTP sent to ${maskedDest}`,
+        message: isMock ? `Verification code generated for ${maskedDest}` : `OTP sent to ${maskedDest}`,
         channel: contact.type,   // 'mobile' or 'email'
-        expiresIn: OTP_TTL_MINUTES * 60
+        expiresIn: OTP_TTL_MINUTES * 60,
+        // In mock mode or when gateway is not active, return OTP so UI can display it & allow instant login
+        otp: isMock ? otp : undefined,
+        isMock: Boolean(isMock)
       });
     }
 

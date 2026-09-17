@@ -937,3 +937,39 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+
+/* ── Demo / Test Mode OTP Notice ── */
+.otp-mock-notice {
+  background: #FFFBEB;
+  border: 1.5px dashed #F59E0B;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 12px 0 18px 0;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+}
+
+.otp-mock-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #B45309;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.otp-mock-code {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #78350F;
+  letter-spacing: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  user-select: all;
+}
+
+.otp-mock-sub {
+  font-size: 0.75rem;
+  color: #92400E;
+  margin-top: 4px;
+  line-height: 1.35;
+}

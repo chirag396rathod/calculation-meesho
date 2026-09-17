@@ -19,7 +19,8 @@ const DEFAULT_TURSO_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLC
 
 const databaseUrl = process.env.DATABASE_URL || DEFAULT_TURSO_URL;
 const authToken = process.env.DATABASE_AUTH_TOKEN || DEFAULT_TURSO_TOKEN;
-const useLocalDbOnly = process.env.USE_LOCAL_DB === 'true';
+const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const useLocalDbOnly = !isVercel && process.env.USE_LOCAL_DB === 'true';
 
 let client = null;
 let isInitialized = false;
