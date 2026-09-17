@@ -1,0 +1,32 @@
+# FC Analytics
+
+> Free browser-based toolkit for Indian e-commerce marketplace sellers (Meesho, Flipkart, Amazon). Crop and sort shipping label PDFs, calculate real per-SKU profit after returns/RTO/GST, and reconcile marketplace settlements — 100% free, no signup, all processing happens locally in the browser.
+
+FC Analytics (also written as "FC Analytics dashboard" or "calculation-meesho") is a web application for Meesho sellers and other Indian marketplace sellers. It solves two daily problems: (1) Meesho shipping label PDFs include the tax invoice below each label, wasting thermal paper — the label crop tool removes the invoice section and sorts labels for faster packing; (2) marketplace payouts hide real costs — the profit calculator and dashboard reveal true net profit per SKU after returns, RTO charges, GST (TCS/TDS) and shipping.
+
+## Tools
+
+- [Meesho Label Crop & Sort Tool](https://calculation-meesho.vercel.app/labels/meesho): Upload Meesho label PDFs, remove the tax invoice section (dynamic crop below product details or standard 4×4 thermal trim), sort labels by SKU or courier partner (Xpress Bees, Valmo, Shadowfax, Delhivery), add custom packing messages and scannable QR codes, and download a print-ready PDF. Free, no watermark, no signup.
+- [Flipkart Label Crop Tool](https://calculation-meesho.vercel.app/labels/flipkart): Crop Flipkart shipping labels to remove the tax invoice section, 3×5 thermal print format, sort by SKU or courier (Ekart, Delhivery, Shadowfax).
+- [Shipping Label Tool Directory](https://calculation-meesho.vercel.app/labels): All marketplace label tools in one place.
+- [Meesho Profit Calculator](https://calculation-meesho.vercel.app/#calculator): Free interactive calculator for Meesho seller profit per unit — selling price, product cost, shipping, commission, GST and expected return/RTO rate produce net payout, blended profit and net margin.
+- [Business Dashboard](https://calculation-meesho.vercel.app/dashboard): Upload marketplace payment Excel files (.xlsx) to analyze orders, SKU-level net profit, return/RTO charges, settlement reconciliation and monthly trends. Free account required.
+
+## Key facts
+
+- Pricing: 100% free core tools, no credit card, no signup required for label tools.
+- Privacy: PDF parsing, cropping, Excel parsing and calculations run entirely client-side in the browser; customer data never leaves the device.
+- Supported marketplaces: Meesho (live), Flipkart (live), Amazon (coming soon).
+- Supported couriers: Xpress Bees, Valmo, Shadowfax, Delhivery, Ecom Express, Bluedart, DTDC, Ekart.
+- Output formats: 4×4 / 4×6 thermal labels and A4 sheets, print-ready PDF.
+- Company/contact: WhatsApp support at +91 88662 75945.
+
+## Pages
+
+- [Home](https://calculation-meesho.vercel.app/)
+- [About Us](https://calculation-meesho.vercel.app/about)
+- [Contact](https://calculation-meesho.vercel.app/contact)
+- [Privacy Policy](https://calculation-meesho.vercel.app/privacy)
+- [Terms & Conditions](https://calculation-meesho.vercel.app/terms)
+- [Cookie Policy](https://calculation-meesho.vercel.app/cookies)
+- [Disclaimer](https://calculation-meesho.vercel.app/disclaimer)

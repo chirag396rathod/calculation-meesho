@@ -6,6 +6,7 @@
 import { renderInfoPage, INFO_PAGES } from './infoPages.js';
 import { mountLabelSorter, setMarketplace, resetForMarketplaceSwitch } from './labelSorter.js';
 import { initMotionPrimitives } from './motionPrimitives.js';
+import { applySeo } from './seo.js';
 
 // Feature Showcase Tab Definitions
 const FEATURE_TABS = {
@@ -372,6 +373,9 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
   const footer = document.querySelector('.sb-footer');
 
   if (!landingView || !appLayout) return;
+
+  // Update title / meta description / canonical / OG / robots for this route
+  applySeo(route);
 
   // Clean up any mobile drawers or scroll locks when leaving app layout
   if (route !== 'dashboard' && route !== 'app') {
