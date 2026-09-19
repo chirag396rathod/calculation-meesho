@@ -938,7 +938,7 @@ export function renderSessionsList(sessions, activeSessionId, { onSwitch, onEdit
 /**
  * Show an animated loader overlay on a specific session card.
  * @param {string} sessionId - The session data-id to target
- * @param {'edit'|'delete'} variant - Controls theme colour and status messages
+ * @param {'edit'|'delete'|'switch'} variant - Controls theme colour and status messages
  * @returns {Function} A cleanup function to remove the loader
  */
 export function showSessionCardLoader(sessionId, variant = 'edit') {
@@ -949,21 +949,30 @@ export function showSessionCardLoader(sessionId, variant = 'edit') {
   card.querySelector('.session-card-loader')?.remove();
   card.classList.add('is-loading');
 
-  const isDelete = variant === 'delete';
+  const variantClass = variant === 'delete' ? 'loader-delete' : variant === 'switch' ? 'loader-switch' : '';
+
+  const initialText = {
+    edit: 'Opening editor…',
+    delete: 'Removing session…',
+    switch: 'Loading session…'
+  }[variant] || 'Processing…';
 
   const overlay = document.createElement('div');
-  overlay.className = `session-card-loader ${isDelete ? 'loader-delete' : ''}`;
+  overlay.className = `session-card-loader ${variantClass}`;
   overlay.innerHTML = `
     <div class="session-loader-spinner"></div>
-    <div class="session-loader-text">${isDelete ? 'Removing session…' : 'Opening editor…'}</div>
+    <div class="session-loader-text">${initialText}</div>
     <div class="session-loader-bar"></div>
   `;
   card.appendChild(overlay);
 
   // Rotate status messages to keep the user engaged
-  const messages = isDelete
-    ? ['Removing session…', 'Cleaning up data…', 'Almost done…']
-    : ['Opening editor…', 'Loading details…', 'Almost ready…'];
+  const messageMap = {
+    edit: ['Opening editor…', 'Loading details…', 'Almost ready…'],
+    delete: ['Removing session…', 'Cleaning up data…', 'Almost done…'],
+    switch: ['Loading session…', 'Fetching data…', 'Preparing dashboard…', 'Almost there…']
+  };
+  const messages = messageMap[variant] || messageMap.edit;
   let msgIdx = 0;
   const textEl = overlay.querySelector('.session-loader-text');
   const msgInterval = setInterval(() => {

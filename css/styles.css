@@ -2334,6 +2334,13 @@ body::before {
   box-shadow: 0 0 12px rgba(220, 38, 38, 0.15);
 }
 
+/* Switch / View variant — blue/indigo themed */
+.session-card-loader.loader-switch .session-loader-spinner {
+  border-top-color: #4F46E5;
+  border-right-color: #818CF8;
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.18);
+}
+
 @keyframes sessionSpinnerRotate {
   to { transform: rotate(360deg); }
 }
@@ -2351,6 +2358,10 @@ body::before {
 
 .session-card-loader.loader-delete .session-loader-text {
   color: #B91C1C;
+}
+
+.session-card-loader.loader-switch .session-loader-text {
+  color: #4338CA;
 }
 
 @keyframes sessionLoaderTextPulse {
@@ -2380,6 +2391,10 @@ body::before {
 
 .session-card-loader.loader-delete .session-loader-bar::after {
   background: linear-gradient(90deg, transparent, #DC2626, #FB923C, transparent);
+}
+
+.session-card-loader.loader-switch .session-loader-bar::after {
+  background: linear-gradient(90deg, transparent, #4F46E5, #818CF8, transparent);
 }
 
 @keyframes sessionBarShimmer {

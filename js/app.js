@@ -911,8 +911,8 @@ async function handleSaveSession({ name, month, notes }) {
  * Handle Switch / View Session
  */
 async function handleSwitchSession(sessionId) {
+  const hideLoader = showSessionCardLoader(sessionId, 'switch');
   try {
-    showToast('Loading session...', 'info');
     const session = await sessionManager.fetchSession(sessionId);
 
     state.allOrders = session.orders || [];
@@ -929,9 +929,11 @@ async function handleSwitchSession(sessionId) {
     saveStateToStorage();
 
     recalculate();
+    hideLoader();
     switchSection('dashboard');
     showToast(`Switched to session "${session.name}" (${state.allOrders.length} orders loaded)`, 'success');
   } catch (err) {
+    hideLoader();
     showToast(`Error loading session: ${err.message}`, 'error');
   }
 }
