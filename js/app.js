@@ -44,6 +44,7 @@ import {
   setupEditSessionModal,
   openEditSessionModal,
   updateActiveSessionBadge,
+  showSessionCardLoader,
   exportCSV,
   exportJSON,
   switchSection,
@@ -939,9 +940,16 @@ async function handleSwitchSession(sessionId) {
  * Handle Edit Session Details
  */
 async function handleEditSession(sessionId, { name, month, notes }) {
-  await sessionManager.updateSession(sessionId, { name, month, notes });
-  showToast('Session details updated!', 'success');
-  refreshSessionsView();
+  const hideLoader = showSessionCardLoader(sessionId, 'edit');
+  try {
+    await sessionManager.updateSession(sessionId, { name, month, notes });
+    showToast('Session details updated!', 'success');
+    refreshSessionsView();
+  } catch (err) {
+    showToast(`Error updating session: ${err.message}`, 'error');
+  } finally {
+    hideLoader();
+  }
 }
 
 /**
@@ -995,12 +1003,15 @@ async function handleDeleteSession(sessionId) {
     return;
   }
 
+  const hideLoader = showSessionCardLoader(sessionId, 'delete');
   try {
     await sessionManager.deleteSession(sessionId);
     showToast(`Session "${name}" deleted`, 'info');
     refreshSessionsView();
   } catch (err) {
     showToast(`Error deleting session: ${err.message}`, 'error');
+  } finally {
+    hideLoader();
   }
 }
 
@@ -1011,8 +1022,13 @@ function refreshSessionsView() {
   renderSessionsList(sessionManager.sessions, sessionManager.getActiveSessionId(), {
     onSwitch: handleSwitchSession,
     onEdit: (id) => {
+      const hideLoader = showSessionCardLoader(id, 'edit');
       const sess = sessionManager.sessions.find(s => s.id === id);
-      if (sess) openEditSessionModal(sess);
+      // Short delay so the loader is visible before the modal opens
+      setTimeout(() => {
+        hideLoader();
+        if (sess) openEditSessionModal(sess);
+      }, 450);
     },
     onUpdateData: handleUpdateSessionData,
     onDelete: handleDeleteSession

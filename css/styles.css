@@ -2292,6 +2292,106 @@ body::before {
   color: #B91C1C;
 }
 
+/* ── Session Card Loader Overlay ── */
+.session-card-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px) saturate(1.6);
+  -webkit-backdrop-filter: blur(6px) saturate(1.6);
+  border-radius: 16px;
+  opacity: 0;
+  animation: sessionLoaderFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes sessionLoaderFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Animated spinner ring with gradient stroke */
+.session-loader-spinner {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid #F1F5F9;
+  border-top-color: #8B1874;
+  border-right-color: #D946EF;
+  animation: sessionSpinnerRotate 0.7s linear infinite;
+  box-shadow: 0 0 12px rgba(139, 24, 116, 0.15);
+}
+
+/* Delete variant — red themed */
+.session-card-loader.loader-delete .session-loader-spinner {
+  border-top-color: #DC2626;
+  border-right-color: #FB923C;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.15);
+}
+
+@keyframes sessionSpinnerRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Status text that fades between messages */
+.session-loader-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.01em;
+  text-align: center;
+  animation: sessionLoaderTextPulse 1.6s ease-in-out infinite;
+  transition: opacity 0.18s ease;
+}
+
+.session-card-loader.loader-delete .session-loader-text {
+  color: #B91C1C;
+}
+
+@keyframes sessionLoaderTextPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+/* Shimmer progress bar beneath the spinner */
+.session-loader-bar {
+  width: 80px;
+  height: 3px;
+  border-radius: 3px;
+  background: #E2E8F0;
+  overflow: hidden;
+  position: relative;
+}
+
+.session-loader-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, #8B1874, #D946EF, transparent);
+  animation: sessionBarShimmer 1.2s ease-in-out infinite;
+  transform: translateX(-100%);
+}
+
+.session-card-loader.loader-delete .session-loader-bar::after {
+  background: linear-gradient(90deg, transparent, #DC2626, #FB923C, transparent);
+}
+
+@keyframes sessionBarShimmer {
+  to { transform: translateX(100%); }
+}
+
+/* Prevent interaction while loading */
+.session-card.is-loading {
+  pointer-events: none;
+  user-select: none;
+}
+
 /* ── Header Session Pill ── */
 .session-pill {
   display: inline-flex;

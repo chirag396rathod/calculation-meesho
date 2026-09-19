@@ -936,6 +936,56 @@ export function renderSessionsList(sessions, activeSessionId, { onSwitch, onEdit
 }
 
 /**
+ * Show an animated loader overlay on a specific session card.
+ * @param {string} sessionId - The session data-id to target
+ * @param {'edit'|'delete'} variant - Controls theme colour and status messages
+ * @returns {Function} A cleanup function to remove the loader
+ */
+export function showSessionCardLoader(sessionId, variant = 'edit') {
+  const card = document.querySelector(`.session-card[data-id="${sessionId}"]`);
+  if (!card) return () => {};
+
+  // Prevent double-loaders
+  card.querySelector('.session-card-loader')?.remove();
+  card.classList.add('is-loading');
+
+  const isDelete = variant === 'delete';
+
+  const overlay = document.createElement('div');
+  overlay.className = `session-card-loader ${isDelete ? 'loader-delete' : ''}`;
+  overlay.innerHTML = `
+    <div class="session-loader-spinner"></div>
+    <div class="session-loader-text">${isDelete ? 'Removing session…' : 'Opening editor…'}</div>
+    <div class="session-loader-bar"></div>
+  `;
+  card.appendChild(overlay);
+
+  // Rotate status messages to keep the user engaged
+  const messages = isDelete
+    ? ['Removing session…', 'Cleaning up data…', 'Almost done…']
+    : ['Opening editor…', 'Loading details…', 'Almost ready…'];
+  let msgIdx = 0;
+  const textEl = overlay.querySelector('.session-loader-text');
+  const msgInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % messages.length;
+    textEl.style.opacity = '0';
+    setTimeout(() => {
+      textEl.textContent = messages[msgIdx];
+      textEl.style.opacity = '';
+    }, 180);
+  }, 1400);
+
+  // Return a cleanup function
+  return () => {
+    clearInterval(msgInterval);
+    card.classList.remove('is-loading');
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.2s ease';
+    setTimeout(() => overlay.remove(), 220);
+  };
+}
+
+/**
  * Setup Create Session Modal
  */
 export function setupCreateSessionModal(onCreate) {
