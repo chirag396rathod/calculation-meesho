@@ -570,7 +570,28 @@ function refreshOrderCollections() {
  * Save current state to localStorage
  */
 function saveStateToStorage() {
-  localStorage.setItem('fc_file_info', JSON.stringify(
+  // Each key is saved independently so a quota failure on one
+  // (common on mobile where localStorage is limited to ~2–5 MB)
+  // does not prevent the others from being saved.
+  const trySet = (key, value) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      if (e instanceof DOMException && (
+        e.code === 22 ||                          // Chrome / Firefox
+        e.code === 1014 ||                        // Firefox alt
+        e.name === 'QuotaExceededError' ||
+        e.name === 'NS_ERROR_DOM_QUOTA_REACHED'   // Firefox
+      )) {
+        console.warn(`[Storage] localStorage quota exceeded for key "${key}". ` +
+          `Data is safe in the cloud — local cache skipped on this device.`);
+      } else {
+        console.warn(`[Storage] Could not save "${key}":`, e);
+      }
+    }
+  };
+
+  trySet('fc_file_info', JSON.stringify(
     state.parsedFiles.map(f => ({
       id: f.id,
       reportName: f.reportName || f.filename,
@@ -582,8 +603,8 @@ function saveStateToStorage() {
     }))
   ));
 
-  localStorage.setItem('fc_orders', JSON.stringify(state.allOrders));
-  localStorage.setItem('fc_ads', JSON.stringify(state.allAds));
+  trySet('fc_orders', JSON.stringify(state.allOrders));
+  trySet('fc_ads', JSON.stringify(state.allAds));
 }
 
 /**
