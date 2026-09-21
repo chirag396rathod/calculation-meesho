@@ -77,12 +77,18 @@ const state = {
  * Initialize the application
  */
 async function init() {
-  // 1. Route immediately from the URL (localStorage token guard) so a
+  // 1. Wire OTP flow into global BEFORE initLandingPage() so it's available
+  //    when handlePathname() fires on the initial /login route load.
+  //    (Previously this was set AFTER initLandingPage, causing the spinner
+  //    to stay forever because window.fcAuthInit was undefined at call time.)
+  window.fcAuthInit = initOtpFlow;
+
+  // 2. Route immediately from the URL (localStorage token guard) so a
   //    /dashboard reload never flashes the public website
   initLabelSorter();
   initLandingPage();
 
-  // 2. Restore auth session (checks JWT token with server)
+  // 3. Restore auth session (checks JWT token with server)
   const authed = await fetchMe();
   updateAuthUI();
 
@@ -90,9 +96,6 @@ async function init() {
   if (!authed && window.location.pathname.replace(/\/+$/, '') === '/dashboard') {
     navigateTo('login');
   }
-
-  // 2. Wire OTP flow into global so landing.js can call it
-  window.fcAuthInit = initOtpFlow;
 
   // 3. Set up logout button in sidebar
   const logoutBtn = document.getElementById('sidebarLogoutBtn');

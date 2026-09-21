@@ -370,6 +370,7 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
   const loginView = document.getElementById('loginView');
   const labelCropView = document.getElementById('labelCropView');
   const labelCropMeeshoView = document.getElementById('labelCropMeeshoView');
+  const profitCalcView = document.getElementById('profitCalcView');
   const footer = document.querySelector('.sb-footer');
 
   if (!landingView || !appLayout) return;
@@ -420,6 +421,7 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     if (loginView) loginView.style.display = 'none';
     if (labelCropView) labelCropView.style.display = 'none';
     if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'none';
+    if (profitCalcView) profitCalcView.style.display = 'none';
     appLayout.style.display = 'flex';
     pushCleanUrl('/dashboard');
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -485,6 +487,7 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     if (infoPageView) infoPageView.style.display = 'none';
     if (labelCropView) labelCropView.style.display = 'none';
     if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'none';
+    if (profitCalcView) profitCalcView.style.display = 'none';
     if (loginView) loginView.style.display = 'flex';
     if (footer) footer.style.display = 'none';
     appLayout.style.display = 'none';
@@ -514,6 +517,7 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     if (loginView) loginView.style.display = 'none';
     if (labelCropView) labelCropView.style.display = 'none';
     if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'none';
+    if (profitCalcView) profitCalcView.style.display = 'none';
     if (footer) footer.style.display = 'block';
     appLayout.style.display = 'none';
     if (infoPageView) {
@@ -528,6 +532,7 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     if (infoPageView) infoPageView.style.display = 'none';
     if (loginView) loginView.style.display = 'none';
     if (labelCropView) labelCropView.style.display = 'none';
+    if (profitCalcView) profitCalcView.style.display = 'none';
     if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'none';
     if (footer) footer.style.display = 'block';
     landingView.style.display = 'block';
