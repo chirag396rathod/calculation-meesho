@@ -48,6 +48,7 @@ import {
   exportCSV,
   exportJSON,
   switchSection,
+  getLastSwitchedSection,
   toggleMobileSidebar,
   closeMobileSidebar
 } from './ui.js';
@@ -76,10 +77,19 @@ const state = {
  * Initialize the application
  */
 async function init() {
-  // 1. Restore auth session first (checks JWT token with server)
-  //    initLandingPage() handles routing so it must know auth state
-  await fetchMe();
+  // 1. Route immediately from the URL (localStorage token guard) so a
+  //    /dashboard reload never flashes the public website
+  initLabelSorter();
+  initLandingPage();
+
+  // 2. Restore auth session (checks JWT token with server)
+  const authed = await fetchMe();
   updateAuthUI();
+
+  // Stale token: routing showed the dashboard but the server rejected the JWT
+  if (!authed && window.location.pathname.replace(/\/+$/, '') === '/dashboard') {
+    navigateTo('login');
+  }
 
   // 2. Wire OTP flow into global so landing.js can call it
   window.fcAuthInit = initOtpFlow;
@@ -137,8 +147,6 @@ async function init() {
   setupDateFilter();
   setupRenameModal(handleRenameReport);
   setupSessionHandlers();
-  initLabelSorter();
-  initLandingPage();
   initBottomSheetPan();
 
   // Initialize SKU Groups and Sessions from backend REST API ONLY if logged in
@@ -181,8 +189,12 @@ async function init() {
     updateActiveSessionBadge(sessionManager.getActiveSessionName());
   });
 
-  // Show dashboard section
-  switchSection('dashboard');
+  // Show dashboard section only if the user hasn't navigated elsewhere
+  // while the boot API calls were still in flight
+  const lastSection = getLastSwitchedSection();
+  if (!lastSection || lastSection === 'dashboard') {
+    switchSection('dashboard');
+  }
   updateHeaderBadge(0, 0);
 
   // Check if we have stored data

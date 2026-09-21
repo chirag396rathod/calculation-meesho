@@ -18,7 +18,7 @@ function titleSuffix() {
  * Canonical route keys → metadata.
  * titles kept ≤ 65 chars, descriptions ≤ 165 chars.
  */
-const ROUTE_META = {
+export const ROUTE_META = {
   home: {
     title: `Free Meesho Label Crop & Sort Tool + Profit Calculator${titleSuffix()}`,
     description: 'Free Meesho label crop & sort tool — remove invoices, sort by SKU or courier, print 4×6 thermal labels. Plus Meesho profit calculator with RTO, GST & settlement. No signup.',

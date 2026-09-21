@@ -2,7 +2,6 @@
  * FC Analytics — Information Pages Component & Content Router
  * Pages: About Us, Privacy Policy, Terms & Conditions, Cookie Policy, Disclaimer, Contact Us
  */
-import { navigateTo } from './landing.js';
 
 export const INFO_PAGES = {
   about: {
@@ -58,7 +57,7 @@ export const INFO_PAGES = {
 
       <div style="margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap;">
         <button class="sb-btn sb-btn-primary" data-sb-route="dashboard">Launch Free Dashboard →</button>
-        <button class="sb-btn sb-btn-outline" data-sb-route="label-sort">🏷️ Try Label Sorter</button>
+        <a class="sb-btn sb-btn-outline" href="/labels/meesho" style="text-decoration: none;" data-sb-route="label-sort">🏷️ Try Label Sorter</a>
       </div>
     `
   },
@@ -322,10 +321,8 @@ export const INFO_PAGES = {
 /**
  * Render an Information Page by key ('about', 'privacy', 'terms', 'cookies', 'disclaimer', 'contact')
  */
-export function renderInfoPage(pageKey = 'about') {
+export function buildInfoPageHtml(pageKey = 'about') {
   const page = INFO_PAGES[pageKey] || INFO_PAGES.about;
-  const container = document.getElementById('infoPageView');
-  if (!container) return;
 
   const tabsHtml = Object.keys(INFO_PAGES).map(k => {
     const p = INFO_PAGES[k];
@@ -348,7 +345,7 @@ export function renderInfoPage(pageKey = 'about') {
     </div>
   `).join('');
 
-  container.innerHTML = `
+  return `
     <!-- Top Hero -->
     <div class="info-hero-banner">
       <div class="info-hero-container">
@@ -378,6 +375,13 @@ export function renderInfoPage(pageKey = 'about') {
       </article>
     </div>
   `;
+}
+
+export function renderInfoPage(pageKey = 'about') {
+  const container = document.getElementById('infoPageView');
+  if (!container) return;
+
+  container.innerHTML = buildInfoPageHtml(pageKey);
 
   // Bind tab switching
   container.querySelectorAll('[data-info-tab]').forEach(btn => {

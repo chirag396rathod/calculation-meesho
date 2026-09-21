@@ -1,0 +1,13 @@
+{
+  "name": "FC Analytics — Free Meesho Seller Tools",
+  "short_name": "FC Analytics",
+  "description": "Free Meesho label crop & sort tool plus seller profit calculator — 100% private, no signup.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#8B1874",
+  "icons": [
+    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

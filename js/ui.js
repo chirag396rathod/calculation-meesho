@@ -786,7 +786,14 @@ export function toggleMobileSidebar() {
 /**
  * Switch between sections
  */
+let lastSwitchedSection = null;
+
+export function getLastSwitchedSection() {
+  return lastSwitchedSection;
+}
+
 export function switchSection(sectionId) {
+  lastSwitchedSection = sectionId;
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 

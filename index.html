@@ -28,7 +28,12 @@
   <meta name="twitter:description" content="Crop & sort Meesho shipping labels by SKU or courier for free. Remove invoices, 4×6 thermal-ready PDFs, plus Meesho profit calculator. No signup.">
   <meta name="twitter:image" content="https://calculation-meesho.vercel.app/logos/og-image.png">
   <title>Free Meesho Label Crop & Sort Tool + Profit Calculator | FC Analytics</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📊</text></svg>">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Raleway:wght@500;600;700;800;900&display=swap" rel="stylesheet">
@@ -190,7 +195,7 @@
     <header class="sb-header">
       <div class="sb-container">
         <div class="sb-header-inner">
-          <a class="sb-logo" href="#" data-sb-route="home">
+          <a class="sb-logo" href="/" data-sb-route="home">
             <div class="sb-logo-box">📊</div>
             <span>FC Analytics</span>
           </a>
@@ -198,7 +203,7 @@
           <!-- Sleek, Minimalist Professional Header Menu -->
           <nav class="sb-nav-links">
             <a class="sb-nav-link" href="#features">Features</a>
-            <a class="sb-nav-link" href="#" data-sb-route="label-sort">Labels Tool</a>
+            <a class="sb-nav-link" href="/labels/meesho" data-sb-route="label-sort">Labels Tool</a>
           </nav>
 
           <div class="sb-header-actions">
@@ -238,9 +243,9 @@
               <button class="sb-btn sb-btn-primary sb-btn-lg" data-sb-route="dashboard" data-motion-magnetic>
                 Get Started for Free →
               </button>
-              <button class="sb-btn sb-btn-outline sb-btn-lg" data-sb-route="label-sort" data-motion-magnetic>
+              <a class="sb-btn sb-btn-outline sb-btn-lg" href="/labels/meesho" style="text-decoration: none;" data-sb-route="label-sort" data-motion-magnetic>
                 🏷️ Sort &amp; Crop Labels
-              </button>
+              </a>
             </div>
 
             <div class="sb-marketplace-proof">
@@ -410,9 +415,9 @@
                 Crop below product details, 4×4 standard thermal trim, auto-group by courier (Xpress Bees, Valmo, Shadowfax), with custom seller message &amp; QR code generator.
               </p>
             </div>
-            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort-crop/meesho" style="width: 100%;" data-motion-magnetic>
+            <a class="sb-btn sb-btn-primary" href="/labels/meesho" style="width: 100%; text-decoration: none;" data-sb-route="label-sort-crop/meesho" data-motion-magnetic>
               Open Meesho Cropper →
-            </button>
+            </a>
           </div>
 
           <!-- Flipkart (ACTIVE - Next to Meesho) -->
@@ -429,9 +434,9 @@
                 Crop tax invoice section away, 3×5 thermal print format, auto-group by courier (Ekart Logistics, Delhivery, Shadowfax), and alphabetical SKU sorting.
               </p>
             </div>
-            <button class="sb-btn sb-btn-primary" data-sb-route="label-sort-crop/flipkart" style="width: 100%; background: #2874F0; border-color: #2874F0;" data-motion-magnetic>
+            <a class="sb-btn sb-btn-primary" href="/labels/flipkart" style="width: 100%; text-decoration: none; background: #2874F0; border-color: #2874F0;" data-sb-route="label-sort-crop/flipkart" data-motion-magnetic>
               Open Flipkart Cropper →
-            </button>
+            </a>
           </div>
 
           <!-- Amazon (COMING SOON) -->
@@ -486,9 +491,9 @@
               </ul>
 
               <div class="sb-showcase-btn-group">
-                <button class="sb-btn sb-btn-primary" data-sb-route="label-sort" data-motion-magnetic>
+                <a class="sb-btn sb-btn-primary" href="/labels/meesho" style="text-decoration: none;" data-sb-route="label-sort" data-motion-magnetic>
                   Open Label Tool Now →
-                </button>
+                </a>
                 <button class="sb-btn sb-btn-outline" data-sb-route="dashboard" data-motion-magnetic>
                   Explore Full Dashboard
                 </button>
@@ -1656,11 +1661,11 @@
           <div class="sb-footer-col">
             <h4>Quick Navigation</h4>
             <ul class="sb-footer-links">
-              <li><a href="#" data-sb-route="home">Home</a></li>
-              <li><a href="#" data-sb-route="login" id="sbFooterLoginLink">Login / Sign In</a></li>
-              <li><a href="#" data-sb-route="label-sort">Shipping Label Sorter</a></li>
+              <li><a href="/" data-sb-route="home">Home</a></li>
+              <li><a href="/login" data-sb-route="login" id="sbFooterLoginLink">Login / Sign In</a></li>
+              <li><a href="/labels/meesho" data-sb-route="label-sort">Shipping Label Sorter</a></li>
               <li><a href="#calculator">Meesho Profit Calculator</a></li>
-              <li><a href="#" data-sb-route="dashboard">Full Business Dashboard</a></li>
+              <li><a href="/dashboard" data-sb-route="dashboard">Full Business Dashboard</a></li>
               <li><a href="#faq">Frequently Asked Questions</a></li>
             </ul>
           </div>
@@ -1668,12 +1673,12 @@
           <div class="sb-footer-col">
             <h4>Information</h4>
             <ul class="sb-footer-links">
-              <li><a href="#" data-sb-route="about">About Us</a></li>
-              <li><a href="#" data-sb-route="privacy">Privacy Policy</a></li>
-              <li><a href="#" data-sb-route="terms">Terms & Conditions</a></li>
-              <li><a href="#" data-sb-route="cookies">Cookie Policy</a></li>
-              <li><a href="#" data-sb-route="disclaimer">Disclaimer</a></li>
-              <li><a href="#" data-sb-route="contact">Contact Us</a></li>
+              <li><a href="/about" data-sb-route="about">About Us</a></li>
+              <li><a href="/privacy" data-sb-route="privacy">Privacy Policy</a></li>
+              <li><a href="/terms" data-sb-route="terms">Terms & Conditions</a></li>
+              <li><a href="/cookies" data-sb-route="cookies">Cookie Policy</a></li>
+              <li><a href="/disclaimer" data-sb-route="disclaimer">Disclaimer</a></li>
+              <li><a href="/contact" data-sb-route="contact">Contact Us</a></li>
             </ul>
           </div>
         </div>
@@ -2671,6 +2676,17 @@
 
   <!-- ═══ Toast Container ═══ -->
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ═══ Boot Router: hide public site instantly on app routes (prevents wrong-page flash) ═══ -->
+  <script>
+    (function () {
+      var p = location.pathname.replace(/\/+$/, '');
+      if (p === '/dashboard' || p === '/login') {
+        var ps = document.getElementById('publicSite');
+        if (ps) ps.style.display = 'none';
+      }
+    })();
+  </script>
 
   <!-- ═══ App Script ═══ -->
   <script type="module" src="/js/app.js"></script>

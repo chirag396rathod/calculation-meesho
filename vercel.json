@@ -1,10 +1,22 @@
 {
   "version": 2,
+  "trailingSlash": false,
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "/api/[...path]"
     },
+    { "source": "/labels/meesho", "destination": "/labels/meesho/index.html" },
+    { "source": "/labels/flipkart", "destination": "/labels/flipkart/index.html" },
+    { "source": "/labels", "destination": "/labels/index.html" },
+    { "source": "/about", "destination": "/about/index.html" },
+    { "source": "/contact", "destination": "/contact/index.html" },
+    { "source": "/privacy", "destination": "/privacy/index.html" },
+    { "source": "/terms", "destination": "/terms/index.html" },
+    { "source": "/cookies", "destination": "/cookies/index.html" },
+    { "source": "/disclaimer", "destination": "/disclaimer/index.html" },
+    { "source": "/login", "destination": "/login/index.html" },
+    { "source": "/dashboard", "destination": "/dashboard/index.html" },
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
