@@ -6,7 +6,7 @@ import { buildInfoPageHtml } from '../js/infoPages.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = path.join(root, 'dist');
-const SITE_URL = 'https://calculation-meesho.vercel.app';
+const SITE_URL = 'https://sellermarginmeesho.vercel.app';
 
 const LANDING_OPEN = '<div class="sb-landing-view" id="landingView">';
 const LANDING_HIDDEN = '<div class="sb-landing-view" id="landingView" style="display: none;">';
@@ -45,17 +45,22 @@ function setHead(html, route) {
     html = html.replace(pattern, replacement);
   }
 
-  if (meta.breadcrumb) {
-    const ld = {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: meta.breadcrumb.map(([name, item], idx) => ({
-        '@type': 'ListItem',
-        position: idx + 1,
-        name,
-        ...(item ? { item: SITE_URL + item } : {})
-      }))
-    };
+  if (meta.breadcrumb || meta.schemas) {
+    const schemas = [];
+    if (meta.breadcrumb) {
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: meta.breadcrumb.map(([name, item], idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name,
+          ...(item ? { item: SITE_URL + item } : {})
+        }))
+      });
+    }
+    if (meta.schemas) schemas.push(...meta.schemas);
+    const ld = schemas.length === 1 ? schemas[0] : { '@context': 'https://schema.org', '@graph': schemas };
     html = html.replace('</head>', `  <script type="application/ld+json" id="fc-route-schema">${JSON.stringify(ld)}</script>\n</head>`);
   }
 
@@ -94,6 +99,11 @@ function setBody(html, route) {
     swaps.push([
       'id="appLayout" style="display: none;"',
       'id="appLayout" style="display: flex;"'
+    ]);
+  } else if (route === 'meesho-profit-calculator' || route === 'profit-calculator') {
+    swaps.push([
+      'id="profitCalcView" style="display: none;"',
+      'id="profitCalcView" style="display: block;"'
     ]);
   } else if (INFO_KEYS.includes(route)) {
     swaps.push([

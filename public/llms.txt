@@ -6,11 +6,11 @@ FC Analytics (also written as "FC Analytics dashboard" or "calculation-meesho") 
 
 ## Tools
 
-- [Meesho Label Crop & Sort Tool](https://calculation-meesho.vercel.app/labels/meesho): Upload Meesho label PDFs, remove the tax invoice section (dynamic crop below product details or standard 4×4 thermal trim), sort labels by SKU or courier partner (Xpress Bees, Valmo, Shadowfax, Delhivery), add custom packing messages and scannable QR codes, and download a print-ready PDF. Free, no watermark, no signup.
-- [Flipkart Label Crop Tool](https://calculation-meesho.vercel.app/labels/flipkart): Crop Flipkart shipping labels to remove the tax invoice section, 3×5 thermal print format, sort by SKU or courier (Ekart, Delhivery, Shadowfax).
-- [Shipping Label Tool Directory](https://calculation-meesho.vercel.app/labels): All marketplace label tools in one place.
-- [Meesho Profit Calculator](https://calculation-meesho.vercel.app/#calculator): Free interactive calculator for Meesho seller profit per unit — selling price, product cost, shipping, commission, GST and expected return/RTO rate produce net payout, blended profit and net margin.
-- [Business Dashboard](https://calculation-meesho.vercel.app/dashboard): Upload marketplace payment Excel files (.xlsx) to analyze orders, SKU-level net profit, return/RTO charges, settlement reconciliation and monthly trends. Free account required.
+- [Meesho Label Crop & Sort Tool](https://sellermarginmeesho.vercel.app/labels/meesho): Upload Meesho label PDFs, remove the tax invoice section (dynamic crop below product details or standard 4×4 thermal trim), sort labels by SKU or courier partner (Xpress Bees, Valmo, Shadowfax, Delhivery), add custom packing messages and scannable QR codes, and download a print-ready PDF. Free, no watermark, no signup.
+- [Flipkart Label Crop Tool](https://sellermarginmeesho.vercel.app/labels/flipkart): Crop Flipkart shipping labels to remove the tax invoice section, 3×5 thermal print format, sort by SKU or courier (Ekart, Delhivery, Shadowfax).
+- [Shipping Label Tool Directory](https://sellermarginmeesho.vercel.app/labels): All marketplace label tools in one place.
+- [Meesho Profit Calculator](https://sellermarginmeesho.vercel.app/#calculator): Free interactive calculator for Meesho seller profit per unit — selling price, product cost, shipping, commission, GST and expected return/RTO rate produce net payout, blended profit and net margin.
+- [Business Dashboard](https://sellermarginmeesho.vercel.app/dashboard): Upload marketplace payment Excel files (.xlsx) to analyze orders, SKU-level net profit, return/RTO charges, settlement reconciliation and monthly trends. Free account required.
 
 ## Key facts
 
@@ -23,10 +23,10 @@ FC Analytics (also written as "FC Analytics dashboard" or "calculation-meesho") 
 
 ## Pages
 
-- [Home](https://calculation-meesho.vercel.app/)
-- [About Us](https://calculation-meesho.vercel.app/about)
-- [Contact](https://calculation-meesho.vercel.app/contact)
-- [Privacy Policy](https://calculation-meesho.vercel.app/privacy)
-- [Terms & Conditions](https://calculation-meesho.vercel.app/terms)
-- [Cookie Policy](https://calculation-meesho.vercel.app/cookies)
-- [Disclaimer](https://calculation-meesho.vercel.app/disclaimer)
+- [Home](https://sellermarginmeesho.vercel.app/)
+- [About Us](https://sellermarginmeesho.vercel.app/about)
+- [Contact](https://sellermarginmeesho.vercel.app/contact)
+- [Privacy Policy](https://sellermarginmeesho.vercel.app/privacy)
+- [Terms & Conditions](https://sellermarginmeesho.vercel.app/terms)
+- [Cookie Policy](https://sellermarginmeesho.vercel.app/cookies)
+- [Disclaimer](https://sellermarginmeesho.vercel.app/disclaimer)

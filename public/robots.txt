@@ -46,4 +46,4 @@ Allow: /
 User-agent: Bytespider
 Allow: /
 
-Sitemap: https://calculation-meesho.vercel.app/sitemap.xml
+Sitemap: https://sellermarginmeesho.vercel.app/sitemap.xml

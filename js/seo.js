@@ -7,7 +7,7 @@
  * ══════════════════════════════════════════════════════════════════════
  */
 
-const SITE_URL = 'https://calculation-meesho.vercel.app';
+const SITE_URL = 'https://sellermarginmeesho.vercel.app';
 const BRAND = 'FC Analytics';
 
 function titleSuffix() {
@@ -23,6 +23,66 @@ export const ROUTE_META = {
     title: `Free Meesho Label Crop & Sort Tool + Profit Calculator${titleSuffix()}`,
     description: 'Free Meesho label crop & sort tool — remove invoices, sort by SKU or courier, print 4×6 thermal labels. Plus Meesho profit calculator with RTO, GST & settlement. No signup.',
     path: '/'
+  },
+  'meesho-profit-calculator': {
+    title: `Free Meesho Profit Calculator 2026 – Profit, GST, RTO & Margin${titleSuffix()}`,
+    description: 'Free Meesho profit calculator for sellers. Calculate net profit, margin, GST, shipping, commission and RTO loss instantly — plus the recommended selling price to list at. No signup.',
+    path: '/meesho-profit-calculator',
+    breadcrumb: [
+      ['Home', '/'],
+      ['Meesho Profit Calculator', null]
+    ],
+    schemas: [
+      {
+        '@type': 'SoftwareApplication',
+        'name': 'Meesho Profit Calculator 2026',
+        'applicationCategory': 'FinanceApplication',
+        'operatingSystem': 'Web',
+        'url': `${SITE_URL}/meesho-profit-calculator`,
+        'description': 'Free Meesho profit calculator for sellers. Calculate net profit, margin, GST, shipping, commission and RTO loss instantly, plus the recommended selling price to list at.',
+        'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'INR' }
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          {
+            '@type': 'Question',
+            'name': 'Is the Meesho profit calculator free?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes — 100% free with no signup. All calculations run locally in your browser.' }
+          },
+          {
+            '@type': 'Question',
+            'name': 'How is Meesho profit calculated?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Net profit = selling price − product cost − shipping − commission − GST on fees − expected RTO/return losses. The calculator shows each deduction separately.' }
+          },
+          {
+            '@type': 'Question',
+            'name': 'Does Meesho charge commission?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Meesho charges 0% referral commission on most categories, but shipping fees and 18% GST on those fees still apply — include them in pricing.' }
+          },
+          {
+            '@type': 'Question',
+            'name': 'Does Meesho charge for returns or RTO?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes. Undelivered/RTO orders can cost forward shipping, packaging and reverse logistics. Enter an expected RTO rate to protect your margin.' }
+          },
+          {
+            '@type': 'Question',
+            'name': 'What is a good profit margin on Meesho?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Most healthy Meesho products run a 20–35% net margin after all deductions. Below 15%, returns and ad spend can quickly wipe you out.' }
+          },
+          {
+            '@type': 'Question',
+            'name': 'Can I sell on Meesho without GST?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'GST registration is mandatory for Meesho suppliers. If you are GST-registered, you can offset part of the fee GST through Input Tax Credit.' }
+          },
+          {
+            '@type': 'Question',
+            'name': 'Is selling on Meesho profitable in 2026?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes, if you price wisely. Most sellers lose money by underpricing or ignoring deductions — calculate real net profit per unit before listing.' }
+          }
+        ]
+      }
+    ]
   },
   'labels/meesho': {
     title: `Free Meesho Label Crop & Sort Tool — 4×6 Thermal PDF${titleSuffix()}`,
@@ -107,6 +167,8 @@ export const ROUTE_META = {
 const ROUTE_ALIASES = {
   home: 'home',
   '': 'home',
+  'profit-calculator': 'meesho-profit-calculator',
+  'meesho-profit-calculator': 'meesho-profit-calculator',
   'label-sort': 'labels/meesho',
   labels: 'labels',
   'label-sort-crop': 'labels',
@@ -156,9 +218,9 @@ function setLink(rel, href) {
   el.setAttribute('href', href);
 }
 
-function setRouteJsonLd(schema) {
+function setRouteJsonLd(schemas) {
   let el = document.getElementById('fc-route-schema');
-  if (!schema) {
+  if (!schemas || !schemas.length) {
     if (el) el.remove();
     return;
   }
@@ -168,7 +230,9 @@ function setRouteJsonLd(schema) {
     el.id = 'fc-route-schema';
     document.head.appendChild(el);
   }
-  el.textContent = JSON.stringify(schema);
+  el.textContent = JSON.stringify(
+    schemas.length === 1 ? schemas[0] : { '@context': 'https://schema.org', '@graph': schemas }
+  );
 }
 
 /**
@@ -187,17 +251,22 @@ export function applySeo(route) {
   setMeta('meta[property="og:url"]', 'content', SITE_URL + meta.path);
   setMeta('meta[name="robots"]', 'content', meta.robots || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
 
-  if (meta.breadcrumb) {
-    setRouteJsonLd({
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: meta.breadcrumb.map(([name, url], idx) => ({
-        '@type': 'ListItem',
-        position: idx + 1,
-        name,
-        ...(url ? { item: SITE_URL + url } : {})
-      }))
-    });
+  if (meta.breadcrumb || meta.schemas) {
+    const schemas = [];
+    if (meta.breadcrumb) {
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: meta.breadcrumb.map(([name, url], idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name,
+          ...(url ? { item: SITE_URL + url } : {})
+        }))
+      });
+    }
+    if (meta.schemas) schemas.push(...meta.schemas);
+    setRouteJsonLd(schemas);
   } else {
     setRouteJsonLd(null);
   }

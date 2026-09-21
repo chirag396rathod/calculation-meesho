@@ -9,15 +9,15 @@
   <meta name="format-detection" content="telephone=no">
   <meta name="description" content="Free Meesho label crop & sort tool — remove invoices, sort by SKU or courier, print 4×6 thermal labels. Plus Meesho profit calculator with RTO, GST & settlement. No signup.">
   <meta name="google-site-verification" content="qBXB4XojyO_kzcycQ1xsSyYam0sG0zHMrKBTk9WIOzw" />
-  <link rel="canonical" href="https://calculation-meesho.vercel.app/">
+  <link rel="canonical" href="https://sellermarginmeesho.vercel.app/">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <!-- Open Graph -->
   <meta property="og:site_name" content="FC Analytics">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://calculation-meesho.vercel.app/">
+  <meta property="og:url" content="https://sellermarginmeesho.vercel.app/">
   <meta property="og:title" content="Free Meesho Label Crop & Sort Tool + Seller Profit Calculator | FC Analytics">
   <meta property="og:description" content="Crop & sort Meesho shipping labels by SKU or courier for free. Remove invoices, 4×6 thermal-ready PDFs, plus Meesho profit calculator with RTO & GST. No signup, 100% private.">
-  <meta property="og:image" content="https://calculation-meesho.vercel.app/logos/og-image.png">
+  <meta property="og:image" content="https://sellermarginmeesho.vercel.app/logos/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="FC Analytics — Free Meesho Label Crop, Sort & Profit Calculator Tools">
@@ -26,7 +26,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Free Meesho Label Crop & Sort Tool + Seller Profit Calculator | FC Analytics">
   <meta name="twitter:description" content="Crop & sort Meesho shipping labels by SKU or courier for free. Remove invoices, 4×6 thermal-ready PDFs, plus Meesho profit calculator. No signup.">
-  <meta name="twitter:image" content="https://calculation-meesho.vercel.app/logos/og-image.png">
+  <meta name="twitter:image" content="https://sellermarginmeesho.vercel.app/logos/og-image.png">
   <title>Free Meesho Label Crop & Sort Tool + Profit Calculator | FC Analytics</title>
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -49,12 +49,12 @@
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://calculation-meesho.vercel.app/#organization",
+        "@id": "https://sellermarginmeesho.vercel.app/#organization",
         "name": "FC Analytics",
-        "url": "https://calculation-meesho.vercel.app/",
+        "url": "https://sellermarginmeesho.vercel.app/",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://calculation-meesho.vercel.app/logos/og-image.png",
+          "url": "https://sellermarginmeesho.vercel.app/logos/og-image.png",
           "width": 1200,
           "height": 630
         },
@@ -68,18 +68,18 @@
       },
       {
         "@type": "WebSite",
-        "@id": "https://calculation-meesho.vercel.app/#website",
-        "url": "https://calculation-meesho.vercel.app/",
+        "@id": "https://sellermarginmeesho.vercel.app/#website",
+        "url": "https://sellermarginmeesho.vercel.app/",
         "name": "FC Analytics",
         "description": "Free Meesho seller tools — shipping label crop & sort, profit calculator, SKU analytics and settlement reconciliation.",
-        "publisher": { "@id": "https://calculation-meesho.vercel.app/#organization" },
+        "publisher": { "@id": "https://sellermarginmeesho.vercel.app/#organization" },
         "inLanguage": "en-IN"
       },
       {
         "@type": "WebApplication",
-        "@id": "https://calculation-meesho.vercel.app/#webapplication",
+        "@id": "https://sellermarginmeesho.vercel.app/#webapplication",
         "name": "FC Analytics — Meesho Label Crop, Sort & Profit Tools",
-        "url": "https://calculation-meesho.vercel.app/",
+        "url": "https://sellermarginmeesho.vercel.app/",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Any (Web Browser)",
         "browserRequirements": "Requires JavaScript",
@@ -91,7 +91,7 @@
           "Meesho profit calculator with return/RTO, GST and settlement breakdown",
           "SKU cost groups, return-charge analysis and monthly session analytics"
         ],
-        "publisher": { "@id": "https://calculation-meesho.vercel.app/#organization" }
+        "publisher": { "@id": "https://sellermarginmeesho.vercel.app/#organization" }
       },
       {
         "@type": "HowTo",
@@ -528,7 +528,7 @@
       </div>
     </section>
 
-    <!-- ═══ Interactive Live Profit Calculator ═══ -->
+    <!-- ═══ Profit Calculator Teaser (full tool lives at /meesho-profit-calculator) ═══ -->
     <section class="sb-section" id="calculator" style="background: #FFFFFF;">
       <div class="sb-container">
         <div class="sb-section-header">
@@ -536,98 +536,19 @@
             <span class="sb-pulse-dot"></span>
             <span>Interactive Margin Tool</span>
           </div>
-          <h2 class="sb-section-title">Meesho Profit & Margin Calculator</h2>
+          <h2 class="sb-section-title">Meesho Profit &amp; Margin Calculator</h2>
           <p class="sb-section-subtitle">Simulate real profitability including return freight penalties, marketplace commission, and GST.</p>
         </div>
 
-        <div class="sb-calc-card" data-motion-spotlight>
-          <div class="sb-calc-grid">
-            <div class="sb-calc-inputs">
-              <div class="sb-input-group">
-                <label for="calcSalePrice">Product Selling Price</label>
-                <div class="sb-input-wrapper">
-                  <span class="sb-input-prefix">₹</span>
-                  <input type="number" id="calcSalePrice" value="399" min="0" step="1">
-                </div>
-              </div>
-
-              <div class="sb-input-group">
-                <label for="calcProductCost">Making / Sourcing Cost</label>
-                <div class="sb-input-wrapper">
-                  <span class="sb-input-prefix">₹</span>
-                  <input type="number" id="calcProductCost" value="140" min="0" step="1">
-                </div>
-              </div>
-
-              <div class="sb-input-group">
-                <label for="calcShippingCost">Estimated Shipping Cost</label>
-                <div class="sb-input-wrapper">
-                  <span class="sb-input-prefix">₹</span>
-                  <input type="number" id="calcShippingCost" value="65" min="0" step="1">
-                </div>
-              </div>
-
-              <div class="sb-input-group">
-                <label for="calcCommissionRate">Meesho Commission (%)</label>
-                <div class="sb-input-wrapper">
-                  <span class="sb-input-prefix">%</span>
-                  <input type="number" id="calcCommissionRate" value="0" min="0" max="100" step="0.5">
-                </div>
-              </div>
-
-              <div class="sb-input-group" style="grid-column: 1 / -1;">
-                <label for="calcReturnRate">Expected Return / RTO Rate (%)</label>
-                <div class="sb-input-wrapper">
-                  <span class="sb-input-prefix">%</span>
-                  <input type="number" id="calcReturnRate" value="18" min="0" max="100" step="1">
-                </div>
-              </div>
-            </div>
-
-            <div class="sb-calc-results">
-              <div>
-                <div style="font-weight: 700; font-size: 1rem; margin-bottom: 14px; color: var(--sb-text-dark);">
-                  Breakdown & Net Settlement
-                </div>
-
-                <div class="sb-calc-res-row">
-                  <span style="color: var(--sb-text-muted);">Platform Deductions (Fee + GST):</span>
-                  <strong id="calcResPlatformFee">₹0.0</strong>
-                </div>
-                <div class="sb-calc-res-row">
-                  <span style="color: var(--sb-text-muted);">Logistics Deductions (+18% GST):</span>
-                  <strong id="calcResShippingFee">₹76.7</strong>
-                </div>
-                <div class="sb-calc-res-row">
-                  <span style="color: var(--sb-text-muted);">Net Payout (Delivered):</span>
-                  <strong id="calcResPayoutDelivered">₹322.3</strong>
-                </div>
-                <div class="sb-calc-res-row">
-                  <span style="color: var(--sb-text-muted);">Gross Profit per Delivered:</span>
-                  <strong id="calcResProfitDelivered">₹182.3</strong>
-                </div>
-              </div>
-
-              <div class="sb-calc-profit-highlight">
-                <div>
-                  <div style="font-size: 0.8rem; font-weight: 700; color: var(--sb-text-muted); text-transform: uppercase;">
-                    Net Profit / Unit
-                  </div>
-                  <div class="sb-profit-big" id="calcResBlendedProfit">₹132.0</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-size: 0.8rem; font-weight: 700; color: var(--sb-text-muted); text-transform: uppercase;">
-                    Net Margin
-                  </div>
-                  <div style="font-size: 1.35rem; font-weight: 800; color: #10B981;" id="calcResMarginPercent">33.1%</div>
-                </div>
-              </div>
-
-              <button class="sb-btn sb-btn-primary" data-sb-route="dashboard" style="width: 100%; margin-top: 16px;" data-motion-magnetic>
-                Analyze Entire Catalog →
-              </button>
-            </div>
-          </div>
+        <div class="sb-calc-card" data-motion-spotlight style="text-align: center; padding: 40px 24px;">
+          <div style="font-size: 2.5rem; margin-bottom: 12px;">🧮</div>
+          <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; color: var(--sb-text-dark);">Free Meesho Profit Calculator 2026</h3>
+          <p style="color: var(--sb-text-muted); max-width: 560px; margin: 0 auto 22px; line-height: 1.7;">
+            Calculate net profit, margin, GST, shipping, commission and RTO loss instantly — plus the recommended selling price to list at. 100% free, no signup.
+          </p>
+          <a class="sb-btn sb-btn-primary sb-btn-lg" href="/meesho-profit-calculator" style="text-decoration: none;" data-sb-route="meesho-profit-calculator" data-motion-magnetic>
+            Open Meesho Profit Calculator →
+          </a>
         </div>
       </div>
     </section>
@@ -805,6 +726,200 @@
          INFORMATION PAGES VIEW (About Us, Privacy, Terms, Cookie, Disclaimer, Contact)
          ══════════════════════════════════════════════════════════════════════ -->
     <div class="sb-info-view" id="infoPageView" style="display: none;"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         MEESHO PROFIT CALCULATOR (STANDALONE SEO PAGE)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="sb-info-view" id="profitCalcView" style="display: none;">
+      <div class="info-hero-banner">
+        <div class="info-hero-container">
+          <div class="info-pill-badge">
+            <span>🧮</span>
+            <span>Free Seller Tool · Updated September 2026</span>
+          </div>
+          <h1 class="info-hero-title">Meesho Profit Calculator 2026 – Calculate Profit, GST &amp; RTO</h1>
+          <p class="info-hero-subtitle">Enter your product cost, selling price, shipping and return rate to see real net profit, margin and the payout that actually reaches your bank — instantly, 100% free, no signup.</p>
+          <div class="info-meta-chips">
+            <div class="info-meta-chip"><strong>Cost:</strong> <span>₹0 Always Free</span></div>
+            <div class="info-meta-chip"><strong>Privacy:</strong> <span>Runs in your browser</span></div>
+            <div class="info-meta-chip"><strong>Signup:</strong> <span>Not required</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-body-container">
+        <article class="info-article-card">
+          <h2 id="calc-tool">Meesho Profit &amp; Margin Calculator</h2>
+          <p>Use this free Meesho profit calculator to estimate your real earning per order before you list. It accounts for product cost, shipping, Meesho commission, GST and expected RTO/return losses — the same deductions that turn a “₹40 margin” into a loss.</p>
+
+          <div class="sb-calc-card" data-motion-spotlight>
+            <div class="sb-calc-grid">
+              <div class="sb-calc-inputs">
+                <div class="sb-input-group">
+                  <label for="calcSalePrice">Product Selling Price</label>
+                  <div class="sb-input-wrapper">
+                    <span class="sb-input-prefix">₹</span>
+                    <input type="number" id="calcSalePrice" value="399" min="0" step="1">
+                  </div>
+                </div>
+
+                <div class="sb-input-group">
+                  <label for="calcProductCost">Making / Sourcing Cost</label>
+                  <div class="sb-input-wrapper">
+                    <span class="sb-input-prefix">₹</span>
+                    <input type="number" id="calcProductCost" value="140" min="0" step="1">
+                  </div>
+                </div>
+
+                <div class="sb-input-group">
+                  <label for="calcShippingCost">Estimated Shipping Cost</label>
+                  <div class="sb-input-wrapper">
+                    <span class="sb-input-prefix">₹</span>
+                    <input type="number" id="calcShippingCost" value="65" min="0" step="1">
+                  </div>
+                </div>
+
+                <div class="sb-input-group">
+                  <label for="calcCommissionRate">Meesho Commission (%)</label>
+                  <div class="sb-input-wrapper">
+                    <span class="sb-input-prefix">%</span>
+                    <input type="number" id="calcCommissionRate" value="0" min="0" max="100" step="0.5">
+                  </div>
+                </div>
+
+                <div class="sb-input-group" style="grid-column: 1 / -1;">
+                  <label for="calcReturnRate">Expected Return / RTO Rate (%)</label>
+                  <div class="sb-input-wrapper">
+                    <span class="sb-input-prefix">%</span>
+                    <input type="number" id="calcReturnRate" value="18" min="0" max="100" step="1">
+                  </div>
+                </div>
+              </div>
+
+              <div class="sb-calc-results">
+                <div>
+                  <div style="font-weight: 700; font-size: 1rem; margin-bottom: 14px; color: var(--sb-text-dark);">
+                    Breakdown &amp; Net Settlement
+                  </div>
+
+                  <div class="sb-calc-res-row">
+                    <span style="color: var(--sb-text-muted);">Platform Deductions (Fee + GST):</span>
+                    <strong id="calcResPlatformFee">₹0.0</strong>
+                  </div>
+                  <div class="sb-calc-res-row">
+                    <span style="color: var(--sb-text-muted);">Logistics Deductions (+18% GST):</span>
+                    <strong id="calcResShippingFee">₹76.7</strong>
+                  </div>
+                  <div class="sb-calc-res-row">
+                    <span style="color: var(--sb-text-muted);">Net Payout (Delivered):</span>
+                    <strong id="calcResPayoutDelivered">₹322.3</strong>
+                  </div>
+                  <div class="sb-calc-res-row">
+                    <span style="color: var(--sb-text-muted);">Gross Profit per Delivered:</span>
+                    <strong id="calcResProfitDelivered">₹182.3</strong>
+                  </div>
+                </div>
+
+                <div class="sb-calc-profit-highlight">
+                  <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--sb-text-muted); text-transform: uppercase;">
+                      Net Profit / Unit
+                    </div>
+                    <div class="sb-profit-big" id="calcResBlendedProfit">₹132.0</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--sb-text-muted); text-transform: uppercase;">
+                      Net Margin
+                    </div>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: #10B981;" id="calcResMarginPercent">33.1%</div>
+                  </div>
+                </div>
+
+                <button class="sb-btn sb-btn-primary" data-sb-route="dashboard" style="width: 100%; margin-top: 16px;" data-motion-magnetic>
+                  Analyze Entire Catalog →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <h2>How Is Meesho Profit Calculated?</h2>
+          <p>Meesho profit is calculated by subtracting every seller cost from the final selling price. Meesho charges 0% referral commission on most categories, but shipping, GST and returns still decide whether you actually make money:</p>
+          <table>
+            <tr><th>Formula</th><th>Meaning</th></tr>
+            <tr><td>Net Payout = Selling Price − Commission − Shipping (incl. GST)</td><td>What Meesho pays you per delivered order.</td></tr>
+            <tr><td>Net Profit = Net Payout − Product Cost − Return/RTO Buffer</td><td>Your true earning after expected return losses.</td></tr>
+            <tr><td>Profit Margin % = Net Profit ÷ Selling Price × 100</td><td>Profit as a percentage of the listed price.</td></tr>
+          </table>
+
+          <h2>Example Meesho Profit Calculation</h2>
+          <table>
+            <tr><th>Cost Factor</th><th>Example Amount</th></tr>
+            <tr><td>Selling Price</td><td>₹399</td></tr>
+            <tr><td>Product / Making Cost</td><td>₹140</td></tr>
+            <tr><td>Shipping Charges</td><td>₹65</td></tr>
+            <tr><td>Platform Deductions (0% commission + GST)</td><td>≈ ₹0</td></tr>
+            <tr><td>Logistics Deductions (+18% GST)</td><td>≈ ₹76.7</td></tr>
+            <tr><td>Expected RTO / Return Buffer (18%)</td><td>Varies by category</td></tr>
+            <tr><td><strong>Net Profit / Unit</strong></td><td><strong>≈ ₹132</strong></td></tr>
+            <tr><td><strong>Net Margin</strong></td><td><strong>≈ 33%</strong></td></tr>
+          </table>
+          <p>Try these numbers in the calculator above — then change the RTO rate and watch how quickly a “profitable” product turns into a loss-making one.</p>
+
+          <h2>Meesho Charges Every Seller Should Include</h2>
+          <h3>Product Cost</h3>
+          <p>Your purchase or manufacturing cost — raw material, labour, finishing and basic packing.</p>
+          <h3>Shipping Charges</h3>
+          <p>Forward shipping to the customer, typically ₹40–₹90 depending on weight and delivery zone. Check your Meesho seller panel for actuals.</p>
+          <h3>GST on Shipping &amp; Fees</h3>
+          <p>Meesho applies 18% GST on logistics/fee components. GST-registered sellers can claim Input Tax Credit (ITC) on these amounts.</p>
+          <h3>Commission / Platform Fees</h3>
+          <p>Meesho is 0% commission on most categories, but keep this field ready — category-level or account-specific deductions can apply.</p>
+          <h3>RTO &amp; Return Cost</h3>
+          <p>Return to Origin orders can cost you forward shipping, packaging and reverse logistics. Adding an expected RTO buffer (5–20% by category) gives a realistic profit estimate.</p>
+          <h3>Ad Spend &amp; Discounts</h3>
+          <p>If you run Meesho ads or discounts, divide the monthly spend by expected orders and include it per unit.</p>
+
+          <h2>How to Set the Right Selling Price on Meesho</h2>
+          <ul>
+            <li>Calculate your landed product cost first.</li>
+            <li>Add shipping, packaging and GST on fees.</li>
+            <li>Add an RTO/return buffer based on your category’s real return rate.</li>
+            <li>Set a minimum acceptable profit margin (most sellers target 20–35%).</li>
+            <li>Compare the final price with competitor listings — never sell below break-even.</li>
+          </ul>
+
+          <h2>Meesho Pricing Mistakes to Avoid</h2>
+          <ul>
+            <li>Ignoring GST and shipping fees while pricing.</li>
+            <li>Not adding an RTO buffer on high-return categories.</li>
+            <li>Running ads without checking net profit per unit.</li>
+            <li>Matching a competitor’s price without knowing your own costs.</li>
+          </ul>
+
+          <h2>Frequently Asked Questions</h2>
+          <h3>Is the Meesho profit calculator free?</h3>
+          <p>Yes — 100% free with no signup. All calculations run locally in your browser.</p>
+          <h3>How is Meesho profit calculated?</h3>
+          <p>Net profit = selling price − product cost − shipping − commission − GST on fees − expected RTO/return losses. The calculator shows each deduction separately.</p>
+          <h3>Does Meesho charge commission?</h3>
+          <p>Meesho charges 0% referral commission on most categories, but shipping fees and 18% GST on those fees still apply — include them in pricing.</p>
+          <h3>Does Meesho charge for returns or RTO?</h3>
+          <p>Yes. Undelivered/RTO orders can cost forward shipping, packaging and reverse logistics. Enter an expected RTO rate to protect your margin.</p>
+          <h3>What is a good profit margin on Meesho?</h3>
+          <p>Most healthy Meesho products run a 20–35% net margin after all deductions. Below 15%, returns and ad spend can quickly wipe you out.</p>
+          <h3>Can I sell on Meesho without GST?</h3>
+          <p> GST registration is mandatory for Meesho suppliers. If you are GST-registered, you can offset part of the fee GST through Input Tax Credit.</p>
+          <h3>Is selling on Meesho profitable in 2026?</h3>
+          <p>Yes, if you price wisely. Most sellers lose money by underpricing or ignoring deductions — calculate real net profit per unit before listing.</p>
+
+          <div style="margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap;">
+            <a class="sb-btn sb-btn-primary" href="/dashboard" data-sb-route="dashboard" style="text-decoration: none;">Track Real SKU Profits Free →</a>
+          </div>
+
+          <p style="margin-top: 28px; color: var(--sb-text-muted); font-size: 0.9rem;"><strong>Disclaimer:</strong> This Meesho profit calculator provides estimates for planning purposes. Actual deductions vary by category, weight, zone, GST rules and current Meesho policies — always verify charges in your seller panel.</p>
+        </article>
+      </div>
+    </div>
 
     <!-- ══════════════════════════════════════════════════════════════════════
          AUTHENTICATION / LOGIN VIEW (SellerBox Style)
@@ -1664,7 +1779,7 @@
               <li><a href="/" data-sb-route="home">Home</a></li>
               <li><a href="/login" data-sb-route="login" id="sbFooterLoginLink">Login / Sign In</a></li>
               <li><a href="/labels/meesho" data-sb-route="label-sort">Shipping Label Sorter</a></li>
-              <li><a href="#calculator">Meesho Profit Calculator</a></li>
+              <li><a href="/meesho-profit-calculator" data-sb-route="meesho-profit-calculator">Meesho Profit Calculator</a></li>
               <li><a href="/dashboard" data-sb-route="dashboard">Full Business Dashboard</a></li>
               <li><a href="#faq">Frequently Asked Questions</a></li>
             </ul>

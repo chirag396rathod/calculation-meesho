@@ -492,6 +492,20 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     window.scrollTo({ top: 0, behavior: 'instant' });
     // Re-initialize OTP flow in case user navigated back
     if (typeof window.fcAuthInit === 'function') window.fcAuthInit();
+  } else if (route === 'meesho-profit-calculator' || route === 'profit-calculator') {
+    // Standalone Meesho Profit Calculator page (public, SEO)
+    if (publicSite) publicSite.style.display = 'block';
+    landingView.style.display = 'none';
+    if (infoPageView) infoPageView.style.display = 'none';
+    if (loginView) loginView.style.display = 'none';
+    if (labelCropView) labelCropView.style.display = 'none';
+    if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'none';
+    const profitCalcView = document.getElementById('profitCalcView');
+    if (profitCalcView) profitCalcView.style.display = 'block';
+    if (footer) footer.style.display = 'block';
+    appLayout.style.display = 'none';
+    pushCleanUrl('/meesho-profit-calculator');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (infoMap[route]) {
     // Information Pages
     const pageKey = infoMap[route];
@@ -630,6 +644,8 @@ function handlePathname() {
     } else {
       navigateTo('login', { pushState: false });
     }
+  } else if (path === '/meesho-profit-calculator' || path === '/profit-calculator') {
+    navigateTo('meesho-profit-calculator', { pushState: false });
   } else if (path === '/privacy' || path === '/privacy-policy') {
     navigateTo('privacy', { pushState: false });
   } else if (path === '/terms' || path === '/terms-and-conditions') {
