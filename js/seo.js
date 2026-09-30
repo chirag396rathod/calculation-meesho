@@ -113,6 +113,116 @@ export const ROUTE_META = {
       ['Label Tools', null]
     ]
   },
+  blog: {
+    title: `Blog — Meesho Seller Guides & Label Tutorials${titleSuffix()}`,
+    description: 'Free Meesho seller guides — crop & sort shipping labels, master the profit formula with GST and RTO, and dispatch faster. Practical playbooks updated for 2026.',
+    path: '/blog',
+    breadcrumb: [['Home', '/'], ['Blog', null]]
+  },
+  'blog/how-to-crop-meesho-label': {
+    title: `How to Crop Meesho Labels & Remove Invoice — Free${titleSuffix()}`,
+    description: 'Learn how to crop Meesho shipping labels online free — remove the tax invoice, trim to 4×4 thermal size and print clean scannable labels in under 2 minutes.',
+    path: '/blog/how-to-crop-meesho-label',
+    breadcrumb: [['Home', '/'], ['Blog', '/blog'], ['Crop Meesho Labels', null]],
+    schemas: [
+      {
+        '@type': 'Article',
+        'headline': 'How to Crop Meesho Shipping Labels & Remove the Tax Invoice (Free, 2026)',
+        'description': 'Step-by-step guide to crop Meesho shipping labels online — remove the tax invoice section, trim to 4×4 thermal size, and print clean labels in under 2 minutes.',
+        'inLanguage': 'en-IN',
+        'author': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'publisher': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'mainEntityOfPage': 'https://sellermarginmeesho.vercel.app/blog/how-to-crop-meesho-label'
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          { '@type': 'Question', 'name': 'Is cropping Meesho labels allowed?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes. The invoice is for your accounting; the courier only needs the shipping label with the barcode and address. Cropping the invoice from your printed copy is standard practice.' } },
+          { '@type': 'Question', 'name': 'Does the tool upload my labels to a server?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'No. All cropping and PDF generation happens locally in your browser. Files never leave your device.' } },
+          { '@type': 'Question', 'name': 'Can I crop labels from multiple Meesho accounts at once?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes, upload several PDFs in one batch, then sort by SKU or courier before generating the final file.' } },
+          { '@type': 'Question', 'name': 'Is the Meesho label cropper free?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes — 100% free with no signup.' } }
+        ]
+      }
+    ]
+  },
+  'blog/meesho-profit-calculator-formula': {
+    title: `Meesho Profit Calculator Formula & Net Margin 2026${titleSuffix()}`,
+    description: 'The exact Meesho profit formula — selling price minus shipping, 18% GST, commission and RTO losses. Worked examples plus a free calculator to test any SKU instantly.',
+    path: '/blog/meesho-profit-calculator-formula',
+    breadcrumb: [['Home', '/'], ['Blog', '/blog'], ['Meesho Profit Formula', null]],
+    schemas: [
+      {
+        '@type': 'Article',
+        'headline': 'Meesho Profit Calculator Formula: GST, RTO & Real Net Margin (2026)',
+        'description': 'The exact Meesho profit formula sellers use — with worked examples and a free calculator to check any SKU instantly.',
+        'inLanguage': 'en-IN',
+        'author': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'publisher': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'mainEntityOfPage': 'https://sellermarginmeesho.vercel.app/blog/meesho-profit-calculator-formula'
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          { '@type': 'Question', 'name': 'What is the Meesho profit formula?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Net Profit = Selling Price − Product Cost − Shipping − Commission − GST on fees − expected RTO/return losses.' } },
+          { '@type': 'Question', 'name': 'Does Meesho charge commission in 2026?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Meesho charges 0% referral commission on most categories, but 18% GST on shipping and fee components still applies to every order.' } },
+          { '@type': 'Question', 'name': 'How much does one Meesho return cost?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Typically ₹140–₹170 in return shipping plus packaging, and the product cost if it comes back damaged.' } },
+          { '@type': 'Question', 'name': 'Is the profit calculator free?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes — 100% free, no signup, and runs entirely in your browser.' } }
+        ]
+      }
+    ]
+  },
+  'blog/meesho-rto-return-charges': {
+    title: `Meesho RTO & Return Charges — Real Cost Per Return${titleSuffix()}`,
+    description: 'Exact Meesho RTO and customer-return charges explained — forward freight, reverse shipping, packaging loss. Learn your break-even return rate before returns eat your margin.',
+    path: '/blog/meesho-rto-return-charges',
+    breadcrumb: [['Home', '/'], ['Blog', '/blog'], ['Meesho RTO & Return Charges', null]],
+    schemas: [
+      {
+        '@type': 'Article',
+        'headline': 'Meesho RTO & Return Charges: What Each Return Really Costs Sellers (2026)',
+        'description': 'Every Meesho RTO and return charge broken down — with a worked example and the break-even return rate formula.',
+        'inLanguage': 'en-IN',
+        'author': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'publisher': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'mainEntityOfPage': 'https://sellermarginmeesho.vercel.app/blog/meesho-rto-return-charges'
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          { '@type': 'Question', 'name': 'Does Meesho charge for RTO orders?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Meesho states RTOs do not carry a separate return shipping fee, but you still lose forward freight and packaging on every RTO.' } },
+          { '@type': 'Question', 'name': 'What is the customer return shipping fee on Meesho?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Return shipping is weight-based, typically ₹140–₹170 for lightweight products including taxes.' } },
+          { '@type': 'Question', 'name': 'What return rate is safe on Meesho?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Compute your break-even rate; most sellers treat anything above 25–30% on a SKU as a stop signal.' } },
+          { '@type': 'Question', 'name': 'How do I track returns per SKU?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Upload your Meesho payment report to the FC Analytics dashboard for per-SKU return and RTO analytics.' } }
+        ]
+      }
+    ]
+  },
+  'blog/sort-meesho-labels-by-sku-courier': {
+    title: `How to Sort Meesho Labels by SKU & Courier Partner${titleSuffix()}`,
+    description: 'Sort Meesho label PDFs by SKU or courier partner (Xpress Bees, Valmo, Shadowfax, Delhivery) before printing — pack faster and stop pick errors. Free tool, no signup.',
+    path: '/blog/sort-meesho-labels-by-sku-courier',
+    breadcrumb: [['Home', '/'], ['Blog', '/blog'], ['Sort Meesho Labels', null]],
+    schemas: [
+      {
+        '@type': 'Article',
+        'headline': 'How to Sort Meesho Labels by SKU & Courier Partner Before Packing (2026)',
+        'description': 'Sort Meesho shipping label PDFs by SKU or courier partner before printing — pack faster, hand over courier batches instantly, and stop pick errors.',
+        'inLanguage': 'en-IN',
+        'author': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'publisher': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'mainEntityOfPage': 'https://sellermarginmeesho.vercel.app/blog/sort-meesho-labels-by-sku-courier'
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          { '@type': 'Question', 'name': 'Which couriers are auto-detected?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Xpress Bees, Valmo, Shadowfax, Delhivery, Ecom Express, Bluedart and DTDC are recognised and grouped automatically from the label PDF text.' } },
+          { '@type': 'Question', 'name': 'Can I sort labels from multiple Meesho accounts together?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes — upload all PDFs in one batch and the tool merges, sorts and exports a single consolidated file.' } },
+          { '@type': 'Question', 'name': 'Does sorting change the label content?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'No. Pages are only reordered; barcodes and addresses stay untouched.' } },
+          { '@type': 'Question', 'name': 'Is the sorting tool free?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes — 100% free, no signup, and processes everything locally in your browser.' } }
+        ]
+      }
+    ]
+  },
   about: {
     title: `About Us — Free Tools for Indian Marketplace Sellers${titleSuffix()}`,
     description: 'Learn about FC Analytics — a free, privacy-first toolkit helping Meesho, Flipkart and Amazon sellers crop labels, track profits and reconcile settlements.',
@@ -195,6 +305,10 @@ const ROUTE_ALIASES = {
   dashboard: 'dashboard',
   app: 'dashboard'
 };
+
+Object.keys(ROUTE_META).forEach(key => {
+  if (ROUTE_ALIASES[key] === undefined) ROUTE_ALIASES[key] = key;
+});
 
 function setMeta(selector, attr, value) {
   let el = document.head.querySelector(selector);

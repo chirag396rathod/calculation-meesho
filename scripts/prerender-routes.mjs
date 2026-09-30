@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ROUTE_META } from '../js/seo.js';
 import { buildInfoPageHtml } from '../js/infoPages.js';
+import { buildBlogIndexHtml, buildBlogPostHtml } from '../js/blog.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = path.join(root, 'dist');
@@ -109,6 +110,17 @@ function setBody(html, route) {
     swaps.push([
       'id="infoPageView" style="display: none;"></div>',
       `id="infoPageView" style="display: block;">${buildInfoPageHtml(route)}</div>`
+    ]);
+  } else if (route === 'blog') {
+    swaps.push([
+      'id="blogView" style="display: none;"></div>',
+      `id="blogView" style="display: block;">${buildBlogIndexHtml()}</div>`
+    ]);
+  } else if (route.startsWith('blog/')) {
+    const slug = route.slice('blog/'.length);
+    swaps.push([
+      'id="blogView" style="display: none;"></div>',
+      `id="blogView" style="display: block;">${buildBlogPostHtml(slug)}</div>`
     ]);
   }
 

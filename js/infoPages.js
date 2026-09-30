@@ -20,6 +20,9 @@ export const INFO_PAGES = {
       
       <p>As sellers and software engineers, we built a focused tool that parses Meesho payment Excel sheets and raw shipping labels in seconds, outputting crystal-clear net margins, SKU breakdown, and 3x faster thermal dispatch. Seeing how much time it saved our own warehouse operations, we made it freely available for fellow Indian e-commerce merchants.</p>
 
+      <h2>Where to Find Us</h2>
+      <p>FC Analytics is free to use at <strong>sellermarginmeesho.vercel.app</strong> (also known as SellerMarginMeesho). Bookmark <a href="https://sellermarginmeesho.vercel.app/">https://sellermarginmeesho.vercel.app</a> for daily Meesho label cropping, sorting, and profit tracking — no signup, always free.</p>
+
       <h2>What We Believe</h2>
       <p>A seller should not need to become an Excel macro programmer just to understand their net profit, crop thermal labels, or verify return charges. FC Analytics brings these critical daily tasks into one clean, lightning-fast workspace.</p>
 

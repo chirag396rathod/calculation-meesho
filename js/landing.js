@@ -4,6 +4,7 @@
  * ══════════════════════════════════════════════════════════════════════
  */
 import { renderInfoPage, INFO_PAGES } from './infoPages.js';
+import { buildBlogIndexHtml, buildBlogPostHtml, BLOG_POSTS } from './blog.js';
 import { mountLabelSorter, setMarketplace, resetForMarketplaceSwitch } from './labelSorter.js';
 import { initMotionPrimitives } from './motionPrimitives.js';
 import { applySeo } from './seo.js';
@@ -371,6 +372,7 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
   const labelCropView = document.getElementById('labelCropView');
   const labelCropMeeshoView = document.getElementById('labelCropMeeshoView');
   const profitCalcView = document.getElementById('profitCalcView');
+  const blogView = document.getElementById('blogView');
   const footer = document.querySelector('.sb-footer');
 
   if (!landingView || !appLayout) return;
@@ -382,6 +384,9 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
   if (route !== 'dashboard' && route !== 'app') {
     closeMobileDrawer();
   }
+
+  // Blog view is opt-in: hide it by default on every navigation
+  if (blogView) blogView.style.display = 'none';
 
   // Normalize info page routes
   const infoMap = {
@@ -508,6 +513,25 @@ export function navigateTo(route, { pushState: doPush = true } = {}) {
     if (footer) footer.style.display = 'block';
     appLayout.style.display = 'none';
     pushCleanUrl('/meesho-profit-calculator');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  } else if (route === 'blog' || route.startsWith('blog/')) {
+    // Blog index and blog posts (public, SEO)
+    const slug = route === 'blog' ? null : route.slice('blog/'.length);
+    const validPost = slug && Object.prototype.hasOwnProperty.call(BLOG_POSTS, slug);
+    if (publicSite) publicSite.style.display = 'block';
+    landingView.style.display = 'none';
+    if (infoPageView) infoPageView.style.display = 'none';
+    if (loginView) loginView.style.display = 'none';
+    if (labelCropView) labelCropView.style.display = 'none';
+    if (labelCropMeeshoView) labelCropMeeshoView.style.display = 'none';
+    if (profitCalcView) profitCalcView.style.display = 'none';
+    if (footer) footer.style.display = 'block';
+    appLayout.style.display = 'none';
+    if (blogView) {
+      blogView.innerHTML = validPost ? buildBlogPostHtml(slug) : buildBlogIndexHtml();
+      blogView.style.display = 'block';
+    }
+    pushCleanUrl(validPost ? '/blog/' + slug : '/blog');
     window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (infoMap[route]) {
     // Information Pages
@@ -651,6 +675,10 @@ function handlePathname() {
     }
   } else if (path === '/meesho-profit-calculator' || path === '/profit-calculator') {
     navigateTo('meesho-profit-calculator', { pushState: false });
+  } else if (path === '/blog') {
+    navigateTo('blog', { pushState: false });
+  } else if (path.startsWith('/blog/')) {
+    navigateTo('blog/' + path.slice('/blog/'.length), { pushState: false });
   } else if (path === '/privacy' || path === '/privacy-policy') {
     navigateTo('privacy', { pushState: false });
   } else if (path === '/terms' || path === '/terms-and-conditions') {
