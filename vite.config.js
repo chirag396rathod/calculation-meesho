@@ -17,6 +17,16 @@ export default defineConfig({
       }
     }
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          pdfjs: ['pdfjs-dist'],
+          charts: ['chart.js']
+        }
+      }
+    }
+  },
   server: {
     port: 5173,
     // Serve index.html for all non-API routes (History API / SPA routing)

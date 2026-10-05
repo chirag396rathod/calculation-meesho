@@ -129,9 +129,36 @@ function setBody(html, route) {
     html = html.replace(from, to);
   }
 
+  // ── Single-H1-per-route enforcement ──────────────────────────────
+  // Each view's hero has a unique class; demote all except the one
+  // this route displays so crawlers see exactly one <h1>.
+  const HERO_DEMOTIONS = [
+    ['<h1 class="sb-hero-title"', '<h2 class="sb-hero-title"'],
+    ['<h1 class="info-hero-title">Meesho Profit Calculator', '<h2 class="info-hero-title">Meesho Profit Calculator'],
+    ['<h1 class="sb-label-hero-title"', '<h2 class="sb-label-hero-title"'],
+    ['<h1 class="sb-meesho-hero-title"', '<h2 class="sb-meesho-hero-title"'],
+    ['<h1 class="sb-login-title"', '<h2 class="sb-login-title"'],
+    ['<h1>Business Dashboard</h1>', '<h2>Business Dashboard</h2>']
+  ];
+  const HERO_KEEP = {
+    home: 0,
+    'meesho-profit-calculator': 1,
+    labels: 2,
+    'labels/meesho': 3,
+    'labels/flipkart': 3,
+    login: 4,
+    dashboard: 5
+  };
+  const keptHero = HERO_KEEP[route];
+  HERO_DEMOTIONS.forEach(([from, to], idx) => {
+    if (idx !== keptHero && html.includes(from)) {
+      html = html.split(from).join(to);
+    }
+  });
+
   if (route === 'labels/flipkart') {
     html = html.replace(
-      /(<h1[^>]*id="sbMarketplaceHeroTitle"[^>]*>)[\s\S]*?(<\/h1>)/,
+      /(<h[12][^>]*id="sbMarketplaceHeroTitle"[^>]*>)[\s\S]*?(<\/h[12]>)/,
       `$1${FLIPKART_HERO_TITLE}$2`
     );
     html = html.replace(

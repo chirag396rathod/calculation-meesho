@@ -1,8 +1,10 @@
 /**
  * fileParser.js — Excel file parsing module
- * Handles reading and parsing Meesho/Flipkart payment files
+ * Handles reading and parsing Meesho/Flipkart payment files.
+ * xlsx is lazy-loaded so public/landing visitors never download it.
  */
-import * as XLSX from 'xlsx';
+
+let XLSX = null;
 
 /**
  * Parse an uploaded Excel file and extract order data
@@ -10,6 +12,7 @@ import * as XLSX from 'xlsx';
  * @returns {Promise<{orders: Array, ads: Array, filename: string, month: string}>}
  */
 export async function parsePaymentFile(file) {
+  if (!XLSX) XLSX = await import('xlsx');
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {

@@ -32,6 +32,10 @@ export const ROUTE_META = {
       ['Home', '/'],
       ['Meesho Profit Calculator', null]
     ],
+    breadcrumb: [
+      ['Home', '/'],
+      ['Meesho Profit Calculator', null]
+    ],
     schemas: [
       {
         '@type': 'SoftwareApplication',
@@ -219,6 +223,87 @@ export const ROUTE_META = {
           { '@type': 'Question', 'name': 'Can I sort labels from multiple Meesho accounts together?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes — upload all PDFs in one batch and the tool merges, sorts and exports a single consolidated file.' } },
           { '@type': 'Question', 'name': 'Does sorting change the label content?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'No. Pages are only reordered; barcodes and addresses stay untouched.' } },
           { '@type': 'Question', 'name': 'Is the sorting tool free?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes — 100% free, no signup, and processes everything locally in your browser.' } }
+        ]
+      }
+    ]
+  },
+  'blog/meesho-shipping-charges-2026': {
+    title: `Meesho Shipping Charges 2026 — Weight Slabs, GST & Rate Card${titleSuffix()}`,
+    description: 'Meesho shipping charges for 2026 explained — forward shipping by weight slab, 18% GST on shipping, return shipping fees and 7 ways to cut logistics cost per order. Free guide.',
+    path: '/blog/meesho-shipping-charges-2026',
+    breadcrumb: [['Home', '/'], ['Blog', '/blog'], ['Meesho Shipping Charges 2026', null]],
+    schemas: [
+      {
+        '@type': 'Article',
+        'headline': 'Meesho Shipping Charges 2026: Weight Slabs, GST & Real Rate Card',
+        'description': 'The complete Meesho shipping charges breakdown for 2026 — weight-slab rates by zone, the 18% GST treatment, volumetric weight traps, return shipping fees and seven ways to pay less per order.',
+        'inLanguage': 'en-IN',
+        'author': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'publisher': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'mainEntityOfPage': 'https://sellermarginmeesho.vercel.app/blog/meesho-shipping-charges-2026'
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          { '@type': 'Question', 'name': 'What are the Meesho shipping charges in 2026?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Forward shipping runs roughly ₹40–₹90 per order depending on weight slab (under 500 g to above 2 kg) and zone (local, regional, national). Verify your exact slabs in the Supplier Panel rate card.' } },
+          { '@type': 'Question', 'name': 'Does Meesho charge GST on shipping?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes — 18% GST applies on the shipping fee and is deducted from your settlement. GST-registered sellers can claim it back as Input Tax Credit.' } },
+          { '@type': 'Question', 'name': 'Who pays return shipping on Meesho?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'The seller pays reverse shipping on customer returns — typically ₹150–₹165 for parcels under 500 g and up to ₹340 at 2.5 kg. Pure RTO orders carry no separate reverse fee, but forward freight, packaging and stock time are still lost.' } },
+          { '@type': 'Question', 'name': 'Why is my shipping charge higher than the rate card?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Common causes: volumetric weight pushing you up a slab, courier-specific surcharges, 18% GST added on top, or a courier-recorded weight discrepancy. Compare per-order shipping against the rate card and dispute wrong deductions.' } },
+          { '@type': 'Question', 'name': 'Is shipping free for Meesho sellers?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'No. Buyers may see free delivery in the app, but the seller account is charged forward shipping plus GST on every order. 0% commission refers to referral commission only.' } }
+        ]
+      }
+    ]
+  },
+  'blog/meesho-tcs-tds-deductions': {
+    title: `Meesho TCS & TDS 2026 — Rates, GSTR-2B Claims & New Tax Act${titleSuffix()}`,
+    description: 'Meesho TCS and TDS explained — 1% GST TCS under Section 52, TDS under Section 393 of the Income-tax Act 2025, GSTR-2B claiming steps and why they are credits, not costs.',
+    path: '/blog/meesho-tcs-tds-deductions',
+    breadcrumb: [['Home', '/'], ['Blog', '/blog'], ['Meesho TCS & TDS Guide', null]],
+    schemas: [
+      {
+        '@type': 'Article',
+        'headline': 'Meesho TCS & TDS Explained (2026): Rates, Claims & the New Tax Act',
+        'description': 'How Meesho TCS and TDS actually work in 2026 — the 1% GST TCS under Section 52, the TDS transition to Section 393 of the Income-tax Act 2025, and the monthly routine to claim every rupee back.',
+        'inLanguage': 'en-IN',
+        'author': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'publisher': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'mainEntityOfPage': 'https://sellermarginmeesho.vercel.app/blog/meesho-tcs-tds-deductions'
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          { '@type': 'Question', 'name': 'Does Meesho deduct TCS from payments?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes. Meesho collects 1% GST TCS under Section 52 (0.5% CGST + 0.5% SGST or 1% IGST) on the net taxable value of your sales and deducts it from every settlement.' } },
+          { '@type': 'Question', 'name': 'What is the TDS rate on Meesho payments?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Through 31 March 2026 it was 0.1% under Section 194-O of the Income-tax Act, 1961. From 1 April 2026, TDS on e-commerce operators is governed by Section 393 of the Income-tax Act, 2025 — verify the current rate in Form 26AS/AIS.' } },
+          { '@type': 'Question', 'name': 'How do I claim TCS deducted by Meesho?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Wait for Meesho\u2019s GSTR-8 filing (by the 10th of the next month), confirm the credit in your GSTR-2B/cash ledger, then claim it in GSTR-3B. For returned orders, wait for the TCS reversal before claiming that portion.' } },
+          { '@type': 'Question', 'name': 'Is TCS a cost of selling on Meesho?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'No. TCS and TDS are advance tax credits in your own name. Only unreconciled, unclaimed amounts become real losses.' } },
+          { '@type': 'Question', 'name': 'Why is my Meesho settlement lower than my sales?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Settlements subtract shipping (+18% GST), return shipping, TCS and TDS. TCS/TDS come back as credits; shipping and returns are real costs. Reconcile line by line to spot wrong deductions.' } }
+        ]
+      }
+    ]
+  },
+  'blog/meesho-payment-reconciliation': {
+    title: `Meesho Payment Reconciliation Guide 2026 — Match Every Rupee${titleSuffix()}`,
+    description: 'Meesho payment reconciliation step by step — match sub-orders to payment events and bank credits, catch missing payouts, decode negative settlements and verify TCS/TDS. Free guide.',
+    path: '/blog/meesho-payment-reconciliation',
+    breadcrumb: [['Home', '/'], ['Blog', '/blog'], ['Meesho Payment Reconciliation', null]],
+    schemas: [
+      {
+        '@type': 'Article',
+        'headline': 'Meesho Payment Reconciliation: Match Orders to Bank Credits (2026)',
+        'description': 'The complete Meesho payment reconciliation workflow — three records to match, the delivery-anchored payment cycle, four exceptions that hide missing money, and how to decode negative settlements.',
+        'inLanguage': 'en-IN',
+        'author': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'publisher': { '@id': 'https://sellermarginmeesho.vercel.app/#organization' },
+        'mainEntityOfPage': 'https://sellermarginmeesho.vercel.app/blog/meesho-payment-reconciliation'
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          { '@type': 'Question', 'name': 'Why is my Meesho payment late?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Payments are delivery-anchored — roughly a week after delivery, longer for returned orders. Check the future-payment view first; only treat it as missing if the payment report shows a settled order with no payout reference and no bank credit after the cycle.' } },
+          { '@type': 'Question', 'name': 'Why is my Meesho settlement less than my sales?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'The settlement subtracts forward shipping + 18% GST, customer-return fees, TCS (1%), TDS and ads spend. TCS and TDS return as tax credits; shipping and returns are real costs.' } },
+          { '@type': 'Question', 'name': 'What is a negative Meesho settlement?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'When return deductions in a cycle exceed forward sales, the balance goes negative — common in fashion with 30–40% return rates. Meesho carries it forward against your next settlement instead of debiting your bank.' } },
+          { '@type': 'Question', 'name': 'How do I verify Meesho actually paid me?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Match the payout reference and amount from the payment report to an actual bank credit. A panel status or report row alone is not proof of payment.' } },
+          { '@type': 'Question', 'name': 'How do I track Meesho payments per SKU?', 'acceptedAnswer': { '@type': 'Answer', 'text': 'Import your payment Excel into the FC Analytics dashboard — it reconciles deductions per order and shows net profit per SKU with returns and RTO separated automatically.' } }
         ]
       }
     ]

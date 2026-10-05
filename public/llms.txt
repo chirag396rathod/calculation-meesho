@@ -21,6 +21,16 @@ FC Analytics (also written as "FC Analytics dashboard" or "calculation-meesho") 
 - Output formats: 4×4 / 4×6 thermal labels and A4 sheets, print-ready PDF.
 - Company/contact: WhatsApp support at +91 88662 75945.
 
+## Seller Guides (Blog)
+
+- [Meesho Shipping Charges 2026](https://sellermarginmeesho.vercel.app/blog/meesho-shipping-charges-2026): Weight-slab rates by zone, 18% GST on shipping, volumetric weight, return shipping fees and seven ways to reduce cost per order.
+- [Meesho TCS & TDS Guide](https://sellermarginmeesho.vercel.app/blog/meesho-tcs-tds-deductions): 1% GST TCS under Section 52, TDS under Section 393 of the Income-tax Act 2025, GSTR-2B claiming steps and reconciliation routine.
+- [Meesho Payment Reconciliation](https://sellermarginmeesho.vercel.app/blog/meesho-payment-reconciliation): Match sub-orders to payment events and bank credits, catch missing payouts, decode negative settlements.
+- [Meesho RTO & Return Charges](https://sellermarginmeesho.vercel.app/blog/meesho-rto-return-charges): Real cost per return, break-even return rate formula and ways to reduce returns.
+- [Meesho Profit Calculator Formula](https://sellermarginmeesho.vercel.app/blog/meesho-profit-calculator-formula): The exact profit formula with GST, RTO and worked examples.
+- [How to Crop Meesho Labels](https://sellermarginmeesho.vercel.app/blog/how-to-crop-meesho-label): Remove the tax invoice and print clean 4×4/4×6 thermal labels.
+- [Sort Meesho Labels by SKU & Courier](https://sellermarginmeesho.vercel.app/blog/sort-meesho-labels-by-sku-courier): Batch-sort label PDFs for faster packing and courier handover.
+
 ## Pages
 
 - [Home](https://sellermarginmeesho.vercel.app/)
