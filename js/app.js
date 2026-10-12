@@ -930,7 +930,7 @@ async function handleSaveSession({ name, month, notes }) {
     fileCount: cleanFiles.length,
     netSettlement: state.analytics?.totalSettlement || 0,
     netProfit: state.analytics?.netProfit || 0,
-    returnRate: state.analytics?.returnRate || 0,
+    returnRate: state.analytics?.totalReturnRate || 0,
     orders: state.allOrders,
     ads: state.allAds,
     parsedFiles: cleanFiles,
@@ -1017,7 +1017,7 @@ async function handleUpdateSessionData(sessionId) {
       fileCount: cleanFiles.length,
       netSettlement: state.analytics?.totalSettlement || 0,
       netProfit: state.analytics?.netProfit || 0,
-      returnRate: state.analytics?.returnRate || 0,
+      returnRate: state.analytics?.totalReturnRate || 0,
       orders: state.allOrders,
       ads: state.allAds,
       parsedFiles: cleanFiles,
@@ -1331,7 +1331,7 @@ function updateNavBadges() {
 
   const returnBadge = document.querySelector('.nav-item[data-section="returns"] .nav-badge');
   if (returnBadge) {
-    returnBadge.textContent = state.analytics.returnCount + state.analytics.rtoCount;
+    returnBadge.textContent = `${state.analytics.returnCount} Ret · ${state.analytics.rtoCount} RTO`;
   }
 }
 

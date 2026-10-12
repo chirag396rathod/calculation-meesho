@@ -290,43 +290,51 @@ export function renderReturnRateChart(canvasId, skuAnalytics, limit = 10) {
 
   const sorted = [...skuAnalytics]
     .filter(s => s.totalOrders >= 3)
-    .sort((a, b) => b.returnRate - a.returnRate)
+    .sort((a, b) => b.totalReturnRate - a.totalReturnRate)
     .slice(0, limit);
 
   const labels = sorted.map(s => s.sku.length > 18 ? s.sku.substring(0, 18) + '…' : s.sku);
-  const rates = sorted.map(s => s.returnRate);
+  const returnRates = sorted.map(s => s.returnRate);
+  const rtoRates = sorted.map(s => s.rtoRate);
 
   chartInstances[canvasId] = new Chart(canvas, {
     type: 'bar',
     data: {
       labels,
-      datasets: [{
-        label: 'Return Rate %',
-        data: rates,
-        backgroundColor: rates.map(r => {
-          if (r > 50) return 'rgba(239, 68, 68, 0.7)';
-          if (r > 30) return 'rgba(249, 115, 22, 0.7)';
-          return 'rgba(245, 158, 11, 0.7)';
-        }),
-        borderColor: rates.map(r => {
-          if (r > 50) return '#ef4444';
-          if (r > 30) return '#f97316';
-          return '#f59e0b';
-        }),
-        borderWidth: 1,
-        borderRadius: 6,
-        borderSkipped: false
-      }]
+      datasets: [
+        {
+          label: 'Return %',
+          data: returnRates,
+          backgroundColor: 'rgba(239, 68, 68, 0.7)',
+          borderColor: '#ef4444',
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false
+        },
+        {
+          label: 'RTO %',
+          data: rtoRates,
+          backgroundColor: 'rgba(249, 115, 22, 0.7)',
+          borderColor: '#f97316',
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: 'y',
       plugins: {
-        legend: { display: false },
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { usePointStyle: true, padding: 16, font: { size: 11 } }
+        },
         tooltip: {
           callbacks: {
-            label: (ctx) => ` Return Rate: ${ctx.raw.toFixed(1)}%`
+            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
           }
         }
       },

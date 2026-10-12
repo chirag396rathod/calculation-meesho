@@ -108,6 +108,9 @@ export function calculateAnalytics(orders, ads = []) {
     shippedCount: shipped.length,
     returnCount: returned.length,
     rtoCount: rto.length,
+    returnRate: orders.length > 0 ? (returned.length / orders.length * 100) : 0,
+    rtoRate: orders.length > 0 ? (rto.length / orders.length * 100) : 0,
+    totalReturnRate: orders.length > 0 ? ((returned.length + rto.length) / orders.length * 100) : 0,
     cancelledCount: cancelled.length,
     exchangeCount: exchange.length,
 
@@ -230,7 +233,9 @@ function calculateSkuAnalytics(orders) {
   Object.values(skuMap).forEach(s => {
     s.totalReturnCharges = s.returnCharges + s.rtoCharges;
     s.netProfit = s.totalSettlement - s.rawCostTotal;
-    s.returnRate = s.totalOrders > 0 ? ((s.returned + s.rto) / s.totalOrders * 100) : 0;
+    s.returnRate = s.totalOrders > 0 ? (s.returned / s.totalOrders * 100) : 0;
+    s.rtoRate = s.totalOrders > 0 ? (s.rto / s.totalOrders * 100) : 0;
+    s.totalReturnRate = s.totalOrders > 0 ? ((s.returned + s.rto) / s.totalOrders * 100) : 0;
     s.deliveryRate = s.totalOrders > 0 ? (s.delivered / s.totalOrders * 100) : 0;
   });
 
@@ -259,7 +264,9 @@ function calculateGroupAnalytics(orders, skuAnalytics) {
     deliveredSettlement: 0,
     rawCostTotal: 0,
     netProfit: 0,
-    returnRate: 0
+    returnRate: 0,
+    rtoRate: 0,
+    totalReturnRate: 0
   });
 
   // Initialize with defined groups
@@ -305,7 +312,9 @@ function calculateGroupAnalytics(orders, skuAnalytics) {
   // Calculate net profit and return rate for each group
   Object.values(groupMap).forEach(g => {
     g.netProfit = g.totalSettlement - g.rawCostTotal;
-    g.returnRate = g.totalOrders > 0 ? ((g.returned + g.rto) / g.totalOrders * 100) : 0;
+    g.returnRate = g.totalOrders > 0 ? (g.returned / g.totalOrders * 100) : 0;
+    g.rtoRate = g.totalOrders > 0 ? (g.rto / g.totalOrders * 100) : 0;
+    g.totalReturnRate = g.totalOrders > 0 ? ((g.returned + g.rto) / g.totalOrders * 100) : 0;
   });
 
   return Object.values(groupMap).filter(g => g.totalOrders > 0).sort((a, b) => b.totalOrders - a.totalOrders);
@@ -364,7 +373,7 @@ function calculateMonthlyAnalytics(orders) {
 export function getTopReturningSkus(skuAnalytics, limit = 10) {
   return [...skuAnalytics]
     .filter(s => s.returned + s.rto > 0)
-    .sort((a, b) => b.returnRate - a.returnRate)
+    .sort((a, b) => b.totalReturnRate - a.totalReturnRate)
     .slice(0, limit);
 }
 
@@ -387,6 +396,9 @@ function getEmptyAnalytics() {
     shippedCount: 0,
     returnCount: 0,
     rtoCount: 0,
+    returnRate: 0,
+    rtoRate: 0,
+    totalReturnRate: 0,
     cancelledCount: 0,
     exchangeCount: 0,
     grossRevenue: 0,

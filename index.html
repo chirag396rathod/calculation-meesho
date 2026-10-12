@@ -2119,15 +2119,17 @@
                   <th>Orders</th>
                   <th>Delivered</th>
                   <th>Returns</th>
+                  <th>RTO</th>
                   <th>Settlement</th>
                   <th>Return Charges</th>
                   <th>Cost Spend</th>
                   <th>Net Profit</th>
                   <th>Return %</th>
+                  <th>RTO %</th>
                 </tr>
               </thead>
               <tbody id="groupTableBody">
-                <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <tr><td colspan="13" style="text-align: center; padding: 40px; color: var(--text-muted);">
                   Upload payment files to see group analytics
                 </td></tr>
               </tbody>
@@ -2174,6 +2176,7 @@
                 <th>Raw Cost</th>
                 <th>Net Profit <span class="sort-icon">↕</span></th>
                 <th>Return % <span class="sort-icon">↕</span></th>
+                <th>RTO % <span class="sort-icon">↕</span></th>
               </tr>
             </thead>
             <tbody id="skuTableBody">
@@ -2198,11 +2201,19 @@
         <div class="return-summary-cards" id="returnSummaryCards">
           <div class="return-card">
             <div class="return-value">0</div>
-            <div class="return-label">Total Returns + RTO</div>
+            <div class="return-label">Total Returns</div>
+          </div>
+          <div class="return-card">
+            <div class="return-value">0</div>
+            <div class="return-label">Total RTO</div>
           </div>
           <div class="return-card">
             <div class="return-value">0%</div>
-            <div class="return-label">Overall Return Rate</div>
+            <div class="return-label">Return Rate</div>
+          </div>
+          <div class="return-card">
+            <div class="return-value">0%</div>
+            <div class="return-label">RTO Rate</div>
           </div>
           <div class="return-card">
             <div class="return-value">₹0</div>
@@ -2253,11 +2264,12 @@
                   <th>RTO</th>
                   <th>Return Charges</th>
                   <th>RTO Charges</th>
-                  <th>Return Rate</th>
+                  <th>Return %</th>
+                  <th>RTO %</th>
                 </tr>
               </thead>
               <tbody id="returnTableBody">
-                <tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <tr><td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">
                   Upload payment files to see return analysis
                 </td></tr>
               </tbody>
@@ -2296,11 +2308,12 @@
                   <th>Return Charges</th>
                   <th>RTO Charges</th>
                   <th>Total Loss</th>
-                  <th>Return Rate</th>
+                  <th>Return %</th>
+                  <th>RTO %</th>
                 </tr>
               </thead>
               <tbody id="groupReturnTableBody">
-                <tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">
                   Create SKU groups to see group-wise return analysis
                 </td></tr>
               </tbody>

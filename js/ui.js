@@ -38,6 +38,8 @@ export function renderMetrics(analytics) {
 
   const profitClass = analytics.netProfit >= 0 ? 'profit' : 'loss';
   const profitSign = analytics.netProfit >= 0 ? '+' : '';
+  const costUnits = analytics.deliveredCount + analytics.shippedCount;
+  const avgCost = costUnits > 0 ? analytics.totalRawCost / costUnits : 0;
 
   container.innerHTML = `
     <div class="metric-card info">
@@ -63,7 +65,7 @@ export function renderMetrics(analytics) {
     <div class="metric-card loss">
       <div class="metric-header">
         <div class="metric-icon" style="--icon-bg: rgba(239, 68, 68, 0.15)">🔄</div>
-        <span class="metric-change negative">${analytics.returnCount + analytics.rtoCount} returns</span>
+        <span class="metric-change negative">${analytics.returnCount} Ret · ${analytics.rtoCount} RTO</span>
       </div>
       <div class="metric-value text-danger">-${formatCurrency(analytics.totalReturnCharges)}</div>
       <div class="metric-label">Return & RTO Charges</div>
@@ -76,7 +78,7 @@ export function renderMetrics(analytics) {
       </div>
       <div class="metric-value text-warning">${formatCurrency(analytics.totalRawCost)}</div>
       <div class="metric-label">Raw Cost (Product)</div>
-      <div class="metric-sub">${analytics.deliveredCount + analytics.shippedCount} units × avg cost</div>
+      <div class="metric-sub">${costUnits} units × ₹${avgCost.toFixed(2)} avg cost</div>
     </div>
 
     <div class="metric-card info">
@@ -120,7 +122,7 @@ export function renderSkuTable(skuAnalytics, filter = 'all', search = '') {
     filtered = filtered.filter(s => {
       if (filter === 'profitable') return s.netProfit > 0;
       if (filter === 'loss') return s.netProfit <= 0;
-      if (filter === 'high-return') return s.returnRate > 30;
+      if (filter === 'high-return') return s.totalReturnRate > 30;
       return true;
     });
   }
@@ -137,7 +139,7 @@ export function renderSkuTable(skuAnalytics, filter = 'all', search = '') {
 
   if (filtered.length === 0) {
     tbody.innerHTML = `
-      <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">
+      <tr><td colspan="12" style="text-align: center; padding: 40px; color: var(--text-muted);">
         No SKUs match your filter criteria
       </td></tr>
     `;
@@ -160,6 +162,7 @@ export function renderSkuTable(skuAnalytics, filter = 'all', search = '') {
       <td class="amount neutral">${formatCurrency(s.rawCostTotal)}</td>
       <td class="amount ${s.netProfit >= 0 ? 'positive' : 'negative'}">${formatCurrency(s.netProfit)}</td>
       <td><span class="${s.returnRate > 30 ? 'text-danger' : s.returnRate > 15 ? 'text-warning' : 'text-success'}">${formatPercent(s.returnRate)}</span></td>
+      <td><span class="${s.rtoRate > 30 ? 'text-danger' : s.rtoRate > 15 ? 'text-warning' : 'text-success'}">${formatPercent(s.rtoRate)}</span></td>
     </tr>
   `).join('');
 }
@@ -178,12 +181,14 @@ export function renderGroupTable(groupAnalytics) {
       <td>${formatCurrency(g.rawCost)}/unit</td>
       <td>${g.totalOrders}</td>
       <td><span class="status-badge delivered">${g.delivered}</span></td>
-      <td><span class="status-badge return">${g.returned + g.rto}</span></td>
+      <td><span class="status-badge return">${g.returned}</span></td>
+      <td><span class="status-badge rto">${g.rto}</span></td>
       <td class="amount ${g.totalSettlement >= 0 ? 'positive' : 'negative'}">${formatCurrency(g.totalSettlement)}</td>
       <td class="amount negative">${g.totalReturnCharges > 0 ? '-' + formatCurrency(g.totalReturnCharges) : '₹0'}</td>
       <td class="amount neutral">${formatCurrency(g.rawCostTotal)}</td>
       <td class="amount ${g.netProfit >= 0 ? 'positive' : 'negative'}">${formatCurrency(g.netProfit)}</td>
       <td><span class="${g.returnRate > 30 ? 'text-danger' : g.returnRate > 15 ? 'text-warning' : 'text-success'}">${formatPercent(g.returnRate)}</span></td>
+      <td><span class="${g.rtoRate > 30 ? 'text-danger' : g.rtoRate > 15 ? 'text-warning' : 'text-success'}">${formatPercent(g.rtoRate)}</span></td>
     </tr>
   `).join('');
 }
@@ -195,22 +200,25 @@ export function renderReturnAnalysis(analytics) {
   const container = document.getElementById('returnSummaryCards');
   if (!container) return;
 
-  const totalReturns = analytics.returnCount + analytics.rtoCount;
-  const overallReturnRate = analytics.totalOrders > 0
-    ? ((totalReturns / analytics.totalOrders) * 100)
-    : 0;
-
   const claimsTotal = analytics.totalClaimsAndCompensation || 0;
   const claimsCount = analytics.claimsCount || 0;
 
   container.innerHTML = `
     <div class="return-card">
-      <div class="return-value">${totalReturns}</div>
-      <div class="return-label">Total Returns + RTO</div>
+      <div class="return-value">${analytics.returnCount}</div>
+      <div class="return-label">Total Returns</div>
     </div>
     <div class="return-card">
-      <div class="return-value">${formatPercent(overallReturnRate)}</div>
-      <div class="return-label">Overall Return Rate</div>
+      <div class="return-value">${analytics.rtoCount}</div>
+      <div class="return-label">Total RTO</div>
+    </div>
+    <div class="return-card">
+      <div class="return-value">${formatPercent(analytics.returnRate || 0)}</div>
+      <div class="return-label">Return Rate</div>
+    </div>
+    <div class="return-card">
+      <div class="return-value">${formatPercent(analytics.rtoRate || 0)}</div>
+      <div class="return-label">RTO Rate</div>
     </div>
     <div class="return-card">
       <div class="return-value text-danger">-${formatCurrency(analytics.totalReturnCharges)}</div>
@@ -237,7 +245,7 @@ export function renderReturnTable(skuAnalytics) {
 
   if (returningSkus.length === 0) {
     tbody.innerHTML = `
-      <tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+      <tr><td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">
         No return data available
       </td></tr>
     `;
@@ -254,6 +262,7 @@ export function renderReturnTable(skuAnalytics) {
       <td class="amount negative">-${formatCurrency(s.returnCharges)}</td>
       <td class="amount negative">-${formatCurrency(s.rtoCharges)}</td>
       <td><span class="${s.returnRate > 50 ? 'text-danger fw-bold' : s.returnRate > 30 ? 'text-danger' : 'text-warning'}">${formatPercent(s.returnRate)}</span></td>
+      <td><span class="${s.rtoRate > 50 ? 'text-danger fw-bold' : s.rtoRate > 30 ? 'text-danger' : 'text-warning'}">${formatPercent(s.rtoRate)}</span></td>
     </tr>
   `).join('');
 }
@@ -271,7 +280,7 @@ export function renderGroupReturnTable(groupAnalytics) {
 
   if (returningGroups.length === 0) {
     tbody.innerHTML = `
-      <tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-muted);">
+      <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">
         No group return data available. Create SKU groups first.
       </td></tr>
     `;
@@ -290,6 +299,7 @@ export function renderGroupReturnTable(groupAnalytics) {
       <td class="amount negative">-${formatCurrency(g.rtoCharges)}</td>
       <td class="amount negative fw-bold">-${formatCurrency(g.totalReturnCharges)}</td>
       <td><span class="${g.returnRate > 50 ? 'text-danger fw-bold' : g.returnRate > 30 ? 'text-danger' : 'text-warning'}">${formatPercent(g.returnRate)}</span></td>
+      <td><span class="${g.rtoRate > 50 ? 'text-danger fw-bold' : g.rtoRate > 30 ? 'text-danger' : 'text-warning'}">${formatPercent(g.rtoRate)}</span></td>
     </tr>
   `).join('');
 }
@@ -722,11 +732,11 @@ export function updateHeaderBadge(orderCount, fileCount, activeReports = []) {
  * Export data as CSV
  */
 export function exportCSV(skuAnalytics, filename = 'sku_analytics.csv') {
-  const headers = ['SKU', 'Group', 'Total Orders', 'Delivered', 'Returned', 'RTO', 'Settlement', 'Return Charges', 'Raw Cost', 'Net Profit', 'Return Rate %'];
+  const headers = ['SKU', 'Group', 'Total Orders', 'Delivered', 'Returned', 'RTO', 'Settlement', 'Return Charges', 'Raw Cost', 'Net Profit', 'Return Rate %', 'RTO Rate %'];
   const rows = skuAnalytics.map(s => [
     s.sku, s.group, s.totalOrders, s.delivered, s.returned, s.rto,
     s.totalSettlement.toFixed(2), s.totalReturnCharges.toFixed(2),
-    s.rawCostTotal.toFixed(2), s.netProfit.toFixed(2), s.returnRate.toFixed(1)
+    s.rawCostTotal.toFixed(2), s.netProfit.toFixed(2), s.returnRate.toFixed(1), s.rtoRate.toFixed(1)
   ]);
 
   const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
