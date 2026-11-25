@@ -110,6 +110,7 @@ export async function parseLabelPDF(inputData, platform = 'auto') {
       courierPartner: isFlipkart ? extractFlipkartCourier(textItems, fullText) : extractCourierPartner(textItems, fullText),
       quantity: isFlipkart ? extractFlipkartQuantity(textItems, fullText) : extractQuantity(textItems, fullText),
       orderNo: isFlipkart ? extractFlipkartOrderNo(textItems, fullText) : extractOrderNo(textItems, fullText),
+      customerName: extractCustomerName(textItems, fullText),
       isMultiQty: false,
       rawText: fullText,
       taxInvoiceY: taxInvoiceY,
@@ -259,6 +260,119 @@ function extractOrderNo(textItems, fullText) {
   const barcodeMatch = fullText.match(/\b(\d{12,})\b/);
   if (barcodeMatch) {
     return barcodeMatch[1];
+  }
+
+  return '';
+}
+
+/**
+ * Extract the customer (consignee) name from label text.
+ * Meesho/Ekart labels print the name just below the "Shipping/Customer address:"
+ * header as a single item, e.g. "Name: SANCHARI SAHA," — handled by Strategy 1.
+ */
+function extractCustomerName(textItems, fullText) {
+  const FIELD_HEADERS = /^(ph|phone|mobile|contact|address|add\.?|city|state|pin|pincode|landmark|email|alternate|order|sku|qty|product|tax|invoice|total|amount|hsn|gst)\b/i;
+
+  const cleanNameValue = (raw) => {
+    const v = String(raw)
+      .replace(/^(?:customer\s*)?name\s*[:\-]\s*/i, '')
+      .replace(/[\s,]+$/, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (v.length >= 2 && v.length <= 40 && /^[A-Za-z][A-Za-z .'\-]*$/.test(v)) return v;
+    return '';
+  };
+
+  // Strategy 1: name embedded in a single item — "Name: SANCHARI SAHA,"
+  for (const item of textItems) {
+    if (/^(?:customer\s+)?name\s*[:\-]\s*\S/i.test(item.text)) {
+      const name = cleanNameValue(item.text);
+      if (name) return name;
+    }
+  }
+
+  // Strategy 2: "Name" header item with the value on the line(s) below
+  for (let i = 0; i < textItems.length; i++) {
+    if (/^(customer\s*name|name|consignee(?:\s*name)?|ship\s*to|deliver\s*to)\s*[:\-]?$/i.test(textItems[i].text)) {
+      const header = textItems[i];
+      const parts = [];
+      for (let j = i + 1; j < textItems.length; j++) {
+        const cand = textItems[j];
+        if (!cand.text) continue;
+        if (FIELD_HEADERS.test(cand.text) || /^\d{6,}$/.test(cand.text)) break;
+        if (cand.y < header.y && Math.abs(cand.x - header.x) <= 60 && parts.length < 4) {
+          const part = cleanNameValue(cand.text);
+          if (part) { parts.push(part); continue; }
+        }
+        if (parts.length > 0) break;
+      }
+      if (parts.length > 0) return parts.join(' ');
+    }
+  }
+
+  // Strategy 3: name directly below an address-block header
+  //   Meesho/Valmo: "Customer Address" → "Honey Patel"
+  //   Ekart: "Shipping ADDRESS"/"Billing Address" → "SANCHARI SAHA,"
+  const ADDR_HEADER = /^(?:(?:shipping|billing)\s*\/?\s*(?:customer\s+)?address|customer\s*address|ship\s*to|deliver\s*to|consignee(?:\s*name)?)\s*[:\-]?$/i;
+  for (let i = 0; i < textItems.length; i++) {
+    if (!ADDR_HEADER.test(textItems[i].text.trim())) continue;
+    const header = textItems[i];
+    let bestName = '';
+    let bestY = -Infinity;
+    for (const cand of textItems) {
+      if (!cand.text || cand === header) continue;
+      const dy = header.y - cand.y;
+      if (dy > 0 && dy <= 30 && Math.abs(cand.x - header.x) <= 30) {
+        const name = cleanNameValue(cand.text);
+        if (name && cand.y > bestY) { bestName = name; bestY = cand.y; }
+      }
+    }
+    if (bestName) return bestName;
+  }
+
+  // Strategy 3b: "BILL TO / SHIP TO" block — item below starts with "<Name> - <address>"
+  for (let i = 0; i < textItems.length; i++) {
+    if (/^bill\s*to\s*\/?\s*ship\s*to$/i.test(textItems[i].text.trim())) {
+      const header = textItems[i];
+      for (const cand of textItems) {
+        if (!cand.text || cand === header) continue;
+        const dy = header.y - cand.y;
+        if (dy > 0 && dy <= 20 && Math.abs(cand.x - header.x) <= 10) {
+          const m = cand.text.match(/^([A-Za-z][A-Za-z .']{1,39}?)\s*-\s/);
+          if (m) return m[1].trim();
+          break;
+        }
+      }
+    }
+  }
+
+  // Strategy 4: name printed directly above a "Ph:"/"Mobile:" line
+  const maxY = textItems.reduce((m, t) => Math.max(m, t.y || 0), 0);
+  let blockName = '';
+  let blockPhoneY = -1;
+  for (let i = 0; i < textItems.length; i++) {
+    const t = textItems[i].text;
+    if (/^(ph|phone|mobile)(?:\s*no)?\s*[:\-]?$/i.test(t) || /^(ph|phone|mobile)\s*[:\-]/i.test(t)) {
+      const phoneItem = textItems[i];
+      if (phoneItem.y > maxY * 0.85) continue;
+      if (phoneItem.y <= blockPhoneY) continue;
+      for (let j = i - 1; j >= 0; j--) {
+        const cand = textItems[j];
+        if (!cand.text) continue;
+        if (cand.y - phoneItem.y > 40) break;
+        if (cand.y > phoneItem.y && Math.abs(cand.x - phoneItem.x) <= 80) {
+          const name = cleanNameValue(cand.text);
+          if (name) { blockName = name; blockPhoneY = phoneItem.y; break; }
+        }
+      }
+    }
+  }
+  if (blockName) return blockName;
+
+  // Strategy 5: regex fallback on full text
+  const fieldMatch = fullText.match(/(?:customer\s*name|name|consignee|ship\s*to|deliver\s*to)\s*[:\-]\s*([A-Za-z][A-Za-z .'\-]{1,39}?)(?=[,|:]|\s+(?:ph|phone|mobile|contact|address|city|state|pin|pincode|landmark|order|sku)\b|\s*$)/i);
+  if (fieldMatch && fieldMatch[1]) {
+    return fieldMatch[1].trim();
   }
 
   return '';

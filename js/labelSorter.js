@@ -21,8 +21,8 @@ const labelState = {
   sortType: 'sku',         // 'sku' | 'courier'
   sortBy: 'name',          // 'name' | 'count'
   sortDirection: 'asc',    // 'asc' | 'desc'
-  cropInvoice: true,       // Option 1 Checkbox: Crop Below Product Details (remove invoice)
-  trim4x4: false,          // Option 2 Checkbox: Trim outer border whitespace (4x4 Standard)
+  cropInvoice: false,      // Option 1 Checkbox: Crop Below Product Details (remove invoice)
+  trim4x4: true,           // Option 2 Checkbox: Trim outer border whitespace (4x4 Standard) — default selection
   comboMode: 'none',       // 'none' | 'keepOnTop' | 'separatePdf'
   customMessage: { enabled: false, text: '' },
   qrCode: { enabled: false, url: '' },
@@ -33,6 +33,10 @@ const labelState = {
   generatedPdfBytes: null,
   stats: null
 };
+
+// ── Default review-request message auto-applied on first PDF upload ──
+// [NAME] is replaced with each label's customer name (falls back to no greeting)
+const REVIEW_MESSAGE = 'Hi [NAME], Enjoyed your purchase? Share your experience with a quick review!';
 
 // ── Color palette for SKU order items ──
 const SKU_COLORS = [
@@ -291,6 +295,7 @@ function setupUploadZone() {
  * Handle uploaded PDF files
  */
 async function handleFileUpload(files) {
+  let addedCount = 0;
   for (const file of files) {
     if (file.type !== 'application/pdf') {
       showToast(`"${file.name}" is not a PDF file`, 'error');
@@ -310,13 +315,45 @@ async function handleFileUpload(files) {
         size: file.size,
         bytes: new Uint8Array(buffer)
       });
+      addedCount++;
     } catch (err) {
       showToast(`Error reading "${file.name}"`, 'error');
     }
   }
 
+  if (addedCount > 0) applyDefaultReviewMessage();
+
   renderUploadedFileList();
   updatePrepareButtonState();
+}
+
+/**
+ * Auto-apply the default review-request message when PDFs are uploaded.
+ * Skipped on Flipkart or when Crop labels is active (section hidden),
+ * and never overwrites a message the user already typed.
+ */
+function applyDefaultReviewMessage() {
+  if (labelState.platform === 'flipkart') return;
+  if (labelState.cropInvoice) return;
+  if (labelState.customMessage.text.trim()) return;
+
+  const section = document.getElementById('customMsgSection');
+  if (!section || section.style.display === 'none') return;
+
+  const checkbox = document.getElementById('customMsgCheckbox');
+  const textarea = document.getElementById('customMsgText');
+  const presets = document.getElementById('customMsgPresets');
+  const charCount = document.getElementById('customMsgCharCount');
+  const msgArea = document.getElementById('customMsgArea');
+
+  labelState.customMessage.enabled = true;
+  labelState.customMessage.text = REVIEW_MESSAGE;
+
+  if (checkbox) checkbox.checked = true;
+  if (msgArea) msgArea.style.display = 'block';
+  if (presets) presets.value = REVIEW_MESSAGE;
+  if (textarea) textarea.value = REVIEW_MESSAGE;
+  if (charCount) charCount.textContent = `${REVIEW_MESSAGE.length}/200`;
 }
 
 /**
@@ -404,6 +441,15 @@ export async function processLabels() {
     if (labelState.labels.length === 0) {
       showToast('No labels found in the uploaded PDFs', 'error');
       return;
+    }
+
+    const missingNames = labelState.labels.filter(l => !l.customerName).length;
+    if (missingNames > 0) {
+      console.warn(`[LabelSorter] Customer name not found on ${missingNames}/${labelState.labels.length} labels — the "Hi [NAME]," greeting is skipped on those pages`);
+      const firstMissing = labelState.labels.find(l => !l.customerName);
+      if (firstMissing) {
+        console.warn('[LabelSorter] First label without a name — raw text (copy & share this for a fix):', firstMissing.rawText);
+      }
     }
 
     // Auto-detect if uploaded files are Flipkart labels
@@ -644,8 +690,8 @@ function setupTrimCropControls() {
     }
   });
 
-  // Initialize with nothing selected
-  syncTrimCropState('none');
+  // Initialize with the default selection (Trim whitespace 4x4)
+  syncTrimCropState('trim');
 }
 
 function setupComboControls() {
@@ -1096,7 +1142,7 @@ function trimWhitespace4x4(page, label) {
   const hasMsg = !labelState.cropInvoice && labelState.customMessage.enabled && labelState.customMessage.text.trim();
   const hasQr = !labelState.cropInvoice && labelState.customMessage.enabled && labelState.qrCode.enabled && labelState.qrCode.url;
   if (hasMsg || hasQr) {
-    const extraSpace = hasQr ? 44 : 24;
+    const extraSpace = hasQr ? 54 : 34;
     bottomCutY = Math.max(bottomCutY - extraSpace, baseY);
   }
 
@@ -1145,7 +1191,7 @@ async function addCustomMessageAndQr(pdfDoc, orderedLabels) {
   if (!hasMessage && !hasQr) return;
 
   const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const fontSize = 8;
+  const fontSize = 12;
   let qrImage = null;
 
   if (hasQr) {
@@ -1166,6 +1212,7 @@ async function addCustomMessageAndQr(pdfDoc, orderedLabels) {
     const page = pages[i];
     const label = orderedLabels[i];
     const { width, height } = page.getSize();
+    const pageMessage = hasMessage ? personalizeMessage(message, label) : '';
 
     // Determine base Y coordinate for the footer
     const mediaBox = page.getMediaBox();
@@ -1182,29 +1229,57 @@ async function addCustomMessageAndQr(pdfDoc, orderedLabels) {
         height: qrSize
       });
 
-      if (hasMessage) {
-        page.drawText(message, {
-          x: qrX + qrSize + 10,
-          y: qrY + 13,
-          size: fontSize,
+      if (pageMessage) {
+        const msgX = qrX + qrSize + 10;
+        const msgSize = fitMessageSize(pageMessage, font, fontSize, width - msgX - 10);
+        page.drawText(pageMessage, {
+          x: msgX,
+          y: qrY + 11,
+          size: msgSize,
           font,
           color: rgb(0.1, 0.1, 0.1)
         });
       }
-    } else if (hasMessage) {
-      const textWidth = font.widthOfTextAtSize(message, fontSize);
+    } else if (pageMessage) {
+      const msgSize = fitMessageSize(pageMessage, font, fontSize, width - 20);
+      const textWidth = font.widthOfTextAtSize(pageMessage, msgSize);
       const calculatedX = (width - textWidth) / 2;
       const textX = Number.isFinite(calculatedX) ? Math.max(calculatedX, 10) : 10;
 
-      page.drawText(message, {
+      page.drawText(pageMessage, {
         x: textX,
-        y: baseY + 7,
-        size: fontSize,
+        y: baseY + 8,
+        size: msgSize,
         font,
         color: rgb(0.15, 0.15, 0.15)
       });
     }
   }
+}
+
+/**
+ * Replace [NAME] in the message with the label's customer name.
+ * Falls back to removing the "Hi [NAME]," greeting when no name is available.
+ */
+function personalizeMessage(message, label) {
+  if (!/\[NAME\]/i.test(message)) return message;
+  const rawName = label && label.customerName ? String(label.customerName) : '';
+  const safeName = rawName.replace(/[^\x20-\x7E]/g, '').replace(/\s+/g, ' ').trim();
+  if (safeName) {
+    return message.replace(/\[NAME\]/gi, safeName);
+  }
+  return message.replace(/^\s*Hi\s*\[NAME\]\s*,\s*/i, '');
+}
+
+/**
+ * Shrink the message font size just enough to fit the available label width
+ */
+function fitMessageSize(text, font, baseSize, maxWidth) {
+  const textWidth = font.widthOfTextAtSize(text, baseSize);
+  if (Number.isFinite(textWidth) && maxWidth > 0 && textWidth > maxWidth) {
+    return Math.max(7, Math.floor((baseSize * maxWidth) / textWidth));
+  }
+  return baseSize;
 }
 
 // ═══════════════════════════════════════════
@@ -1330,8 +1405,8 @@ export function startOver() {
   labelState.sortType = 'sku';
   labelState.sortBy = 'name';
   labelState.sortDirection = 'asc';
-  labelState.cropInvoice = true;
-  labelState.trim4x4 = false;
+  labelState.cropInvoice = false;
+  labelState.trim4x4 = true;
   labelState.comboMode = 'none';
   labelState.customMessage = { enabled: false, text: '' };
   labelState.qrCode = { enabled: false, url: '' };
@@ -1361,9 +1436,11 @@ export function startOver() {
   document.getElementById('sortDesc')?.classList.remove('active');
 
   const cropCb = document.getElementById('cropInvoiceCheckbox');
-  if (cropCb) cropCb.checked = true;
+  if (cropCb) cropCb.checked = false;
   const trimCb = document.getElementById('trim4x4Checkbox');
-  if (trimCb) trimCb.checked = false;
+  if (trimCb) trimCb.checked = true;
+  document.getElementById('cropInvoiceOptionLabel')?.classList.remove('active');
+  document.getElementById('trim4x4OptionLabel')?.classList.add('active');
   const customMsgSection = document.getElementById('customMsgSection');
   if (customMsgSection) customMsgSection.style.display = 'none';
 
