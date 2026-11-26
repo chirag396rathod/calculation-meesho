@@ -1118,8 +1118,9 @@ function cropBelowProductDetails(page, label) {
 }
 
 /**
- * Option 2: 4×4 Standard (Crop bottom white space below invoice and trim outer borders)
- * Keeps complete label and complete invoice, while removing the empty bottom space to fit 4x4 thermal format
+ * Option 2: 4×4 Standard (Remove bottom white space below invoice only)
+ * Keeps complete label and complete invoice with original left, right and top margins,
+ * while removing the empty bottom space below the invoice
  */
 function trimWhitespace4x4(page, label) {
   const mediaBox = page.getMediaBox();
@@ -1146,18 +1147,10 @@ function trimWhitespace4x4(page, label) {
     bottomCutY = Math.max(bottomCutY - extraSpace, baseY);
   }
 
-  // Determine top border (trim top whitespace margin)
-  let topCutY;
-  if (label && Number.isFinite(label.maxTextY)) {
-    topCutY = Math.min(label.maxTextY + 9, baseY + height - 6);
-  } else {
-    topCutY = baseY + height - 8;
-  }
-
-  // Determine left and right outer borders
-  const cropX = Math.max(baseX + 10, 0);
-  const cropW = Math.min(width - 18, 576);
-  const cropH = topCutY - bottomCutY;
+  // Keep original left, right and top — no side/top trim, only remove bottom white space
+  const cropX = baseX;
+  const cropW = width;
+  const cropH = (baseY + height) - bottomCutY;
 
   page.setCropBox(cropX, bottomCutY, cropW, cropH);
   page.setMediaBox(cropX, bottomCutY, cropW, cropH);
