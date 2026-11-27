@@ -3514,6 +3514,32 @@ body::before {
   box-shadow: 0 2px 8px rgba(40, 116, 240, 0.32);
 }
 
+/* ── Payment upload platform pills ── */
+.payment-platform-wrap {
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.payment-platform-pill.active {
+  background: #0F172A;
+  color: #FFFFFF;
+}
+
+.payment-platform-pill.active#paymentPlatformBtnMeesho {
+  background: #8B1874;
+  box-shadow: 0 2px 8px rgba(139, 24, 116, 0.28);
+}
+
+.payment-platform-pill.active#paymentPlatformBtnFlipkart {
+  background: #2874F0;
+  box-shadow: 0 2px 8px rgba(40, 116, 240, 0.32);
+}
+
+[data-theme="dark"] .payment-platform-pill.active {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
 .platform-status-badge {
   font-size: 0.68rem;
   padding: 2px 7px;

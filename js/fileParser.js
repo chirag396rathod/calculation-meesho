@@ -2,16 +2,21 @@
  * fileParser.js — Excel file parsing module
  * Handles reading and parsing Meesho/Flipkart payment files.
  * xlsx is lazy-loaded so public/landing visitors never download it.
+ * Meesho parsing lives here; Flipkart settlement parsing lives in
+ * flipkartParser.js. Both emit the same normalized order shape.
  */
+
+import { isFlipkartSettlement, parseFlipkartSettlement } from './flipkartParser.js';
 
 let XLSX = null;
 
 /**
  * Parse an uploaded Excel file and extract order data
  * @param {File} file - The uploaded .xlsx file
+ * @param {string} [platformHint] - 'meesho' | 'flipkart' to force a platform
  * @returns {Promise<{orders: Array, ads: Array, filename: string, month: string}>}
  */
-export async function parsePaymentFile(file) {
+export async function parsePaymentFile(file, platformHint) {
   if (!XLSX) XLSX = await import('xlsx');
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -19,24 +24,7 @@ export async function parsePaymentFile(file) {
       try {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-        
-        const result = {
-          filename: file.name,
-          month: extractMonth(file.name),
-          orders: [],
-          ads: [],
-          platform: detectPlatform(workbook)
-        };
-
-        // Parse based on detected platform
-        if (result.platform === 'meesho') {
-          result.orders = parseMeeshoOrders(workbook);
-          result.ads = parseMeeshoAds(workbook);
-        } else if (result.platform === 'flipkart') {
-          result.orders = parseFlipkartOrders(workbook);
-        }
-
-        resolve(result);
+        resolve(parseWorkbookResult(workbook, file.name, platformHint));
       } catch (err) {
         reject(new Error(`Failed to parse file: ${err.message}`));
       }
@@ -47,13 +35,49 @@ export async function parsePaymentFile(file) {
 }
 
 /**
+ * Parse an already-read workbook into the standard result object
+ * (browser-free so node verification scripts can call it directly)
+ * @param {object} workbook - xlsx workbook
+ * @param {string} filename - source file name
+ * @param {string} [platformHint] - 'meesho' | 'flipkart' to force a platform
+ */
+export async function parseWorkbookResult(workbook, filename, platformHint) {
+  if (!XLSX) XLSX = await import('xlsx');
+  const result = {
+    filename,
+    month: extractMonth(filename),
+    orders: [],
+    ads: [],
+    platform: detectPlatform(workbook, platformHint)
+  };
+
+  // Parse based on detected platform
+  if (result.platform === 'meesho') {
+    result.orders = parseMeeshoOrders(workbook);
+    result.ads = parseMeeshoAds(workbook);
+  } else if (result.platform === 'flipkart') {
+    const flipkart = await parseFlipkartSettlement(workbook);
+    result.orders = flipkart.orders;
+    result.ads = flipkart.ads;
+    if (flipkart.month) result.month = flipkart.month;
+  }
+
+  return result;
+}
+
+/**
  * Detect whether the file is from Meesho or Flipkart
  */
-function detectPlatform(workbook) {
+function detectPlatform(workbook, hint) {
+  if (hint === 'meesho' || hint === 'flipkart') return hint;
+
   const sheetNames = workbook.SheetNames.map(s => s.toLowerCase());
-  
+
   if (sheetNames.includes('order payments')) {
     return 'meesho';
+  }
+  if (isFlipkartSettlement(sheetNames)) {
+    return 'flipkart';
   }
   if (sheetNames.includes('final bank settlement') || sheetNames.includes('commission rate card')) {
     return 'flipkart';
@@ -236,75 +260,6 @@ function parseMeeshoAds(workbook) {
   }
 
   return ads;
-}
-
-/**
- * Parse Flipkart Final Bank Settlement / Commission Rate Card
- */
-function parseFlipkartOrders(workbook) {
-  // Try Commission Rate Card first (more detailed)
-  let sheetName = 'Commission Rate Card';
-  if (!workbook.Sheets[sheetName]) {
-    sheetName = 'Final Bank Settlement';
-  }
-  const sheet = workbook.Sheets[sheetName];
-  if (!sheet) return [];
-
-  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
-  
-  let headerRowIdx = -1;
-  for (let i = 0; i < Math.min(10, rawData.length); i++) {
-    const row = rawData[i];
-    if (row && row.some(cell => String(cell).includes('Order Id'))) {
-      headerRowIdx = i;
-      break;
-    }
-  }
-
-  if (headerRowIdx === -1) return [];
-  const headers = rawData[headerRowIdx].map(h => String(h || '').trim());
-  
-  const orders = [];
-  for (let i = headerRowIdx + 1; i < rawData.length; i++) {
-    const row = rawData[i];
-    if (!row || !row[0]) continue;
-    if (String(row[0]).includes('OD') === false) continue;
-
-    const getCol = (name) => {
-      const idx = headers.findIndex(h => h.includes(name));
-      return idx !== -1 ? row[idx] : null;
-    };
-
-    const order = {
-      subOrderNo: String(getCol('Sub Order') || row[1] || ''),
-      orderDate: parseDate(getCol('Order Date')),
-      productName: '',
-      sku: String(getCol('SKU') || '').trim(),
-      status: normalizeStatus(String(getCol('Order Status') || '')),
-      listingPrice: toNum(getCol('Item Selling Price') || getCol('Order Amount')),
-      quantity: 1,
-      settlementAmount: toNum(getCol('Final Settlement Price') || getCol('Final Settlement')),
-      shippingCharge: toNum(getCol('Shipping Fee') || getCol('Shipping')),
-      commissionAmount: toNum(getCol('Total Commission')),
-      tcs: toNum(getCol('TCS')),
-      tds: toNum(getCol('TDS')),
-      totalSaleAmount: toNum(getCol('Item Selling Price') || getCol('Order Amount')),
-      totalReturnAmount: 0,
-      fixedFee: toNum(getCol('Fixed Fee')),
-      returnShippingCharge: 0
-    };
-
-    // For returns, settlement is negative
-    if (order.settlementAmount < 0 && (order.status === 'Return' || order.status === 'RTO')) {
-      order.totalReturnAmount = Math.abs(order.settlementAmount);
-    }
-
-    if (order.sku) {
-      orders.push(order);
-    }
-  }
-
-  return orders;
 }
 
 /**

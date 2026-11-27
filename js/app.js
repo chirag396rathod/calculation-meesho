@@ -408,6 +408,7 @@ function getActiveOrders() {
 // ═══════════════════════════════════════════
 
 let pendingParsedFiles = [];
+let paymentPlatformSelection = 'auto';
 
 /**
  * Setup file upload modal
@@ -419,6 +420,16 @@ function setupUploadModal() {
   const zone = document.getElementById('uploadZone');
   const fileInput = document.getElementById('fileInput');
   const processBtn = document.getElementById('processFilesBtn');
+  const platformPills = document.querySelectorAll('#paymentPlatformSelector .payment-platform-pill');
+
+  // Platform selection (Auto / Meesho / Flipkart)
+  platformPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      platformPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      paymentPlatformSelection = pill.dataset.paymentPlatform || 'auto';
+    });
+  });
 
   // Open modal
   uploadBtns.forEach(btn => {
@@ -499,7 +510,7 @@ async function handleFiles(files) {
     listContainer.appendChild(item);
 
     try {
-      const result = await parsePaymentFile(file);
+      const result = await parsePaymentFile(file, paymentPlatformSelection);
       const defaultReportName = result.month
         ? `${result.month} - ${result.platform || 'Payment'} Report`
         : file.name.replace(/\.[^/.]+$/, '');
